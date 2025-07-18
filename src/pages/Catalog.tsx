@@ -556,113 +556,188 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
     : null;
 
   return (
-    <Card className="overflow-hidden hover:shadow-warm transition-all duration-300 bg-white/80 backdrop-blur border-0">
-      <CardHeader className="p-0">
-        <div className="relative aspect-square overflow-hidden">
-          <img
-            src={currentImage || '/placeholder.svg'}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-          />
-          {product.is_custom_order && (
-            <Badge className="absolute top-2 right-2 bg-pet-gold text-white">
-              <Tag className="h-3 w-3 mr-1" />
-              Sob encomenda
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 space-y-4">
-        <div>
-          <h3 className="font-bold text-lg text-primary">{product.name}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {product.description}
-          </p>
-          {product.observations && (
-            <p className="text-xs text-pet-gold mt-1">{product.observations}</p>
-          )}
-        </div>
-
-        {/* Seletor de cores */}
-        {productColors.length > 0 && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center">
-              <Palette className="h-3 w-3 mr-1" />
-              Cores disponíveis:
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {productColors.map((color) => (
-                <button
-                  key={color.id}
-                  onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)}
-                  className={`w-6 h-6 rounded-full border-2 transition-all ${
-                    selectedColor === color.id 
-                      ? 'border-pet-brown-dark scale-110' 
-                      : 'border-gray-300 hover:border-pet-gold'
-                  }`}
-                  style={{ backgroundColor: color.hex_code }}
-                  title={color.name}
-                />
-              ))}
+    <div className="group perspective-1000">
+      <Card className="
+        relative overflow-hidden
+        bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-xl
+        border border-white/20 shadow-2xl
+        transform-gpu transition-all duration-500 ease-out
+        hover:scale-[1.02] hover:-translate-y-2
+        hover:rotate-x-2 hover:rotate-y-1
+        hover:shadow-3xl hover:shadow-pet-gold/20
+        before:absolute before:inset-0 before:bg-gradient-to-br before:from-pet-gold/5 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
+      ">
+        {/* Glassmorphism overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
+        
+        <CardHeader className="p-0 relative">
+          <div className="relative aspect-square overflow-hidden">
+            {/* 3D Image container */}
+            <div className="
+              w-full h-full transform-gpu transition-all duration-700 ease-out
+              group-hover:scale-110 group-hover:rotate-1
+            ">
+              <img
+                src={currentImage || '/placeholder.svg'}
+                alt={product.name}
+                className="w-full h-full object-cover filter group-hover:brightness-110 transition-all duration-500"
+              />
+              
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out opacity-0 group-hover:opacity-100" />
             </div>
-            {selectedColor && (
-              <p className="text-xs text-muted-foreground">
-                Cor selecionada: {productColors.find(c => c.id === selectedColor)?.name}
-              </p>
+            
+            {/* Floating badge */}
+            {product.is_custom_order && (
+              <Badge className="
+                absolute top-3 right-3 
+                bg-gradient-to-r from-pet-gold to-yellow-500 
+                text-white shadow-lg backdrop-blur-sm
+                transform transition-all duration-300
+                group-hover:scale-110 group-hover:-translate-y-1
+                border border-white/30
+              ">
+                <Tag className="h-3 w-3 mr-1" />
+                Sob encomenda
+              </Badge>
+            )}
+            
+            {/* Price preview floating */}
+            {selectedSize && selectedPrice && (
+              <div className="
+                absolute bottom-3 left-3
+                bg-white/90 backdrop-blur-md rounded-full px-3 py-1
+                shadow-lg border border-white/30
+                transform transition-all duration-300
+                translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100
+              ">
+                <span className="text-sm font-bold text-pet-brown-dark">
+                  R$ {selectedPrice.toFixed(2)}
+                </span>
+              </div>
             )}
           </div>
-        )}
-
-        {/* Tabela de preços compacta */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Tamanhos e preços:</Label>
-          <div className="grid grid-cols-2 gap-1">
-            {product.product_prices.map((price) => (
-              <div
-                key={price.size}
-                onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
-                className={`cursor-pointer border rounded text-xs px-2 py-1 transition-all duration-200 hover:shadow-sm ${
-                  selectedSize === price.size 
-                    ? 'bg-pet-gold text-white border-pet-gold' 
-                    : 'bg-white border-gray-200 hover:border-pet-gold'
-                }`}
-              >
-                <div className="flex items-center justify-between leading-tight">
-                  <span className="font-medium">{price.size}</span>
-                  <span className="font-semibold">R$ {price.price.toFixed(2)}</span>
-                </div>
-                {price.sizes?.dimensions && (
-                  <div className="text-xs opacity-75 leading-tight">
-                    {price.sizes.dimensions}
-                  </div>
-                )}
-              </div>
-            ))}
+        </CardHeader>
+        
+        <CardContent className="p-5 space-y-4 relative z-20">
+          {/* Title with 3D effect */}
+          <div className="transform transition-all duration-300 group-hover:translate-y-[-2px]">
+            <h3 className="font-bold text-lg text-primary mb-2 leading-tight">
+              {product.name}
+            </h3>
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
+            {product.observations && (
+              <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>
+            )}
           </div>
-        </div>
 
-        {/* Ações */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onViewDetails(product)}
-            className="flex-1"
-          >
-            <Eye className="h-4 w-4 mr-1" />
-            Ver
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => onWhatsApp(selectedSize, selectedColor)}
-            className="flex-1 bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300"
-          >
-            <MessageCircle className="h-4 w-4 mr-1" />
-            Pedir
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          {/* Color selector with enhanced 3D effects */}
+          {productColors.length > 0 && (
+            <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
+              <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
+                <Palette className="h-3 w-3 mr-2" />
+                Cores disponíveis:
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {productColors.map((color) => (
+                  <button
+                    key={color.id}
+                    onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)}
+                    className={`
+                      w-8 h-8 rounded-full border-2 transition-all duration-300 ease-out
+                      transform hover:scale-125 hover:-translate-y-1
+                      shadow-md hover:shadow-xl
+                      ${selectedColor === color.id 
+                        ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' 
+                        : 'border-white hover:border-pet-gold shadow-sm'
+                      }
+                    `}
+                    style={{ backgroundColor: color.hex_code }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+              {selectedColor && (
+                <p className="text-xs text-muted-foreground animate-fade-in">
+                  Cor selecionada: {productColors.find(c => c.id === selectedColor)?.name}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Modern price grid */}
+          <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
+            <Label className="text-sm font-medium text-pet-brown-dark">Tamanhos e preços:</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {product.product_prices.map((price, index) => (
+                <div
+                  key={price.size}
+                  onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  className={`
+                    cursor-pointer border rounded-lg text-xs p-3 transition-all duration-300 ease-out
+                    transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg
+                    backdrop-blur-sm
+                    ${selectedSize === price.size 
+                      ? 'bg-gradient-to-r from-pet-gold to-yellow-500 text-white border-pet-gold shadow-lg ring-2 ring-pet-gold/30' 
+                      : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'
+                    }
+                  `}
+                >
+                  <div className="flex items-center justify-between leading-tight">
+                    <span className="font-semibold">{price.size}</span>
+                    <span className="font-bold">R$ {price.price.toFixed(2)}</span>
+                  </div>
+                  {price.sizes?.dimensions && (
+                    <div className="text-xs opacity-75 leading-tight mt-1">
+                      {price.sizes.dimensions}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Enhanced action buttons */}
+          <div className="flex gap-3 pt-2 transform transition-all duration-300 group-hover:translate-y-[-1px]">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewDetails(product)}
+              className="
+                flex-1 border-pet-gold/30 text-pet-brown-dark hover:bg-pet-gold/10
+                transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
+                shadow-sm hover:shadow-md backdrop-blur-sm
+              "
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Ver Detalhes
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => onWhatsApp(selectedSize, selectedColor)}
+              className="
+                flex-1 bg-gradient-to-r from-pet-gold to-yellow-500 hover:from-yellow-500 hover:to-pet-gold
+                text-white shadow-lg hover:shadow-xl
+                transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
+                border border-white/20
+              "
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Pedir Agora
+            </Button>
+          </div>
+        </CardContent>
+        
+        {/* Bottom glow effect */}
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-pet-gold/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </Card>
+    </div>
   );
 }
 

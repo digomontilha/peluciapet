@@ -52,6 +52,8 @@
     --shadow-warm: 0 10px 30px -10px hsl(var(--pet-brown-medium) / 0.3);
     --shadow-soft: 0 4px 20px -8px hsl(var(--pet-brown-dark) / 0.2);
     --shadow-gold: 0 0 40px hsl(var(--pet-gold) / 0.3);
+    --shadow-elegant: 0 25px 50px -12px hsl(var(--pet-brown-dark) / 0.25);
+    --shadow-glow: 0 35px 60px -12px hsl(var(--pet-gold) / 0.4);
 
     /* Animações suaves */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -122,5 +124,64 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Perspective utilities for 3D effects */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .perspective-1500 {
+    perspective: 1500px;
+  }
+  
+  /* Transform style for 3D children */
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  
+  /* Backface visibility utilities */
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  /* Custom 3D transforms */
+  .rotate-x-2 {
+    transform: rotateX(2deg);
+  }
+  
+  .rotate-y-1 {
+    transform: rotateY(1deg);
+  }
+  
+  .rotate-x-4 {
+    transform: rotateX(4deg);
+  }
+  
+  .rotate-y-2 {
+    transform: rotateY(2deg);
+  }
+  
+  /* Improved hover scale with 3D effect */
+  .hover-scale-3d {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-scale-3d:hover {
+    transform: scale3d(1.05, 1.05, 1.05) translateZ(0);
+  }
+  
+  /* Glass morphism effect */
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Text shadow for better readability */
+  .text-shadow-warm {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
