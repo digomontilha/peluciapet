@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProductForm from "./pages/ProductForm";
 import ProductList from "./pages/ProductList";
 import SizeManagement from "./pages/SizeManagement";
+import CategoryManagement from "./pages/CategoryManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/admin/products/new" element={<ProductForm />} />
             <Route path="/admin/products/:id/edit" element={<ProductForm />} />
             <Route path="/admin/sizes" element={<SizeManagement />} />
+            <Route path="/admin/categories" element={<CategoryManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
