@@ -359,26 +359,26 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
           </div>
         )}
 
-        {/* Tabela de preços com dimensões */}
+        {/* Tabela de preços compacta */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tamanhos e preços:</Label>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {product.product_prices.map((price) => (
               <div
                 key={price.size}
                 onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
-                className={`cursor-pointer border rounded-md p-2 text-xs transition-all duration-200 ${
+                className={`cursor-pointer border rounded text-xs px-2 py-1 transition-all duration-200 hover:shadow-sm ${
                   selectedSize === price.size 
-                    ? 'bg-primary text-primary-foreground border-primary' 
-                    : 'bg-background border-border hover:border-primary/50'
+                    ? 'bg-pet-gold text-white border-pet-gold' 
+                    : 'bg-white border-gray-200 hover:border-pet-gold'
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between leading-tight">
                   <span className="font-medium">{price.size}</span>
-                  <span className="font-medium">R$ {price.price.toFixed(2)}</span>
+                  <span className="font-semibold">R$ {price.price.toFixed(2)}</span>
                 </div>
                 {price.sizes?.dimensions && (
-                  <div className="text-xs opacity-70 mt-1">
+                  <div className="text-xs opacity-75 leading-tight">
                     {price.sizes.dimensions}
                   </div>
                 )}
