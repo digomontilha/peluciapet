@@ -195,33 +195,139 @@ export default function Catalog() {
     <div className="min-h-screen bg-gradient-soft">
       <Header />
       
-      {/* Hero Section */}
+      {/* Hero Section - ESPETACULAR */}
       <section 
-        className="bg-gradient-warm text-white py-16 relative overflow-hidden"
+        className="relative min-h-[70vh] overflow-hidden"
         style={{
           backgroundImage: `url(${banner})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundBlendMode: 'overlay'
+          backgroundAttachment: 'fixed'
         }}
       >
-        <div className="absolute inset-0 bg-gradient-warm/80"></div>
-        <div className="container text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg">
-            Catálogo PelúciaPet
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 drop-shadow-md">
-            Produtos de luxo para o conforto do seu pet
-          </p>
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
-            className="bg-white text-pet-brown-dark hover:bg-pet-beige-light transition-all duration-300 shadow-warm"
-          >
-            <MessageCircle className="h-5 w-5 mr-2" />
-            Fale Conosco
-          </Button>
+        {/* Overlay gradiente animado */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pet-brown-dark/90 via-pet-gold/60 to-pet-brown-medium/90 animate-glow-pulse"></div>
+        
+        {/* Partículas flutuantes */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white/30 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 4}s`
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Efeito de brilho em movimento */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[slide-shine_8s_ease-in-out_infinite]"></div>
+
+        {/* Conteúdo principal com efeitos 3D */}
+        <div className="relative z-20 container min-h-[70vh] flex items-center justify-center">
+          <div className="text-center space-y-8 transform perspective-1000">
+            
+            {/* Título principal com efeito 3D impressionante */}
+            <div className="relative">
+              <h1 className="text-5xl md:text-8xl font-black mb-6 relative">
+                {/* Sombra do texto em 3D */}
+                <span className="absolute inset-0 text-pet-brown-dark/50 transform translate-x-2 translate-y-2 blur-sm">
+                  Catálogo PelúciaPet
+                </span>
+                {/* Texto principal com gradiente animado */}
+                <span className="relative bg-gradient-to-r from-white via-pet-gold to-white bg-clip-text text-transparent animate-glow-pulse text-shadow-warm">
+                  Catálogo PelúciaPet
+                </span>
+                {/* Brilho superior */}
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent bg-clip-text text-transparent opacity-0 animate-[glow-pulse_3s_ease-in-out_infinite]">
+                  Catálogo PelúciaPet
+                </span>
+              </h1>
+              
+              {/* Linha decorativa animada */}
+              <div className="w-32 h-1 bg-gradient-to-r from-pet-gold to-yellow-400 mx-auto rounded-full animate-pulse transform hover:scale-110 transition-transform duration-300"></div>
+            </div>
+
+            {/* Subtítulo elegante */}
+            <p className="text-xl md:text-3xl text-white/95 mb-8 drop-shadow-lg leading-relaxed max-w-4xl mx-auto animate-fade-in">
+              <span className="relative">
+                Produtos de luxo para o 
+                <span className="text-pet-gold font-bold animate-glow-pulse"> conforto supremo </span>
+                do seu pet
+              </span>
+            </p>
+
+            {/* Botões com efeitos incríveis */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+                className="
+                  relative group px-8 py-4 text-lg font-bold
+                  bg-gradient-to-r from-pet-gold via-yellow-400 to-pet-gold 
+                  hover:from-yellow-400 hover:via-pet-gold hover:to-yellow-400
+                  text-white shadow-2xl hover:shadow-3xl
+                  transform transition-all duration-500 ease-out
+                  hover:scale-110 hover:-translate-y-2
+                  border-2 border-white/30
+                  backdrop-blur-sm
+                  before:absolute before:inset-0 before:bg-white/20 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
+                  overflow-hidden
+                "
+              >
+                {/* Efeito de brilho no botão */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                
+                <div className="relative flex items-center gap-3">
+                  <MessageCircle className="h-6 w-6 animate-bounce" />
+                  <span>Fale Conosco Agora</span>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
+                className="
+                  px-8 py-4 text-lg font-bold
+                  bg-white/10 hover:bg-white/20
+                  border-2 border-white/50 hover:border-white
+                  text-white backdrop-blur-md
+                  transform transition-all duration-500 ease-out
+                  hover:scale-105 hover:-translate-y-1
+                  shadow-lg hover:shadow-2xl
+                  group
+                "
+              >
+                <div className="flex items-center gap-3">
+                  <Eye className="h-6 w-6 group-hover:animate-pulse" />
+                  <span>Ver Produtos</span>
+                </div>
+              </Button>
+            </div>
+
+            {/* Indicador de scroll animado */}
+            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+              <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
+                <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Efeitos de canto com gradientes */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-radial from-pet-gold/30 to-transparent rounded-full filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-radial from-white/20 to-transparent rounded-full filter blur-3xl animate-float"></div>
+        
+        {/* Onda decorativa na parte inferior */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg className="w-full h-20 fill-current text-background" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="animate-[wave_6s_ease-in-out_infinite]"></path>
+          </svg>
         </div>
       </section>
 

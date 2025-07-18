@@ -184,4 +184,25 @@
   .text-shadow-warm {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+  
+  /* Additional gradient utilities */
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+  
+  /* Wave animation keyframe */
+  @keyframes wave {
+    0%, 100% { transform: translateX(0px); }
+    50% { transform: translateX(-25px); }
+  }
+  
+  /* Slide shine animation */
+  @keyframes slide-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  .animate-wave {
+    animation: wave 6s ease-in-out infinite;
+  }
 }
