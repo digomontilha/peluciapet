@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import logo from '@/assets/pelucia-pet-logo.jpg';
+import logo from '@/assets/pelucia-pet-logo-oficial.png';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);

@@ -10,7 +10,7 @@ import {
 import { useAuth } from '@/components/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import logo from '@/assets/pelucia-pet-logo.jpg';
+import logo from '@/assets/pelucia-pet-logo-oficial.png';
 
 export function Header() {
   const { user, isAdmin, signOut } = useAuth();
