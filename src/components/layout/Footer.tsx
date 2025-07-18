@@ -45,31 +45,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Redes sociais */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-pet-gold">Siga-nos</h4>
-            <div className="flex space-x-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:text-pet-gold hover:bg-white/10"
-                onClick={() => window.open('https://instagram.com/peluciapet', '_blank')}
-              >
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:text-pet-gold hover:bg-white/10"
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
-              >
-                <MessageCircle className="h-5 w-5" />
-              </Button>
-            </div>
-            <p className="text-xs text-white/70">
-              WhatsApp: Encomendas e dúvidas
-            </p>
-          </div>
         </div>
 
         <div className="border-t border-white/20 mt-8 pt-6 text-center">
