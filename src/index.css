@@ -2,41 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Design system PelúciaPet - Cores oficiais da marca */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Cores da marca PelúciaPet */
+    --background: 32 47% 97%; /* Bege claro #FDF6ED */
+    --foreground: 30 65% 12%; /* Marrom escuro #5C2C0D */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 32 47% 97%;
+    --card-foreground: 30 65% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 32 47% 97%;
+    --popover-foreground: 30 65% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 30 65% 12%; /* Marrom escuro #5C2C0D */
+    --primary-foreground: 32 47% 97%; /* Bege claro */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 30 45% 40%; /* Marrom médio #A0522D */
+    --secondary-foreground: 32 47% 97%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 28 35% 75%; /* Bege médio #EBC6A8 */
+    --muted-foreground: 30 65% 12%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 65% 55%; /* Dourado #D4A04C */
+    --accent-foreground: 30 65% 12%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 32 47% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 28 35% 85%;
+    --input: 28 35% 85%;
+    --ring: 45 65% 55%;
 
-    --radius: 0.5rem;
+    /* Cores adicionais da marca */
+    --pet-brown-dark: 30 65% 12%; /* #5C2C0D */
+    --pet-brown-medium: 30 45% 40%; /* #A0522D */
+    --pet-beige-light: 32 47% 97%; /* #FDF6ED */
+    --pet-beige-medium: 28 35% 75%; /* #EBC6A8 */
+    --pet-gold: 45 65% 55%; /* #D4A04C */
+    --pet-brown-outline: 30 70% 15%; /* #3B1F0F */
+
+    /* Gradientes da marca */
+    --gradient-warm: linear-gradient(135deg, hsl(var(--pet-gold)), hsl(var(--pet-brown-medium)));
+    --gradient-soft: linear-gradient(180deg, hsl(var(--pet-beige-light)), hsl(var(--pet-beige-medium)));
+    --gradient-elegant: linear-gradient(45deg, hsl(var(--pet-brown-dark)), hsl(var(--pet-brown-medium)));
+
+    /* Sombras elegantes */
+    --shadow-warm: 0 10px 30px -10px hsl(var(--pet-brown-medium) / 0.3);
+    --shadow-soft: 0 4px 20px -8px hsl(var(--pet-brown-dark) / 0.2);
+    --shadow-gold: 0 0 40px hsl(var(--pet-gold) / 0.3);
+
+    /* Animações suaves */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-gentle: all 0.2s ease-out;
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 

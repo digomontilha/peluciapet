@@ -61,7 +61,32 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Cores específicas da PelúciaPet
+				'pet-brown': {
+					dark: 'hsl(var(--pet-brown-dark))',
+					medium: 'hsl(var(--pet-brown-medium))',
+					outline: 'hsl(var(--pet-brown-outline))'
+				},
+				'pet-beige': {
+					light: 'hsl(var(--pet-beige-light))',
+					medium: 'hsl(var(--pet-beige-medium))'
+				},
+				'pet-gold': 'hsl(var(--pet-gold))'
+			},
+			backgroundImage: {
+				'gradient-warm': 'var(--gradient-warm)',
+				'gradient-soft': 'var(--gradient-soft)',
+				'gradient-elegant': 'var(--gradient-elegant)'
+			},
+			boxShadow: {
+				'warm': 'var(--shadow-warm)',
+				'soft': 'var(--shadow-soft)',
+				'gold': 'var(--shadow-gold)'
+			},
+			transitionTimingFunction: {
+				'smooth': 'var(--transition-smooth)',
+				'gentle': 'var(--transition-gentle)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
