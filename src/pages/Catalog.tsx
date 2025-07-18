@@ -362,21 +362,21 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
         {/* Tabela de preços com dimensões */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tamanhos e preços:</Label>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 gap-1">
             {product.product_prices.map((price) => (
               <Button
                 key={price.size}
                 variant={selectedSize === price.size ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
-                className="text-xs h-auto py-2 px-3 flex flex-col items-start"
+                className="text-xs h-auto py-1.5 px-2 flex flex-col items-start"
               >
                 <div className="flex items-center justify-between w-full">
-                  <span className="font-bold">{price.size}</span>
-                  <span className="font-bold">R$ {price.price.toFixed(2)}</span>
+                  <span className="font-medium text-xs">{price.size}</span>
+                  <span className="font-medium text-xs">R$ {price.price.toFixed(2)}</span>
                 </div>
                 {price.sizes?.dimensions && (
-                  <span className="text-xs opacity-75 mt-1">
+                  <span className="text-xs opacity-70 mt-0.5">
                     {price.sizes.dimensions}
                   </span>
                 )}
