@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import banner from '@/assets/pelucia-pet-banner.png';
 
 interface Product {
   id: string;
@@ -161,19 +162,28 @@ export default function Catalog() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-warm text-white py-16">
-        <div className="container text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+      <section 
+        className="bg-gradient-warm text-white py-16 relative overflow-hidden"
+        style={{
+          backgroundImage: `url(${banner})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: 'overlay'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-warm/80"></div>
+        <div className="container text-center relative z-10">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg">
             Catálogo PelúciaPet
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8">
+          <p className="text-xl md:text-2xl text-white/90 mb-8 drop-shadow-md">
             Produtos de luxo para o conforto do seu pet
           </p>
           <Button
             variant="secondary"
             size="lg"
             onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
-            className="bg-white text-pet-brown-dark hover:bg-pet-beige-light transition-all duration-300"
+            className="bg-white text-pet-brown-dark hover:bg-pet-beige-light transition-all duration-300 shadow-warm"
           >
             <MessageCircle className="h-5 w-5 mr-2" />
             Fale Conosco
