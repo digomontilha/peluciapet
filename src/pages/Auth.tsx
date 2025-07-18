@@ -35,23 +35,37 @@ export default function Auth() {
         if (error) throw error;
 
         if (data.user) {
-          // Verificar se é admin
-          const { data: adminProfile } = await supabase
-            .from('admin_profiles')
-            .select('*')
-            .eq('user_id', data.user.id)
-            .maybeSingle();
+          // Verificar se é admin usando timeout para aguardar a sessão
+          setTimeout(async () => {
+            try {
+              const { data: adminProfile, error } = await supabase
+                .from('admin_profiles')
+                .select('*')
+                .eq('user_id', data.user.id)
+                .maybeSingle();
 
-          if (!adminProfile) {
-            await supabase.auth.signOut();
-            throw new Error('Acesso negado. Apenas administradores podem fazer login.');
-          }
+              console.log('Admin check:', { adminProfile, error, userId: data.user.id });
 
-          toast({
-            title: "Login realizado com sucesso!",
-            description: `Bem-vindo(a), ${adminProfile.full_name || email}!`,
-          });
-          navigate('/admin');
+              if (!adminProfile) {
+                await supabase.auth.signOut();
+                setError('Acesso negado. Apenas administradores podem fazer login.');
+                setLoading(false);
+                return;
+              }
+
+              toast({
+                title: "Login realizado com sucesso!",
+                description: `Bem-vindo(a), ${adminProfile.full_name || email}!`,
+              });
+              navigate('/admin');
+              setLoading(false);
+            } catch (err) {
+              console.error('Erro ao verificar admin:', err);
+              await supabase.auth.signOut();
+              setError('Erro ao verificar permissões administrativas.');
+              setLoading(false);
+            }
+          }, 100);
         }
       } else {
         const redirectUrl = `${window.location.origin}/`;
