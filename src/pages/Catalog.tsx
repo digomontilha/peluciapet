@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Eye, Palette, Tag } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MessageCircle, Eye, Palette, Tag, X, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
@@ -271,6 +272,137 @@ export default function Catalog() {
           </div>
         )}
       </div>
+
+      {/* Modal de detalhes do produto */}
+      <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedProduct && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-primary flex items-center justify-between">
+                  {selectedProduct.name}
+                  {selectedProduct.is_custom_order && (
+                    <Badge className="bg-pet-gold text-white">
+                      <Tag className="h-3 w-3 mr-1" />
+                      Sob encomenda
+                    </Badge>
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Galeria de imagens */}
+                <div className="space-y-4">
+                  <div className="aspect-square overflow-hidden rounded-lg">
+                    <img
+                      src={getProductImage(selectedProduct, selectedColor) || '/placeholder.svg'}
+                      alt={selectedProduct.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  {/* Cores disponíveis */}
+                  {getAvailableColors(selectedProduct).length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center">
+                        <Palette className="h-3 w-3 mr-1" />
+                        Cores disponíveis:
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {getAvailableColors(selectedProduct).map((color) => (
+                          <button
+                            key={color.id}
+                            onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)}
+                            className={`w-8 h-8 rounded-full border-2 transition-all ${
+                              selectedColor === color.id 
+                                ? 'border-pet-brown-dark scale-110' 
+                                : 'border-gray-300 hover:border-pet-gold'
+                            }`}
+                            style={{ backgroundColor: color.hex_code }}
+                            title={color.name}
+                          />
+                        ))}
+                      </div>
+                      {selectedColor && (
+                        <p className="text-sm text-muted-foreground">
+                          Cor selecionada: {colors.find(c => c.id === selectedColor)?.name}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Informações do produto */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Descrição</h3>
+                    <p className="text-muted-foreground">
+                      {selectedProduct.description}
+                    </p>
+                    {selectedProduct.observations && (
+                      <p className="text-pet-gold mt-2 font-medium">
+                        {selectedProduct.observations}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Categoria</h3>
+                    <Badge variant="outline" className="text-sm">
+                      <span className="mr-1">{selectedProduct.categories?.icon}</span>
+                      {selectedProduct.categories?.name}
+                    </Badge>
+                  </div>
+
+                  {/* Tabela de preços detalhada */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3">Tamanhos e preços</h3>
+                    <div className="space-y-2">
+                      {selectedProduct.product_prices.map((price) => (
+                        <div
+                          key={price.size}
+                          onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
+                          className={`cursor-pointer border rounded-lg p-3 transition-all duration-200 ${
+                            selectedSize === price.size 
+                              ? 'bg-pet-gold text-white border-pet-gold' 
+                              : 'bg-background border-border hover:border-pet-gold'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-bold text-lg">{price.size}</span>
+                              {price.sizes?.dimensions && (
+                                <p className="text-sm opacity-75">
+                                  {price.sizes.dimensions}
+                                </p>
+                              )}
+                            </div>
+                            <span className="font-bold text-xl">
+                              R$ {price.price.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Botões de ação */}
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      onClick={() => window.open(generateWhatsAppLink(selectedProduct, selectedSize, selectedColor), '_blank')}
+                      className="flex-1 bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300"
+                      size="lg"
+                    >
+                      <MessageCircle className="h-5 w-5 mr-2" />
+                      Pedir via WhatsApp
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
