@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { MessageCircle, Eye, Palette, Tag, X, Heart } from 'lucide-react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { MessageCircle, Eye, Palette, Tag, X, Heart, Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
@@ -67,6 +68,7 @@ export default function Catalog() {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -226,26 +228,107 @@ export default function Catalog() {
       <div className="container py-12">
         {/* Filtros de categoria */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-primary mb-4">Categorias</h2>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-primary">Categorias</h2>
+            
+            {/* Menu hambúrguer para mobile */}
+            <Sheet open={isCategoryMenuOpen} onOpenChange={setIsCategoryMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="md:hidden flex items-center gap-2"
+                >
+                  <Menu className="h-4 w-4" />
+                  Categorias
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80">
+                <SheetHeader>
+                  <SheetTitle className="text-xl font-bold text-primary">Categorias</SheetTitle>
+                  <SheetDescription>
+                    Escolha uma categoria para filtrar os produtos
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-3">
+                  <Button
+                    variant={selectedCategory === 'all' ? 'default' : 'ghost'}
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setIsCategoryMenuOpen(false);
+                    }}
+                    className="w-full justify-start text-left h-auto p-4 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        🏪
+                      </div>
+                      <span className="font-medium">Todos os produtos</span>
+                    </div>
+                  </Button>
+                  {categories.map((category) => (
+                    <Button
+                      key={category.id}
+                      variant={selectedCategory === category.name ? 'default' : 'ghost'}
+                      onClick={() => {
+                        setSelectedCategory(category.name);
+                        setIsCategoryMenuOpen(false);
+                      }}
+                      className="w-full justify-start text-left h-auto p-4 transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                          {category.icon}
+                        </div>
+                        <span className="font-medium">{category.name}</span>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+          {/* Filtros em linha para desktop */}
+          <div className="hidden md:flex flex-wrap gap-3">
             <Button
               variant={selectedCategory === 'all' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('all')}
-              className="transition-all duration-300"
+              className="transition-all duration-300 hover-scale"
             >
-              Todos os produtos
+              🏪 Todos os produtos
             </Button>
             {categories.map((category) => (
               <Button
                 key={category.id}
                 variant={selectedCategory === category.name ? 'default' : 'outline'}
                 onClick={() => setSelectedCategory(category.name)}
-                className="transition-all duration-300"
+                className="transition-all duration-300 hover-scale"
               >
                 <span className="mr-2">{category.icon}</span>
                 {category.name}
               </Button>
             ))}
+          </div>
+          
+          {/* Categoria selecionada para mobile */}
+          <div className="md:hidden mt-4">
+            <div className="bg-card rounded-lg p-3 border">
+              <p className="text-sm text-muted-foreground mb-1">Categoria selecionada:</p>
+              <div className="flex items-center gap-2">
+                {selectedCategory === 'all' ? (
+                  <>
+                    <span>🏪</span>
+                    <span className="font-medium">Todos os produtos</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{categories.find(c => c.name === selectedCategory)?.icon}</span>
+                    <span className="font-medium">{selectedCategory}</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
