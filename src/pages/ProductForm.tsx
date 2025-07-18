@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,8 @@ interface ProductPrice {
 export default function ProductForm() {
   const { isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditing = !!id;
   
   const [productData, setProductData] = useState({
     name: '',
@@ -68,6 +70,54 @@ export default function ProductForm() {
     }
   }, [loading, isAdmin, navigate]);
 
+  const fetchProductData = async (productId: string) => {
+    try {
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+
+      if (productError) throw productError;
+
+      setProductData({
+        name: product.name || '',
+        description: product.description || '',
+        category_id: product.category_id || '',
+        observations: product.observations || '',
+        is_custom_order: product.is_custom_order || false,
+        status: (product.status as 'active' | 'inactive' | 'draft') || 'active'
+      });
+
+      // Buscar preços
+      const { data: pricesData, error: pricesError } = await supabase
+        .from('product_prices')
+        .select('*')
+        .eq('product_id', productId);
+
+      if (pricesError) throw pricesError;
+
+      const updatedPrices = ['P', 'M', 'G', 'GG'].map(size => {
+        const existingPrice = pricesData?.find(p => p.size === size);
+        return {
+          size,
+          price: existingPrice?.price || 0
+        };
+      });
+
+      setPrices(updatedPrices);
+
+    } catch (error) {
+      console.error('Erro ao carregar produto:', error);
+      toast({
+        title: "Erro ao carregar produto",
+        description: "Não foi possível carregar os dados do produto.",
+        variant: "destructive",
+      });
+      navigate('/admin/products');
+    }
+  };
+
   const fetchData = async () => {
     try {
       const [categoriesResult, colorsResult] = await Promise.all([
@@ -80,6 +130,11 @@ export default function ProductForm() {
 
       setCategories(categoriesResult.data || []);
       setColors(colorsResult.data || []);
+      
+      // Se for edição, carregar dados do produto
+      if (isEditing && id) {
+        await fetchProductData(id);
+      }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -170,18 +225,36 @@ export default function ProductForm() {
         throw new Error('Todos os preços devem ser maiores que zero');
       }
       
-      // Criar produto
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert(productData)
-        .select()
-        .single();
+      let productId: string;
       
-      if (productError) throw productError;
+      if (isEditing && id) {
+        // Atualizar produto existente
+        const { error: productError } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', id);
+        
+        if (productError) throw productError;
+        productId = id;
+        
+        // Remover preços antigos e inserir novos
+        await supabase.from('product_prices').delete().eq('product_id', id);
+        
+      } else {
+        // Criar novo produto
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .insert(productData)
+          .select()
+          .single();
+        
+        if (productError) throw productError;
+        productId = product.id;
+      }
       
       // Inserir preços
       const pricesData = prices.map(price => ({
-        product_id: product.id,
+        product_id: productId,
         size: price.size,
         price: price.price
       }));
@@ -192,15 +265,17 @@ export default function ProductForm() {
       
       if (pricesError) throw pricesError;
       
-      // Upload de imagens
-      await uploadProductImages(product.id);
+      // Upload de imagens (apenas se houver novas imagens)
+      if (Object.values(selectedImages).some(files => files.length > 0)) {
+        await uploadProductImages(productId);
+      }
       
       toast({
-        title: "Produto criado com sucesso!",
-        description: `${productData.name} foi adicionado ao catálogo.`,
+        title: isEditing ? "Produto atualizado!" : "Produto criado!",
+        description: `${productData.name} foi ${isEditing ? 'atualizado' : 'adicionado ao catálogo'}.`,
       });
       
-      navigate('/admin');
+      navigate('/admin/products');
       
     } catch (error: any) {
       console.error('Erro ao salvar produto:', error);
@@ -230,15 +305,15 @@ export default function ProductForm() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-primary mb-2">
-              Novo Produto
+              {isEditing ? 'Editar Produto' : 'Novo Produto'}
             </h1>
             <p className="text-muted-foreground">
-              Adicione um novo produto ao catálogo da PelúciaPet
+              {isEditing ? 'Edite as informações do produto' : 'Adicione um novo produto ao catálogo da PelúciaPet'}
             </p>
           </div>
           <Button 
             variant="outline" 
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/products')}
             className="flex items-center"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -415,7 +490,7 @@ export default function ProductForm() {
         <div className="mt-8 flex justify-end space-x-4">
           <Button
             variant="outline"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/products')}
             disabled={saving}
           >
             Cancelar
@@ -426,7 +501,7 @@ export default function ProductForm() {
             className="bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300"
           >
             <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Salvando...' : 'Salvar Produto'}
+            {saving ? 'Salvando...' : (isEditing ? 'Atualizar Produto' : 'Salvar Produto')}
           </Button>
         </div>
       </div>
