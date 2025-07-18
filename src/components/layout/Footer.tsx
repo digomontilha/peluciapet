@@ -17,6 +17,19 @@ export function Footer() {
             </p>
           </div>
 
+          {/* Links úteis */}
+          <div className="space-y-4">
+            <h4 className="font-semibold text-pet-gold">Links Úteis</h4>
+            <div className="space-y-2">
+              <a 
+                href="/como-comprar" 
+                className="block text-sm text-white/90 hover:text-pet-gold transition-colors"
+              >
+                Como Comprar
+              </a>
+            </div>
+          </div>
+
           {/* Contato */}
           <div className="space-y-4">
             <h4 className="font-semibold text-pet-gold">Contato</h4>
