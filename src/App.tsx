@@ -12,6 +12,8 @@ import ProductForm from "./pages/ProductForm";
 import ProductList from "./pages/ProductList";
 import SizeManagement from "./pages/SizeManagement";
 import CategoryManagement from "./pages/CategoryManagement";
+import ColorManagement from "./pages/ColorManagement";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/admin/products/:id/edit" element={<ProductForm />} />
             <Route path="/admin/sizes" element={<SizeManagement />} />
             <Route path="/admin/categories" element={<CategoryManagement />} />
+            <Route path="/admin/colors" element={<ColorManagement />} />
+            <Route path="/admin/users" element={<UserManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
