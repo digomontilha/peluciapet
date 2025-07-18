@@ -158,6 +158,12 @@ export default function AdminDashboard() {
             onClick={() => navigate('/admin/users')}
           />
           <ActionCard
+            title="Códigos de Variantes"
+            description="Gerenciar códigos únicos por tamanho e cor"
+            icon={Package}
+            onClick={() => navigate('/admin/variants')}
+          />
+          <ActionCard
             title="Ver Catálogo"
             description="Visualizar loja como cliente"
             icon={Eye}

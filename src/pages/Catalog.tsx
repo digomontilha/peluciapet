@@ -150,14 +150,42 @@ export default function Catalog() {
     selectedCategory === 'all' || product.categories?.name === selectedCategory
   );
 
-  const generateWhatsAppLink = (product: Product, size?: string, color?: string) => {
+  const generateWhatsAppLink = async (product: Product, size?: string, color?: string) => {
+    let variantCode = '';
+    
+    // Buscar código da variante específica
+    if (size) {
+      try {
+        const { data: variant } = await supabase
+          .from('product_variants')
+          .select('variant_code')
+          .eq('product_id', product.id)
+          .eq('size', size)
+          .eq('color_id', color || null)
+          .single();
+        
+        if (variant) {
+          variantCode = variant.variant_code;
+        }
+      } catch (error) {
+        console.log('Variante não encontrada, usando código do produto');
+        variantCode = product.id.substring(0, 8).toUpperCase();
+      }
+    }
+    
     const colorName = color ? colors.find(c => c.id === color)?.name : '';
     const sizeInfo = size ? `tamanho ${size}` : '';
     const colorInfo = colorName ? `cor ${colorName}` : '';
     const productInfo = [sizeInfo, colorInfo].filter(Boolean).join(', ');
+    const codeInfo = variantCode ? `\nCódigo: ${variantCode}` : '';
     
-    const message = `Olá! Tenho interesse no produto: ${product.name}${productInfo ? ` (${productInfo})` : ''}`;
+    const message = `Olá! Tenho interesse no produto: ${product.name}${productInfo ? ` (${productInfo})` : ''}${codeInfo}`;
     return `https://wa.me/5511914608191?text=${encodeURIComponent(message)}`;
+  };
+
+  const handleWhatsAppClick = async (product: Product, size?: string, color?: string) => {
+    const link = await generateWhatsAppLink(product, size, color);
+    window.open(link, '_blank');
   };
 
   const getProductImage = (product: Product, colorId?: string) => {
@@ -446,7 +474,7 @@ export default function Catalog() {
               product={product}
               colors={colors}
               onWhatsApp={(size, color) => 
-                window.open(generateWhatsAppLink(product, size, color), '_blank')
+                handleWhatsAppClick(product, size, color)
               }
               onViewDetails={setSelectedProduct}
             />
@@ -578,7 +606,7 @@ export default function Catalog() {
                   {/* Botões de ação */}
                   <div className="flex gap-3 pt-4">
                     <Button
-                      onClick={() => window.open(generateWhatsAppLink(selectedProduct, selectedSize, selectedColor), '_blank')}
+                      onClick={() => handleWhatsAppClick(selectedProduct, selectedSize, selectedColor)}
                       className="flex-1 bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300"
                       size="lg"
                     >

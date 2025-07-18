@@ -166,6 +166,57 @@ export type Database = {
           },
         ]
       }
+      product_variants: {
+        Row: {
+          color_id: string | null
+          created_at: string
+          id: string
+          is_available: boolean | null
+          product_id: string
+          size: string
+          stock_quantity: number | null
+          updated_at: string
+          variant_code: string
+        }
+        Insert: {
+          color_id?: string | null
+          created_at?: string
+          id?: string
+          is_available?: boolean | null
+          product_id: string
+          size: string
+          stock_quantity?: number | null
+          updated_at?: string
+          variant_code: string
+        }
+        Update: {
+          color_id?: string | null
+          created_at?: string
+          id?: string
+          is_available?: boolean | null
+          product_id?: string
+          size?: string
+          stock_quantity?: number | null
+          updated_at?: string
+          variant_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_color_id_fkey"
+            columns: ["color_id"]
+            isOneToOne: false
+            referencedRelation: "colors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_id: string | null
@@ -175,6 +226,7 @@ export type Database = {
           is_custom_order: boolean | null
           name: string
           observations: string | null
+          product_code: string | null
           status: string | null
           updated_at: string
         }
@@ -186,6 +238,7 @@ export type Database = {
           is_custom_order?: boolean | null
           name: string
           observations?: string | null
+          product_code?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -197,6 +250,7 @@ export type Database = {
           is_custom_order?: boolean | null
           name?: string
           observations?: string | null
+          product_code?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -251,6 +305,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_variant_code: {
+        Args: { product_code: string; size_name: string; color_name?: string }
+        Returns: string
+      }
       is_admin: {
         Args: { user_id?: string }
         Returns: boolean

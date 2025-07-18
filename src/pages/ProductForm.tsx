@@ -49,6 +49,7 @@ export default function ProductForm() {
   const [productData, setProductData] = useState({
     name: '',
     description: '',
+    product_code: '',
     category_id: '',
     observations: '',
     is_custom_order: false,
@@ -87,6 +88,7 @@ export default function ProductForm() {
       setProductData({
         name: product.name || '',
         description: product.description || '',
+        product_code: product.product_code || '',
         category_id: product.category_id || '',
         observations: product.observations || '',
         is_custom_order: product.is_custom_order || false,
@@ -359,6 +361,21 @@ export default function ProductForm() {
                   placeholder="Ex: Caminha Luxo Pelúcia"
                   className="border-pet-beige-medium focus:border-pet-gold"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="product_code">Código do Produto *</Label>
+                <Input
+                  id="product_code"
+                  value={productData.product_code}
+                  onChange={(e) => setProductData(prev => ({ ...prev, product_code: e.target.value.toUpperCase() }))}
+                  placeholder="Ex: CAM001, ROU001"
+                  className="border-pet-beige-medium focus:border-pet-gold font-mono"
+                  maxLength={10}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Código único do produto (máx. 10 caracteres). Será usado para gerar códigos de variantes.
+                </p>
               </div>
 
               <div className="space-y-2">
