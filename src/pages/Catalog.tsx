@@ -31,6 +31,10 @@ interface Product {
   product_prices: Array<{
     size: string;
     price: number;
+    sizes?: {
+      name: string;
+      dimensions: string;
+    };
   }>;
 }
 
@@ -46,10 +50,17 @@ interface Color {
   hex_code: string;
 }
 
+interface Size {
+  id: string;
+  name: string;
+  dimensions: string;
+}
+
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
+  const [sizes, setSizes] = useState<Size[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('');
@@ -62,44 +73,64 @@ export default function Catalog() {
 
   const fetchData = async () => {
     try {
-      // Buscar produtos
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select(`
-          *,
-          categories:category_id (name, icon),
-          product_images (
-            image_url,
-            alt_text,
-            color_id,
-            colors:color_id (name, hex_code)
-          ),
-          product_prices (size, price)
-        `)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
+      // Buscar dados em paralelo
+      const [productsResult, categoriesResult, colorsResult, sizesResult] = await Promise.all([
+        supabase
+          .from('products')
+          .select(`
+            *,
+            categories:category_id (name, icon),
+            product_images (
+              image_url,
+              alt_text,
+              color_id,
+              colors:color_id (name, hex_code)
+            ),
+            product_prices (size, price)
+          `)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false }),
+        
+        supabase
+          .from('categories')
+          .select('*')
+          .order('name'),
+          
+        supabase
+          .from('colors')
+          .select('*')
+          .order('name'),
+          
+        supabase
+          .from('sizes')
+          .select('*')
+          .order('display_order')
+      ]);
 
-      if (productsError) throw productsError;
+      if (productsResult.error) throw productsResult.error;
+      if (categoriesResult.error) throw categoriesResult.error;
+      if (colorsResult.error) throw colorsResult.error;
+      if (sizesResult.error) throw sizesResult.error;
 
-      // Buscar categorias
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
+      // Processar produtos para incluir informações de dimensões
+      const processedProducts = (productsResult.data || []).map(product => ({
+        ...product,
+        product_prices: product.product_prices.map(price => {
+          const sizeInfo = sizesResult.data?.find(size => size.name === price.size);
+          return {
+            ...price,
+            sizes: sizeInfo ? {
+              name: sizeInfo.name,
+              dimensions: sizeInfo.dimensions
+            } : undefined
+          };
+        })
+      }));
 
-      if (categoriesError) throw categoriesError;
-
-      // Buscar cores
-      const { data: colorsData, error: colorsError } = await supabase
-        .from('colors')
-        .select('*')
-        .order('name');
-
-      if (colorsError) throw colorsError;
-
-      setProducts(productsData || []);
-      setCategories(categoriesData || []);
-      setColors(colorsData || []);
+      setProducts(processedProducts);
+      setCategories(categoriesResult.data || []);
+      setColors(colorsResult.data || []);
+      setSizes(sizesResult.data || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -328,19 +359,27 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
           </div>
         )}
 
-        {/* Tabela de preços */}
+        {/* Tabela de preços com dimensões */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tamanhos e preços:</Label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {product.product_prices.map((price) => (
               <Button
                 key={price.size}
                 variant={selectedSize === price.size ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
-                className="text-xs h-8"
+                className="text-xs h-auto py-2 px-3 flex flex-col items-start"
               >
-                {price.size} - R$ {price.price.toFixed(2)}
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-bold">{price.size}</span>
+                  <span className="font-bold">R$ {price.price.toFixed(2)}</span>
+                </div>
+                {price.sizes?.dimensions && (
+                  <span className="text-xs opacity-75 mt-1">
+                    {price.sizes.dimensions}
+                  </span>
+                )}
               </Button>
             ))}
           </div>
