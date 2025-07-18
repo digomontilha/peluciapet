@@ -362,25 +362,27 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
         {/* Tabela de preços com dimensões */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tamanhos e preços:</Label>
-          <div className="grid grid-cols-1 gap-1">
+          <div className="space-y-1">
             {product.product_prices.map((price) => (
-              <Button
+              <div
                 key={price.size}
-                variant={selectedSize === price.size ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
-                className="text-xs h-auto py-1.5 px-2 flex flex-col items-start"
+                className={`cursor-pointer border rounded-md p-2 text-xs transition-all duration-200 ${
+                  selectedSize === price.size 
+                    ? 'bg-primary text-primary-foreground border-primary' 
+                    : 'bg-background border-border hover:border-primary/50'
+                }`}
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-medium text-xs">{price.size}</span>
-                  <span className="font-medium text-xs">R$ {price.price.toFixed(2)}</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{price.size}</span>
+                  <span className="font-medium">R$ {price.price.toFixed(2)}</span>
                 </div>
                 {price.sizes?.dimensions && (
-                  <span className="text-xs opacity-70 mt-0.5">
+                  <div className="text-xs opacity-70 mt-1">
                     {price.sizes.dimensions}
-                  </span>
+                  </div>
                 )}
-              </Button>
+              </div>
             ))}
           </div>
         </div>
