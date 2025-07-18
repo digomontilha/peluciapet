@@ -146,6 +146,12 @@ export default function AdminDashboard() {
             onClick={() => navigate('/admin/colors')}
           />
           <ActionCard
+            title="Tamanhos"
+            description="Configurar tamanhos e dimensões"
+            icon={Settings}
+            onClick={() => navigate('/admin/sizes')}
+          />
+          <ActionCard
             title="Administradores"
             description="Gerenciar usuários administrativos"
             icon={Users}

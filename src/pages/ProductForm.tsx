@@ -27,8 +27,16 @@ interface Color {
   hex_code: string;
 }
 
+interface Size {
+  id: string;
+  name: string;
+  dimensions: string;
+  display_order: number;
+}
+
 interface ProductPrice {
-  size: string;
+  size_id: string;
+  size_name: string;
   price: number;
 }
 
@@ -47,15 +55,11 @@ export default function ProductForm() {
     status: 'active' as 'active' | 'inactive' | 'draft'
   });
   
-  const [prices, setPrices] = useState<ProductPrice[]>([
-    { size: 'P', price: 0 },
-    { size: 'M', price: 0 },
-    { size: 'G', price: 0 },
-    { size: 'GG', price: 0 }
-  ]);
+  const [prices, setPrices] = useState<ProductPrice[]>([]);
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
+  const [sizes, setSizes] = useState<Size[]>([]);
   const [selectedImages, setSelectedImages] = useState<{[colorId: string]: File[]}>({});
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -97,10 +101,15 @@ export default function ProductForm() {
 
       if (pricesError) throw pricesError;
 
-      const updatedPrices = ['P', 'M', 'G', 'GG'].map(size => {
-        const existingPrice = pricesData?.find(p => p.size === size);
+      // Buscar preços com os novos tamanhos
+      const sizesResponse = await supabase.from('sizes').select('*').order('display_order');
+      const sizesData = sizesResponse.data || [];
+      
+      const updatedPrices = sizesData.map(size => {
+        const existingPrice = pricesData?.find(p => p.size === size.name);
         return {
-          size,
+          size_id: size.id,
+          size_name: size.name,
           price: existingPrice?.price || 0
         };
       });
@@ -120,16 +129,29 @@ export default function ProductForm() {
 
   const fetchData = async () => {
     try {
-      const [categoriesResult, colorsResult] = await Promise.all([
+      const [categoriesResult, colorsResult, sizesResult] = await Promise.all([
         supabase.from('categories').select('*').order('name'),
-        supabase.from('colors').select('*').order('name')
+        supabase.from('colors').select('*').order('name'),
+        supabase.from('sizes').select('*').order('display_order')
       ]);
 
       if (categoriesResult.error) throw categoriesResult.error;
       if (colorsResult.error) throw colorsResult.error;
+      if (sizesResult.error) throw sizesResult.error;
 
       setCategories(categoriesResult.data || []);
       setColors(colorsResult.data || []);
+      setSizes(sizesResult.data || []);
+      
+      // Inicializar preços para os tamanhos disponíveis
+      if (!isEditing) {
+        const initialPrices = (sizesResult.data || []).map(size => ({
+          size_id: size.id,
+          size_name: size.name,
+          price: 0
+        }));
+        setPrices(initialPrices);
+      }
       
       // Se for edição, carregar dados do produto
       if (isEditing && id) {
@@ -255,7 +277,7 @@ export default function ProductForm() {
       // Inserir preços
       const pricesData = prices.map(price => ({
         product_id: productId,
-        size: price.size,
+        size: price.size_name,
         price: price.price
       }));
       
@@ -398,25 +420,35 @@ export default function ProductForm() {
               <CardTitle className="text-primary">Preços por Tamanho</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {prices.map((price, index) => (
-                <div key={price.size} className="flex items-center space-x-4">
-                  <Label className="w-8 font-medium">{price.size}</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={price.price}
-                    onChange={(e) => {
-                      const newPrices = [...prices];
-                      newPrices[index].price = parseFloat(e.target.value) || 0;
-                      setPrices(newPrices);
-                    }}
-                    placeholder="0.00"
-                    className="border-pet-beige-medium focus:border-pet-gold"
-                  />
-                  <span className="text-muted-foreground">R$</span>
-                </div>
-              ))}
+              {prices.map((price, index) => {
+                const size = sizes.find(s => s.id === price.size_id);
+                return (
+                  <div key={price.size_id} className="flex items-center space-x-4">
+                    <div className="w-16">
+                      <Badge className="bg-pet-gold text-white font-bold">
+                        {price.size_name}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {size?.dimensions}
+                      </p>
+                    </div>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={price.price}
+                      onChange={(e) => {
+                        const newPrices = [...prices];
+                        newPrices[index].price = parseFloat(e.target.value) || 0;
+                        setPrices(newPrices);
+                      }}
+                      placeholder="0.00"
+                      className="border-pet-beige-medium focus:border-pet-gold"
+                    />
+                    <span className="text-muted-foreground">R$</span>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         </div>

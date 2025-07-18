@@ -210,6 +210,42 @@ export type Database = {
           },
         ]
       }
+      sizes: {
+        Row: {
+          created_at: string
+          depth_cm: number | null
+          dimensions: string
+          display_order: number
+          height_cm: number | null
+          id: string
+          name: string
+          updated_at: string
+          width_cm: number | null
+        }
+        Insert: {
+          created_at?: string
+          depth_cm?: number | null
+          dimensions: string
+          display_order?: number
+          height_cm?: number | null
+          id?: string
+          name: string
+          updated_at?: string
+          width_cm?: number | null
+        }
+        Update: {
+          created_at?: string
+          depth_cm?: number | null
+          dimensions?: string
+          display_order?: number
+          height_cm?: number | null
+          id?: string
+          name?: string
+          updated_at?: string
+          width_cm?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
