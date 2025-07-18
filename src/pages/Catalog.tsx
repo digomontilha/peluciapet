@@ -362,7 +362,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
         {/* Tabela de preços compacta */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tamanhos e preços:</Label>
-          <div className="space-y-0.5">
+          <div className="grid grid-cols-2 gap-1">
             {product.product_prices.map((price) => (
               <div
                 key={price.size}
