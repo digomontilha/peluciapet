@@ -16,7 +16,8 @@ export default function ComoComprar() {
     telefone: '',
     email: '',
     assunto: '',
-    mensagem: ''
+    mensagem: '',
+    captcha: ''
   });
 
   // Estado do CAPTCHA
@@ -48,7 +49,7 @@ export default function ComoComprar() {
     }));
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Verificar CAPTCHA
@@ -61,21 +62,50 @@ export default function ComoComprar() {
       generateCaptcha(); // Gerar novo CAPTCHA
       return;
     }
-    
-    toast({
-      title: "Mensagem enviada com sucesso!",
-      description: "Entraremos em contato em breve.",
-    });
 
-    // Limpar formulário e gerar novo CAPTCHA
-    setFormData({
-      nome: '',
-      telefone: '',
-      email: '',
-      assunto: '',
-      mensagem: ''
-    });
-    generateCaptcha();
+    try {
+      // Enviar e-mail através da edge function
+      const response = await fetch(`https://eogzmfpioypmrcbjnvtd.supabase.co/functions/v1/send-contact-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: formData.nome,
+          telefone: formData.telefone,
+          email: formData.email,
+          assunto: formData.assunto,
+          mensagem: formData.mensagem
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao enviar mensagem');
+      }
+
+      toast({
+        title: "Mensagem enviada com sucesso!",
+        description: "Recebemos sua mensagem e entraremos em contato em breve.",
+      });
+
+      // Limpar formulário e gerar novo CAPTCHA
+      setFormData({
+        nome: '',
+        telefone: '',
+        email: '',
+        assunto: '',
+        mensagem: '',
+        captcha: ''
+      });
+      generateCaptcha();
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: "Ocorreu um erro. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
