@@ -543,32 +543,32 @@ export default function Catalog() {
       <section className="bg-background py-16">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-card rounded-2xl p-6 text-center shadow-elegant hover:shadow-glow transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
                 <MessageCircle className="h-6 w-6 text-pet-gold" />
               </div>
               <h3 className="font-bold text-foreground mb-2">Frete</h3>
               <p className="text-sm text-muted-foreground">À combinar</p>
             </div>
 
-            <div className="bg-card rounded-2xl p-6 text-center shadow-elegant hover:shadow-glow transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
                 <Tag className="h-6 w-6 text-pet-gold" />
               </div>
               <h3 className="font-bold text-foreground mb-2">Parcelamento</h3>
               <p className="text-sm text-muted-foreground">Com juros</p>
             </div>
 
-            <div className="bg-card rounded-2xl p-6 text-center shadow-elegant hover:shadow-glow transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
                 <Heart className="h-6 w-6 text-pet-gold" />
               </div>
               <h3 className="font-bold text-foreground mb-2">Garantia de Qualidade</h3>
               <p className="text-sm text-muted-foreground">1 meses de garantia</p>
             </div>
 
-            <div className="bg-card rounded-2xl p-6 text-center shadow-elegant hover:shadow-glow transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
                 <X className="h-6 w-6 text-pet-gold" />
               </div>
               <h3 className="font-bold text-foreground mb-2">Troca Fácil</h3>
