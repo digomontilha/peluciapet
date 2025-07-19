@@ -338,7 +338,7 @@ export default function UserManagement() {
           <DialogTrigger asChild>
             <Button onClick={openCreateDialog} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Novo Admin
+              Novo Usuário
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
