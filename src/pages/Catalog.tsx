@@ -261,7 +261,7 @@ export default function Catalog() {
             <div className="relative">
               <h1 className="text-5xl md:text-8xl font-black mb-6 relative">
                 {/* Texto principal com gradiente animado */}
-                <span className="relative bg-gradient-to-r from-white via-pet-gold to-white bg-clip-text text-transparent animate-glow-pulse text-shadow-warm">
+                <span className="relative bg-gradient-to-r from-white via-pet-gold to-white bg-clip-text text-transparent animate-glow-pulse">
                   Catálogo PelúciaPet
                 </span>
                 {/* Brilho superior */}
