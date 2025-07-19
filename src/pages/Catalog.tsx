@@ -262,10 +262,6 @@ export default function Catalog() {
             {/* Título principal com efeito 3D impressionante */}
             <div className="relative">
               <h1 className="text-5xl md:text-8xl font-black mb-6 relative">
-                {/* Sombra do texto em 3D */}
-                <span className="absolute inset-0 text-pet-brown-dark/50 transform translate-x-2 translate-y-2 blur-sm">
-                  Catálogo PelúciaPet
-                </span>
                 {/* Texto principal com gradiente animado */}
                 <span className="relative bg-gradient-to-r from-white via-pet-gold to-white bg-clip-text text-transparent animate-glow-pulse text-shadow-warm">
                   Catálogo PelúciaPet
