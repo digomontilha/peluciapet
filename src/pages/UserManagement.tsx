@@ -30,7 +30,7 @@ export default function UserManagement() {
   const [formData, setFormData] = useState({
     user_id: '',
     full_name: '',
-    role: 'admin',
+    role: 'user',
     email: '',
     password: '',
     confirmPassword: ''
@@ -101,7 +101,7 @@ export default function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setIsDialogOpen(false);
       setEditingUser(null);
-      setFormData({ user_id: '', full_name: '', role: 'admin', email: '', password: '', confirmPassword: '' });
+      setFormData({ user_id: '', full_name: '', role: 'user', email: '', password: '', confirmPassword: '' });
       toast({
         title: editingUser ? 'Usuário atualizado' : 'Usuário criado',
         description: editingUser ? 'O usuário admin foi atualizado com sucesso.' : 'O novo usuário admin foi criado com sucesso.'
@@ -237,7 +237,7 @@ export default function UserManagement() {
 
   const openCreateDialog = () => {
     setEditingUser(null);
-    setFormData({ user_id: '', full_name: '', role: 'admin', email: '', password: '', confirmPassword: '' });
+    setFormData({ user_id: '', full_name: '', role: 'user', email: '', password: '', confirmPassword: '' });
     setIsDialogOpen(true);
   };
 
@@ -245,8 +245,8 @@ export default function UserManagement() {
     switch (role) {
       case 'super_admin':
         return <Crown className="h-4 w-4" />;
-      case 'admin':
-        return <Shield className="h-4 w-4" />;
+      case 'user':
+        return <User className="h-4 w-4" />;
       default:
         return <User className="h-4 w-4" />;
     }
@@ -256,7 +256,7 @@ export default function UserManagement() {
     switch (role) {
       case 'super_admin':
         return 'default';
-      case 'admin':
+      case 'user':
         return 'secondary';
       default:
         return 'outline';
@@ -361,7 +361,7 @@ export default function UserManagement() {
                     <SelectValue placeholder="Selecione a função" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                   </SelectContent>
                 </Select>
@@ -482,7 +482,7 @@ export default function UserManagement() {
             <CardContent>
               <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center gap-1 w-fit">
                 {getRoleIcon(user.role)}
-                {user.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                {user.role === 'super_admin' ? 'Super Admin' : 'User'}
               </Badge>
               <p className="text-xs text-muted-foreground mt-2">
                 Criado em {new Date(user.created_at).toLocaleDateString('pt-BR')}
