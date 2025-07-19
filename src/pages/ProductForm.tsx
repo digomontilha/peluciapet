@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Upload, X, Save, ArrowLeft } from 'lucide-react';
+import { Plus, Upload, X, Save, ArrowLeft, Hash, Package2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +40,15 @@ interface ProductPrice {
   price: number;
 }
 
+interface ProductVariant {
+  id?: string;
+  size: string;
+  color_id?: string;
+  variant_code: string;
+  stock_quantity: number;
+  is_available: boolean;
+}
+
 export default function ProductForm() {
   const { isAdmin, loading } = useAuth();
   const navigate = useNavigate();
@@ -57,6 +66,7 @@ export default function ProductForm() {
   });
   
   const [prices, setPrices] = useState<ProductPrice[]>([]);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
@@ -64,6 +74,7 @@ export default function ProductForm() {
   const [selectedImages, setSelectedImages] = useState<{[colorId: string]: File[]}>({});
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [showVariants, setShowVariants] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -534,6 +545,40 @@ export default function ProductForm() {
             ))}
           </CardContent>
         </Card>
+
+        {/* Gestão Rápida de Variantes */}
+        {isEditing && (
+          <Card className="mt-8 bg-white/80 backdrop-blur border-0 shadow-soft">
+            <CardHeader>
+              <CardTitle className="text-primary flex items-center gap-2">
+                <Hash className="h-5 w-5" />
+                Gestão de Variantes e Estoque
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Gerencie códigos únicos e controle de estoque para cada combinação de tamanho e cor.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    Produto: <span className="text-primary">{productData.product_code}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    As variantes são geradas automaticamente baseadas no código do produto, tamanho e cor.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate(`/admin/variants?product=${id}`)}
+                  className="bg-pet-brown-medium hover:bg-pet-brown-dark text-white"
+                >
+                  <Package2 className="h-4 w-4 mr-2" />
+                  Gerenciar Variantes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Ações */}
         <div className="mt-8 flex justify-end space-x-4">

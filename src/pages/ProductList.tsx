@@ -15,11 +15,16 @@ interface Product {
   id: string;
   name: string;
   description: string;
+  product_code: string;
   status: string;
   is_custom_order: boolean;
   category_id: string;
   created_at: string;
   categories?: { name: string };
+  product_images?: Array<{
+    image_url: string;
+    alt_text?: string;
+  }>;
 }
 
 export default function ProductList() {
@@ -51,7 +56,11 @@ export default function ProductList() {
         .from('products')
         .select(`
           *,
-          categories (name)
+          categories (name),
+          product_images (
+            image_url,
+            alt_text
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -192,12 +201,36 @@ export default function ProductList() {
             {filteredProducts.map((product) => (
               <Card key={product.id} className="bg-white/80 backdrop-blur border-0 shadow-soft hover:shadow-warm transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                  <div className="flex gap-4">
+                    {/* Imagem do produto */}
+                    <div className="flex-shrink-0">
+                      {product.product_images && product.product_images.length > 0 ? (
+                        <img
+                          src={product.product_images[0].image_url}
+                          alt={product.product_images[0].alt_text || product.name}
+                          className="w-24 h-24 object-cover rounded-lg border-2 border-pet-beige-medium"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-24 h-24 bg-pet-beige-light rounded-lg border-2 border-pet-beige-medium flex items-center justify-center">
+                          <Package className="h-8 w-8 text-pet-brown-medium" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Informações do produto */}
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-primary truncate">
                           {product.name}
                         </h3>
+                        {product.product_code && (
+                          <Badge variant="outline" className="text-xs">
+                            {product.product_code}
+                          </Badge>
+                        )}
                         <Badge 
                           variant={product.status === 'active' ? 'default' : 'secondary'}
                           className={product.status === 'active' ? 'bg-green-100 text-green-800' : ''}
@@ -224,10 +257,14 @@ export default function ProductList() {
                         <span>
                           Criado em: {new Date(product.created_at).toLocaleDateString('pt-BR')}
                         </span>
+                        {product.product_images && (
+                          <span>{product.product_images.length} imagem(ns)</span>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-4">
+                    {/* Ações */}
+                    <div className="flex flex-col gap-2 ml-4">
                       <Button
                         variant="outline"
                         size="sm"
@@ -235,6 +272,15 @@ export default function ProductList() {
                         className="hover:bg-pet-beige-light transition-all duration-300"
                       >
                         <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/admin/variants?product=${product.id}`)}
+                        className="hover:bg-pet-beige-light transition-all duration-300"
+                        title="Gerenciar Variantes"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
