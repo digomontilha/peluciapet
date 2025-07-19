@@ -6,10 +6,48 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export default function ComoComprar() {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    nome: '',
+    telefone: '',
+    email: '',
+    assunto: '',
+    mensagem: ''
+  });
+
   const handleWhatsApp = () => {
     window.open('https://wa.me/5511914608191', '_blank');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Simular envio da mensagem
+    toast({
+      title: "Mensagem enviada com sucesso!",
+      description: "Entraremos em contato em breve. Obrigado!",
+    });
+
+    // Limpar formulário
+    setFormData({
+      nome: '',
+      telefone: '',
+      email: '',
+      assunto: '',
+      mensagem: ''
+    });
   };
 
   return (
@@ -184,28 +222,59 @@ export default function ComoComprar() {
             <Card className="shadow-elegant">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-primary mb-6">Formulário de Contato</h3>
-                <form className="space-y-4">
+                <form onSubmit={handleFormSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium mb-1 block">Nome *</label>
-                      <Input placeholder="Seu nome" required />
+                      <Input 
+                        name="nome"
+                        value={formData.nome}
+                        onChange={handleInputChange}
+                        placeholder="Seu nome" 
+                        required 
+                      />
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-1 block">Telefone</label>
-                      <Input placeholder="(11) 99999-9999" />
+                      <Input 
+                        name="telefone"
+                        value={formData.telefone}
+                        onChange={handleInputChange}
+                        placeholder="(11) 99999-9999" 
+                      />
                     </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">E-mail *</label>
-                    <Input type="email" placeholder="seu@email.com" required />
+                    <Input 
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="seu@email.com" 
+                      required 
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">Assunto *</label>
-                    <Input placeholder="Sobre qual produto você quer saber?" required />
+                    <Input 
+                      name="assunto"
+                      value={formData.assunto}
+                      onChange={handleInputChange}
+                      placeholder="Sobre qual produto você quer saber?" 
+                      required 
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">Mensagem *</label>
-                    <Textarea placeholder="Digite sua mensagem aqui..." rows={4} required />
+                    <Textarea 
+                      name="mensagem"
+                      value={formData.mensagem}
+                      onChange={handleInputChange}
+                      placeholder="Digite sua mensagem aqui..." 
+                      rows={4} 
+                      required 
+                    />
                   </div>
                   <Button type="submit" className="w-full">
                     <Mail className="h-4 w-4 mr-2" />
