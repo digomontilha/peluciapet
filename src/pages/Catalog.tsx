@@ -646,7 +646,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
             {product.is_custom_order && (
               <Badge className="
                 absolute top-3 right-3 
-                bg-gradient-to-r from-pet-gold to-yellow-500 
+                bg-pet-brown-medium 
                 text-white shadow-lg backdrop-blur-sm
                 transform transition-all duration-300
                 group-hover:scale-110 group-hover:-translate-y-1
