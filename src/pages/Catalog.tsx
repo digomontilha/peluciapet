@@ -11,41 +11,36 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import banner from '@/assets/pelucia-pet-banner.png';
 
-interface ProductSize {
-  name: string;
-  dimensions: string;
-}
-
-interface ProductImage {
-  image_url: string;
-  alt_text?: string;
-  color_id?: string;
-  colors?: {
-    name: string;
-    hex_code: string;
-  };
-}
-
-interface ProductPrice {
-  price: number;
-  product_sizes?: ProductSize;
-  sizes?: ProductSize;
-}
-
-interface CategoryInfo {
-  name: string;
-  icon: string;
-}
-
 interface Product {
   id: string;
   name: string;
   description: string;
   observations?: string;
   is_custom_order: boolean;
-  categories?: CategoryInfo;
-  product_images: ProductImage[];
-  product_prices: ProductPrice[];
+  categories?: {
+    name: string;
+    icon: string;
+  };
+  product_images: Array<{
+    image_url: string;
+    alt_text?: string;
+    color_id?: string;
+    colors?: {
+      name: string;
+      hex_code: string;
+    };
+  }>;
+  product_prices: Array<{
+    price: number;
+    product_sizes?: {
+      name: string;
+      dimensions: string;
+    };
+    sizes?: {
+      name: string;
+      dimensions: string;
+    };
+  }>;
 }
 
 interface Category {
@@ -83,68 +78,72 @@ export default function Catalog() {
   }, []);
 
   const fetchData = async () => {
-  try {
-    // Buscar dados em paralelo
-    const [productsResult, categoriesResult, colorsResult] = await Promise.all([
-      supabase
-        .from('products')
-        .select(`
-          *,
-          categories:category_id (name, icon),
-          product_images (
-            image_url,
-            alt_text,
-            color_id,
-            colors:color_id (name, hex_code)
-          ),
-          product_prices (
-            price,
-            product_sizes (
-              name,
-              dimensions
+    try {
+      // Buscar dados em paralelo
+      const [productsResult, categoriesResult, colorsResult] = await Promise.all([
+        supabase
+          .from('products')
+          .select(`
+            *,
+            categories:category_id (name, icon),
+            product_images (
+              image_url,
+              alt_text,
+              color_id,
+              colors:color_id (name, hex_code)
+            ),
+            product_prices (
+              price,
+              product_sizes (
+                name,
+                dimensions
+              )
             )
-          )
-        `)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false }),
-      
-      supabase
-        .from('categories')
-        .select('*')
-        .order('name'),
+          `)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false }),
         
-      supabase
-        .from('colors')
-        .select('*')
-        .order('name')
-    ]);
+        supabase
+          .from('categories')
+          .select('*')
+          .order('name'),
+          
+        supabase
+          .from('colors')
+          .select('*')
+          .order('name')
+      ]);
 
-    if (productsResult.error) throw productsResult.error;
-    if (categoriesResult.error) throw categoriesResult.error;
-    if (colorsResult.error) throw colorsResult.error;
+      if (productsResult.error) throw productsResult.error;
+      if (categoriesResult.error) throw categoriesResult.error;
+      if (colorsResult.error) throw colorsResult.error;
 
-    // Processar produtos corretamente (CORRIGIDO)
-    const processedProducts = (productsResult.data || []).map(product => ({
-      ...product,
-      product_prices: product.product_prices,
-    }));
+      // Processar produtos para incluir informações de dimensões
+      const processedProducts = (productsResult.data || []).map(product => ({
+        ...product,
+        product_prices: product.product_prices.map(price => ({
+          ...price,
+          sizes: price.product_sizes ? {
+            name: price.product_sizes.name,
+            dimensions: price.product_sizes.dimensions
+          } : undefined
+        }))
+      }));
 
-    setProducts(processedProducts);
-    setCategories(categoriesResult.data || []);
-    setColors(colorsResult.data || []);
-
-  } catch (error) {
-    console.error('Erro ao carregar dados:', error);
-    toast({
-      title: "Erro ao carregar produtos",
-      description: "Não foi possível carregar o catálogo.",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setProducts(processedProducts);
+      setCategories(categoriesResult.data || []);
+      setColors(colorsResult.data || []);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: "Erro ao carregar produtos",
+        description: "Não foi possível carregar o catálogo.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredProducts = products.filter(product => 
     selectedCategory === 'all' || product.categories?.name === selectedCategory
