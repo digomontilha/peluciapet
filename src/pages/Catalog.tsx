@@ -126,13 +126,7 @@ export default function Catalog() {
       // Processar produtos para incluir informações de dimensões
       const processedProducts = (productsResult.data || []).map(product => ({
         ...product,
-        product_prices: product.product_prices.map(price => ({
-          ...price,
-          sizes: price.product_sizes ? {
-            name: price.product_sizes.name,
-            dimensions: price.product_sizes.dimensions
-          } : undefined
-        }))
+        product_prices: product.product_prices)
       }));
 
       setProducts(processedProducts);
