@@ -499,7 +499,7 @@ export default function Catalog() {
                           onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
                           className={`cursor-pointer border rounded-lg p-3 transition-all duration-200 ${
                             selectedSize === price.size 
-                              ? 'bg-pet-gold text-white border-pet-gold' 
+                              ? 'bg-pet-brown-medium text-white border-pet-brown-medium' 
                               : 'bg-background border-border hover:border-pet-gold'
                           }`}
                         >
