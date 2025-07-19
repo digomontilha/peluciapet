@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Users, Settings, Plus, Eye } from 'lucide-react';
+import { Package, Users, Settings, Plus, Eye, Mail } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { supabase } from '@/integrations/supabase/client';
@@ -168,6 +168,12 @@ export default function AdminDashboard() {
             description="Visualizar loja como cliente"
             icon={Eye}
             onClick={() => navigate('/')}
+          />
+          <ActionCard
+            title="Mensagens de Contato"
+            description="Gerenciar mensagens do formulário"
+            icon={Mail}
+            onClick={() => navigate('/admin/contacts')}
           />
           <ActionCard
             title="Novo Produto"

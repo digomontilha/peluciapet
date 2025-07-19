@@ -89,6 +89,42 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          assunto: string
+          created_at: string
+          email: string
+          id: string
+          mensagem: string
+          nome: string
+          status: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          assunto: string
+          created_at?: string
+          email: string
+          id?: string
+          mensagem: string
+          nome: string
+          status?: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          assunto?: string
+          created_at?: string
+          email?: string
+          id?: string
+          mensagem?: string
+          nome?: string
+          status?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           alt_text: string | null

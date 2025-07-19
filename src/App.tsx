@@ -15,6 +15,7 @@ import CategoryManagement from "./pages/CategoryManagement";
 import ColorManagement from "./pages/ColorManagement";
 import UserManagement from "./pages/UserManagement";
 import ProductVariants from "./pages/ProductVariants";
+import ContactManagement from "./pages/ContactManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/admin/colors" element={<ColorManagement />} />
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/variants" element={<ProductVariants />} />
+            <Route path="/admin/contacts" element={<ContactManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
