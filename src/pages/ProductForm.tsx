@@ -76,6 +76,7 @@ export default function ProductForm() {
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [showVariants, setShowVariants] = useState(false);
+  const [selectedColorId, setSelectedColorId] = useState<string>('');
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -541,18 +542,47 @@ export default function ProductForm() {
           <CardHeader>
             <CardTitle className="text-primary">Imagens do Produto</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Adicione imagens para cada cor disponível. Máximo 5MB por imagem.
+              Selecione uma cor para visualizar e gerenciar suas imagens. Máximo 5MB por imagem.
             </p>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {colors.map((color) => (
-              <div key={color.id} className="border rounded-lg p-4 border-pet-beige-medium">
+          <CardContent className="space-y-4">
+            {/* Seletor de Cor */}
+            <div className="space-y-2">
+              <Label htmlFor="color-selector">Selecionar Cor</Label>
+              <Select 
+                value={selectedColorId} 
+                onValueChange={setSelectedColorId}
+              >
+                <SelectTrigger className="border-pet-beige-medium focus:border-pet-gold">
+                  <SelectValue placeholder="Escolha uma cor para gerenciar imagens" />
+                </SelectTrigger>
+                <SelectContent>
+                  {colors.map((color) => (
+                    <SelectItem key={color.id} value={color.id}>
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className="w-4 h-4 rounded-full border border-gray-300"
+                          style={{ backgroundColor: color.hex_code }}
+                        />
+                        <span>{color.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Área de upload e visualização para a cor selecionada */}
+            {selectedColorId && (
+              <div className="border rounded-lg p-4 border-pet-beige-medium">
                 <div className="flex items-center space-x-3 mb-4">
                   <div
                     className="w-6 h-6 rounded-full border-2 border-gray-300"
-                    style={{ backgroundColor: color.hex_code }}
+                    style={{ backgroundColor: colors.find(c => c.id === selectedColorId)?.hex_code }}
                   />
-                  <Label className="font-medium">{color.name}</Label>
+                  <Label className="font-medium">
+                    {colors.find(c => c.id === selectedColorId)?.name}
+                  </Label>
                 </div>
                 
                 <div className="space-y-3">
@@ -560,12 +590,12 @@ export default function ProductForm() {
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={(e) => handleImageUpload(color.id, e.target.files)}
+                    onChange={(e) => handleImageUpload(selectedColorId, e.target.files)}
                     className="hidden"
-                    id={`upload-${color.id}`}
+                    id={`upload-${selectedColorId}`}
                   />
                   <Label
-                    htmlFor={`upload-${color.id}`}
+                    htmlFor={`upload-${selectedColorId}`}
                     className="flex items-center justify-center w-full h-20 border-2 border-dashed border-pet-beige-medium rounded-lg cursor-pointer hover:border-pet-gold transition-colors"
                   >
                     <div className="text-center">
@@ -575,15 +605,15 @@ export default function ProductForm() {
                   </Label>
                   
                   {/* Imagens existentes */}
-                  {existingImages[color.id] && existingImages[color.id].length > 0 && (
+                  {existingImages[selectedColorId] && existingImages[selectedColorId].length > 0 && (
                     <div className="mb-3">
                       <p className="text-xs text-muted-foreground mb-2">Imagens atuais:</p>
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {existingImages[color.id].map((image) => (
+                        {existingImages[selectedColorId].map((image) => (
                           <div key={image.id} className="relative">
                             <img
                               src={image.image_url}
-                              alt={image.alt_text || `Imagem ${color.name}`}
+                              alt={image.alt_text || `Imagem ${colors.find(c => c.id === selectedColorId)?.name}`}
                               className="w-full h-16 object-cover rounded border-2 border-pet-beige-medium"
                               onError={(e) => {
                                 e.currentTarget.src = '/placeholder.svg';
@@ -593,7 +623,7 @@ export default function ProductForm() {
                               variant="destructive"
                               size="sm"
                               className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                              onClick={() => removeExistingImage(image.id, color.id)}
+                              onClick={() => removeExistingImage(image.id, selectedColorId)}
                             >
                               <X className="h-3 w-3" />
                             </Button>
@@ -604,11 +634,11 @@ export default function ProductForm() {
                   )}
 
                   {/* Novas imagens selecionadas */}
-                  {selectedImages[color.id] && selectedImages[color.id].length > 0 && (
+                  {selectedImages[selectedColorId] && selectedImages[selectedColorId].length > 0 && (
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">Novas imagens a serem adicionadas:</p>
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {selectedImages[color.id].map((file, index) => (
+                        {selectedImages[selectedColorId].map((file, index) => (
                           <div key={index} className="relative">
                             <img
                               src={URL.createObjectURL(file)}
@@ -619,7 +649,7 @@ export default function ProductForm() {
                               variant="destructive"
                               size="sm"
                               className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                              onClick={() => removeImage(color.id, index)}
+                              onClick={() => removeImage(selectedColorId, index)}
                             >
                               <X className="h-3 w-3" />
                             </Button>
@@ -630,7 +660,7 @@ export default function ProductForm() {
                   )}
                 </div>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
