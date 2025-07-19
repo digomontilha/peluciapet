@@ -66,11 +66,6 @@ interface Size {
   dimensions: string;
 }
 
-// Interface para o resultado da consulta de variante
-interface ProductVariant {
-  variant_code: string;
-}
-
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -159,17 +154,13 @@ export default function Catalog() {
     // Buscar código da variante específica
     if (size) {
       try {
-        // Tipagem explícita para resolver o erro de inferência de tipos
-        const result = await supabase
+        const { data: variant } = await supabase
           .from('product_variants')
           .select('variant_code')
           .eq('product_id', product.id)
           .eq('size', size)
           .eq('color_id', color || null)
           .single();
-        
-        // Tipagem explícita do resultado
-        const variant = result.data as ProductVariant | null;
         
         if (variant) {
           variantCode = variant.variant_code;
