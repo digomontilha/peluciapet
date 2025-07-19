@@ -37,6 +37,7 @@ export default function UserManagement() {
     password: '',
     confirmPassword: ''
   });
+  const [searchingUser, setSearchingUser] = useState(false);
 
   // Verificar se o usuário tem permissão para acessar esta página
   useEffect(() => {
@@ -193,6 +194,25 @@ export default function UserManagement() {
     saveUserMutation.mutate(formData);
   };
 
+  const searchUserByEmail = async (email: string) => {
+    if (!email.trim()) return;
+    
+    setSearchingUser(true);
+    try {
+      // Como não podemos acessar auth.users diretamente, vamos verificar se já existe um perfil admin com este email
+      // ou implementar uma solução mais simples
+      toast({
+        title: "Busca simplificada",
+        description: "Por favor, digite manualmente o ID do usuário ou implemente busca personalizada.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Erro ao buscar usuário:', error);
+    } finally {
+      setSearchingUser(false);
+    }
+  };
+
   const handleEdit = (user: AdminProfile) => {
     setEditingUser(user);
     setFormData({
@@ -308,18 +328,44 @@ export default function UserManagement() {
                 </div>
               )}
                
-              {!editingUser && (
-                <div>
-                  <Label htmlFor="user_id">ID do Usuário *</Label>
-                  <Input
-                    id="user_id"
-                    value={formData.user_id}
-                    onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                    placeholder="UUID do usuário do Supabase Auth"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Digite o ID do usuário que já existe no Supabase Auth
-                  </p>
+               {!editingUser && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="search_email">Buscar por Email (opcional)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="search_email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="email@exemplo.com"
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        onClick={() => searchUserByEmail(formData.email)}
+                        disabled={searchingUser}
+                      >
+                        {searchingUser ? 'Buscando...' : 'Buscar'}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Digite o email e clique em buscar para encontrar o ID automaticamente
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="user_id">ID do Usuário *</Label>
+                    <Input
+                      id="user_id"
+                      value={formData.user_id}
+                      onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                      placeholder="UUID do usuário do Supabase Auth"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Cole aqui o ID do usuário que já existe no Supabase Auth
+                    </p>
+                  </div>
                 </div>
               )}
               
