@@ -11,36 +11,41 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import banner from '@/assets/pelucia-pet-banner.png';
 
+interface ProductSize {
+  name: string;
+  dimensions: string;
+}
+
+interface ProductImage {
+  image_url: string;
+  alt_text?: string;
+  color_id?: string;
+  colors?: {
+    name: string;
+    hex_code: string;
+  };
+}
+
+interface ProductPrice {
+  price: number;
+  product_sizes?: ProductSize;
+  sizes?: ProductSize;
+}
+
+interface CategoryInfo {
+  name: string;
+  icon: string;
+}
+
 interface Product {
   id: string;
   name: string;
   description: string;
   observations?: string;
   is_custom_order: boolean;
-  categories?: {
-    name: string;
-    icon: string;
-  };
-  product_images: Array<{
-    image_url: string;
-    alt_text?: string;
-    color_id?: string;
-    colors?: {
-      name: string;
-      hex_code: string;
-    };
-  }>;
-  product_prices: Array<{
-    price: number;
-    product_sizes?: {
-      name: string;
-      dimensions: string;
-    };
-    sizes?: {
-      name: string;
-      dimensions: string;
-    };
-  }>;
+  categories?: CategoryInfo;
+  product_images: ProductImage[];
+  product_prices: ProductPrice[];
 }
 
 interface Category {
