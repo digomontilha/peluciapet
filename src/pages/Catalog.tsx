@@ -83,66 +83,68 @@ export default function Catalog() {
   }, []);
 
   const fetchData = async () => {
-    try {
-      // Buscar dados em paralelo
-      const [productsResult, categoriesResult, colorsResult] = await Promise.all([
-        supabase
-          .from('products')
-          .select(`
-            *,
-            categories:category_id (name, icon),
-            product_images (
-              image_url,
-              alt_text,
-              color_id,
-              colors:color_id (name, hex_code)
-            ),
-            product_prices (
-              price,
-              product_sizes (
-                name,
-                dimensions
-              )
+  try {
+    // Buscar dados em paralelo
+    const [productsResult, categoriesResult, colorsResult] = await Promise.all([
+      supabase
+        .from('products')
+        .select(`
+          *,
+          categories:category_id (name, icon),
+          product_images (
+            image_url,
+            alt_text,
+            color_id,
+            colors:color_id (name, hex_code)
+          ),
+          product_prices (
+            price,
+            product_sizes (
+              name,
+              dimensions
             )
-          `)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false }),
+          )
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false }),
+      
+      supabase
+        .from('categories')
+        .select('*')
+        .order('name'),
         
-        supabase
-          .from('categories')
-          .select('*')
-          .order('name'),
-          
-        supabase
-          .from('colors')
-          .select('*')
-          .order('name')
-      ]);
+      supabase
+        .from('colors')
+        .select('*')
+        .order('name')
+    ]);
 
-      if (productsResult.error) throw productsResult.error;
-      if (categoriesResult.error) throw categoriesResult.error;
-      if (colorsResult.error) throw colorsResult.error;
+    if (productsResult.error) throw productsResult.error;
+    if (categoriesResult.error) throw categoriesResult.error;
+    if (colorsResult.error) throw colorsResult.error;
 
-      // Processar produtos para incluir informações de dimensões
-      const processedProducts = (productsResult.data || []).map(product => ({
-        ...product,
-        product_prices: product.product_prices)
-      }));
+    // Processar produtos corretamente (CORRIGIDO)
+    const processedProducts = (productsResult.data || []).map(product => ({
+      ...product,
+      product_prices: product.product_prices,
+    }));
 
-      setProducts(processedProducts);
-      setCategories(categoriesResult.data || []);
-      setColors(colorsResult.data || []);
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      toast({
-        title: "Erro ao carregar produtos",
-        description: "Não foi possível carregar o catálogo.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    setProducts(processedProducts);
+    setCategories(categoriesResult.data || []);
+    setColors(colorsResult.data || []);
+
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
+    toast({
+      title: "Erro ao carregar produtos",
+      description: "Não foi possível carregar o catálogo.",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const filteredProducts = products.filter(product => 
     selectedCategory === 'all' || product.categories?.name === selectedCategory
