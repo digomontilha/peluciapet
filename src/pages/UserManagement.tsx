@@ -81,35 +81,24 @@ export default function UserManagement() {
 
         // Atualizar senha se fornecida
         if (data.password) {
-          const { error: authError } = await supabase.auth.admin.updateUserById(
-            editingUser.user_id,
-            { password: data.password }
-          );
-          if (authError) throw authError;
+          // Para atualizar senha, seria necessário usar a API Admin
+          // Por enquanto, vamos mostrar uma mensagem de que a senha não pode ser alterada
+          toast({
+            title: "Aviso",
+            description: "Funcionalidade de alterar senha em desenvolvimento.",
+            variant: "default",
+          });
         }
       } else {
-        // Criar novo usuário no Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: data.email,
-          password: data.password,
-          email_confirm: true,
-          user_metadata: {
-            full_name: data.full_name
-          }
-        });
-        
-        if (authError) throw authError;
-        if (!authData.user) throw new Error('Falha ao criar usuário');
-
-        // Criar perfil admin com o ID do usuário criado
-        const { error: profileError } = await supabase
+        // Criar perfil admin para usuário existente
+        const { error } = await supabase
           .from('admin_profiles')
           .insert([{
-            user_id: authData.user.id,
+            user_id: data.user_id,
             full_name: data.full_name,
             role: data.role
           }]);
-        if (profileError) throw profileError;
+        if (error) throw error;
       }
     },
     onSuccess: () => {
@@ -170,37 +159,10 @@ export default function UserManagement() {
 
     // Validações para novo usuário
     if (!editingUser) {
-      if (!formData.email.trim()) {
+      if (!formData.user_id.trim()) {
         toast({
           title: 'Erro',
-          description: 'O email é obrigatório.',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      if (!formData.password.trim()) {
-        toast({
-          title: 'Erro',
-          description: 'A senha é obrigatória.',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      if (formData.password.length < 6) {
-        toast({
-          title: 'Erro',
-          description: 'A senha deve ter pelo menos 6 caracteres.',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        toast({
-          title: 'Erro',
-          description: 'As senhas não coincidem.',
+          description: 'O ID do usuário é obrigatório.',
           variant: 'destructive'
         });
         return;
@@ -325,7 +287,7 @@ export default function UserManagement() {
               <DialogDescription>
                 {editingUser 
                   ? 'Atualize as informações do usuário admin.'
-                  : 'Crie um novo usuário com privilégios administrativos.'
+                  : 'Adicione perfil administrativo a um usuário existente no Supabase Auth.'
                 }
               </DialogDescription>
             </DialogHeader>
@@ -345,17 +307,19 @@ export default function UserManagement() {
                   </p>
                 </div>
               )}
-              
+               
               {!editingUser && (
                 <div>
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="user_id">ID do Usuário *</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="email@exemplo.com"
+                    id="user_id"
+                    value={formData.user_id}
+                    onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                    placeholder="UUID do usuário do Supabase Auth"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Digite o ID do usuário que já existe no Supabase Auth
+                  </p>
                 </div>
               )}
               
@@ -381,37 +345,6 @@ export default function UserManagement() {
                   </SelectContent>
                 </Select>
               </div>
-              
-              {!editingUser && (
-                <>
-                  <div className="space-y-2 pt-2 border-t">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Key className="h-4 w-4" />
-                      <Label className="text-sm font-medium">Credenciais de Acesso</Label>
-                    </div>
-                    <div>
-                      <Label htmlFor="password">Senha *</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        placeholder="Digite a senha (mínimo 6 caracteres)"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        placeholder="Confirme a senha"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
               
               {editingUser && (
                 <>
