@@ -233,8 +233,6 @@ export default function Catalog() {
           backgroundAttachment: 'fixed'
         }}
       >
-        {/* Overlay gradiente sutil */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pet-brown-dark/40 via-transparent to-pet-brown-medium/30"></div>
         
         {/* Partículas flutuantes */}
         <div className="absolute inset-0 overflow-hidden">
@@ -343,9 +341,6 @@ export default function Catalog() {
           </div>
         </div>
 
-        {/* Efeitos de canto com gradientes */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-radial from-pet-gold/30 to-transparent rounded-full filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-radial from-white/20 to-transparent rounded-full filter blur-3xl animate-float"></div>
         
         {/* Onda decorativa na parte inferior */}
         <div className="absolute bottom-0 left-0 right-0">
