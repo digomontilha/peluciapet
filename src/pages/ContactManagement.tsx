@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,20 +28,21 @@ interface ContactMessage {
 export default function ContactManagement() {
   const { user, loading: isLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     if (!isLoading && !user) {
-      window.location.href = "/auth";
+      navigate("/auth");
       return;
     }
 
     if (user) {
       fetchMessages();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, navigate]);
 
   const fetchMessages = async () => {
     try {
@@ -120,7 +122,7 @@ export default function ContactManagement() {
         <div className="flex items-center gap-4 mb-6">
           <Button 
             variant="outline" 
-            onClick={() => window.location.href = "/admin"}
+            onClick={() => navigate("/admin")}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
