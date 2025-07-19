@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function ComoComprar() {
   const { toast } = useToast();
@@ -18,23 +18,6 @@ export default function ComoComprar() {
     assunto: '',
     mensagem: ''
   });
-
-  // Estados para o captcha
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
-  const [userCaptchaAnswer, setUserCaptchaAnswer] = useState('');
-
-  // Gerar novo captcha
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    setCaptcha({ num1, num2, answer: num1 + num2 });
-    setUserCaptchaAnswer('');
-  };
-
-  // Gerar captcha inicial
-  useEffect(() => {
-    generateCaptcha();
-  }, []);
 
   const handleWhatsApp = () => {
     window.open('https://wa.me/5511914608191', '_blank');
@@ -51,17 +34,6 @@ export default function ComoComprar() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Verificar captcha
-    if (parseInt(userCaptchaAnswer) !== captcha.answer) {
-      toast({
-        title: "Erro no Captcha",
-        description: "Por favor, resolva a operação matemática corretamente.",
-        variant: "destructive",
-      });
-      generateCaptcha(); // Gerar novo captcha
-      return;
-    }
-    
     // Criar mensagem formatada para WhatsApp
     const mensagemWhatsApp = `*Nova mensagem do site:*\n\n*Nome:* ${formData.nome}\n*Telefone:* ${formData.telefone}\n*Email:* ${formData.email}\n*Assunto:* ${formData.assunto}\n\n*Mensagem:*\n${formData.mensagem}`;
     
@@ -76,7 +48,7 @@ export default function ComoComprar() {
       description: "A mensagem foi preparada e será enviada via WhatsApp.",
     });
 
-    // Limpar formulário e gerar novo captcha
+    // Limpar formulário
     setFormData({
       nome: '',
       telefone: '',
@@ -84,7 +56,6 @@ export default function ComoComprar() {
       assunto: '',
       mensagem: ''
     });
-    generateCaptcha();
   };
 
   return (
@@ -313,41 +284,6 @@ export default function ComoComprar() {
                       required 
                     />
                   </div>
-                  
-                  {/* Captcha */}
-                  <div className="bg-muted/50 p-4 rounded-lg border">
-                    <label className="text-sm font-medium mb-2 block">Verificação de Segurança *</label>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 text-lg font-mono bg-background px-3 py-2 rounded border">
-                        <span>{captcha.num1}</span>
-                        <span>+</span>
-                        <span>{captcha.num2}</span>
-                        <span>=</span>
-                        <span>?</span>
-                      </div>
-                      <Input
-                        type="number"
-                        value={userCaptchaAnswer}
-                        onChange={(e) => setUserCaptchaAnswer(e.target.value)}
-                        placeholder="Resultado"
-                        className="w-24"
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={generateCaptcha}
-                        className="flex-shrink-0"
-                      >
-                        ↻
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Resolva a operação matemática acima
-                    </p>
-                  </div>
-
                   <Button type="submit" className="w-full">
                     <Mail className="h-4 w-4 mr-2" />
                     Enviar Mensagem
