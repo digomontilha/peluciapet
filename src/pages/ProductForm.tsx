@@ -72,6 +72,7 @@ export default function ProductForm() {
   const [colors, setColors] = useState<Color[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
   const [selectedImages, setSelectedImages] = useState<{[colorId: string]: File[]}>({});
+  const [existingImages, setExistingImages] = useState<{[colorId: string]: Array<{id: string; image_url: string; alt_text?: string}>}>({});
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [showVariants, setShowVariants] = useState(false);
@@ -128,6 +129,31 @@ export default function ProductForm() {
       });
 
       setPrices(updatedPrices);
+
+      // Buscar imagens existentes
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('product_images')
+        .select('*')
+        .eq('product_id', productId)
+        .order('display_order');
+
+      if (imagesError) throw imagesError;
+
+      // Agrupar imagens por cor
+      const imagesByColor: {[colorId: string]: Array<{id: string; image_url: string; alt_text?: string}>} = {};
+      imagesData?.forEach(image => {
+        const colorId = image.color_id || 'no-color';
+        if (!imagesByColor[colorId]) {
+          imagesByColor[colorId] = [];
+        }
+        imagesByColor[colorId].push({
+          id: image.id,
+          image_url: image.image_url,
+          alt_text: image.alt_text
+        });
+      });
+
+      setExistingImages(imagesByColor);
 
     } catch (error) {
       console.error('Erro ao carregar produto:', error);
@@ -208,6 +234,35 @@ export default function ProductForm() {
       ...prev,
       [colorId]: prev[colorId]?.filter((_, i) => i !== index) || []
     }));
+  };
+
+  const removeExistingImage = async (imageId: string, colorId: string) => {
+    try {
+      const { error } = await supabase
+        .from('product_images')
+        .delete()
+        .eq('id', imageId);
+
+      if (error) throw error;
+
+      // Atualizar o estado local
+      setExistingImages(prev => ({
+        ...prev,
+        [colorId]: prev[colorId]?.filter(img => img.id !== imageId) || []
+      }));
+
+      toast({
+        title: "Imagem removida",
+        description: "A imagem foi removida com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao remover imagem:', error);
+      toast({
+        title: "Erro ao remover imagem",
+        description: "Não foi possível remover a imagem.",
+        variant: "destructive",
+      });
+    }
   };
 
   const uploadProductImages = async (productId: string) => {
@@ -519,25 +574,58 @@ export default function ProductForm() {
                     </div>
                   </Label>
                   
+                  {/* Imagens existentes */}
+                  {existingImages[color.id] && existingImages[color.id].length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-muted-foreground mb-2">Imagens atuais:</p>
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                        {existingImages[color.id].map((image) => (
+                          <div key={image.id} className="relative">
+                            <img
+                              src={image.image_url}
+                              alt={image.alt_text || `Imagem ${color.name}`}
+                              className="w-full h-16 object-cover rounded border-2 border-pet-beige-medium"
+                              onError={(e) => {
+                                e.currentTarget.src = '/placeholder.svg';
+                              }}
+                            />
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                              onClick={() => removeExistingImage(image.id, color.id)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Novas imagens selecionadas */}
                   {selectedImages[color.id] && selectedImages[color.id].length > 0 && (
-                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                      {selectedImages[color.id].map((file, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`Preview ${index}`}
-                            className="w-full h-16 object-cover rounded"
-                          />
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                            onClick={() => removeImage(color.id, index)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2">Novas imagens a serem adicionadas:</p>
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                        {selectedImages[color.id].map((file, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index}`}
+                              className="w-full h-16 object-cover rounded border-2 border-green-300"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                              onClick={() => removeImage(color.id, index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
