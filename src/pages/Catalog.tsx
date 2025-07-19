@@ -525,7 +525,7 @@ export default function Catalog() {
                   <div className="flex gap-3 pt-4">
                     <Button
                       onClick={() => handleWhatsAppClick(selectedProduct, selectedSize, selectedColor)}
-                      className="flex-1 bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300"
+                      className="flex-1 bg-green-500 hover:bg-green-600 text-white transition-all duration-300"
                       size="lg"
                     >
                       <MessageCircle className="h-5 w-5 mr-2" />
