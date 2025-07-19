@@ -176,21 +176,21 @@ export type Database = {
           id: string
           price: number
           product_id: string
-          size: string
+          product_size_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           price: number
           product_id: string
-          size: string
+          product_size_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           price?: number
           product_id?: string
-          size?: string
+          product_size_id?: string | null
         }
         Relationships: [
           {
@@ -200,7 +200,53 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_prices_product_size_id_fkey"
+            columns: ["product_size_id"]
+            isOneToOne: false
+            referencedRelation: "product_sizes"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      product_sizes: {
+        Row: {
+          created_at: string
+          depth_cm: number | null
+          dimensions: string
+          display_order: number
+          height_cm: number | null
+          id: string
+          name: string
+          product_id: string
+          updated_at: string
+          width_cm: number | null
+        }
+        Insert: {
+          created_at?: string
+          depth_cm?: number | null
+          dimensions: string
+          display_order?: number
+          height_cm?: number | null
+          id?: string
+          name: string
+          product_id: string
+          updated_at?: string
+          width_cm?: number | null
+        }
+        Update: {
+          created_at?: string
+          depth_cm?: number | null
+          dimensions?: string
+          display_order?: number
+          height_cm?: number | null
+          id?: string
+          name?: string
+          product_id?: string
+          updated_at?: string
+          width_cm?: number | null
+        }
+        Relationships: []
       }
       product_variants: {
         Row: {
@@ -209,7 +255,7 @@ export type Database = {
           id: string
           is_available: boolean | null
           product_id: string
-          size: string
+          product_size_id: string | null
           stock_quantity: number | null
           updated_at: string
           variant_code: string
@@ -220,7 +266,7 @@ export type Database = {
           id?: string
           is_available?: boolean | null
           product_id: string
-          size: string
+          product_size_id?: string | null
           stock_quantity?: number | null
           updated_at?: string
           variant_code: string
@@ -231,7 +277,7 @@ export type Database = {
           id?: string
           is_available?: boolean | null
           product_id?: string
-          size?: string
+          product_size_id?: string | null
           stock_quantity?: number | null
           updated_at?: string
           variant_code?: string
@@ -249,6 +295,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_product_size_id_fkey"
+            columns: ["product_size_id"]
+            isOneToOne: false
+            referencedRelation: "product_sizes"
             referencedColumns: ["id"]
           },
         ]

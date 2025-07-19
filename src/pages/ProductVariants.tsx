@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface ProductVariant {
   id: string;
   product_id: string;
-  size: string;
+  product_size_id: string;
   color_id?: string;
   variant_code: string;
   stock_quantity: number;
@@ -29,6 +29,10 @@ interface ProductVariant {
   colors?: {
     name: string;
     hex_code: string;
+  };
+  product_sizes?: {
+    name: string;
+    dimensions: string;
   };
 }
 
@@ -58,7 +62,7 @@ export default function ProductVariants() {
   const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
   const [formData, setFormData] = useState({
     product_id: '',
-    size: '',
+    product_size_id: '',
     color_id: 'none',
     stock_quantity: 0,
     is_available: true
@@ -73,7 +77,8 @@ export default function ProductVariants() {
         .select(`
           *,
           products!inner(name, product_code),
-          colors(name, hex_code)
+          colors(name, hex_code),
+          product_sizes(name, dimensions)
         `)
         .order('created_at', { ascending: false });
       
@@ -110,26 +115,30 @@ export default function ProductVariants() {
   });
 
   const { data: sizes } = useQuery({
-    queryKey: ['sizes'],
+    queryKey: ['product-sizes', formData.product_id],
     queryFn: async () => {
+      if (!formData.product_id) return [];
       const { data, error } = await supabase
-        .from('sizes')
+        .from('product_sizes')
         .select('*')
+        .eq('product_id', formData.product_id)
         .order('display_order');
       
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!formData.product_id
   });
 
   // Generate variant code
-  const generateVariantCode = (productId: string, size: string, colorId?: string) => {
+  const generateVariantCode = (productId: string, sizeId: string, colorId?: string) => {
     const product = products?.find(p => p.id === productId);
+    const size = sizes?.find(s => s.id === sizeId);
     const color = colorId ? colors?.find(c => c.id === colorId) : null;
     
-    if (!product) return '';
+    if (!product || !size) return '';
     
-    const sizePrefix = size.substring(0, 2).toUpperCase();
+    const sizePrefix = size.name.substring(0, 2).toUpperCase();
     const colorPrefix = color ? color.name.substring(0, 2).toUpperCase() : '';
     
     return colorPrefix 
@@ -140,7 +149,7 @@ export default function ProductVariants() {
   // Create/Update variant mutation
   const saveVariantMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const variantCode = generateVariantCode(data.product_id, data.size, data.color_id === 'none' ? undefined : data.color_id || undefined);
+      const variantCode = generateVariantCode(data.product_id, data.product_size_id, data.color_id === 'none' ? undefined : data.color_id || undefined);
       
       const variantData = {
         ...data,
@@ -165,7 +174,7 @@ export default function ProductVariants() {
       queryClient.invalidateQueries({ queryKey: ['product-variants'] });
       setIsDialogOpen(false);
       setEditingVariant(null);
-      setFormData({ product_id: '', size: '', color_id: 'none', stock_quantity: 0, is_available: true });
+      setFormData({ product_id: '', product_size_id: '', color_id: 'none', stock_quantity: 0, is_available: true });
       toast({
         title: editingVariant ? 'Variante atualizada' : 'Variante criada',
         description: editingVariant ? 'A variante foi atualizada com sucesso.' : 'A nova variante foi criada com sucesso.'
@@ -210,7 +219,7 @@ export default function ProductVariants() {
   });
 
   const handleSave = () => {
-    if (!formData.product_id || !formData.size) {
+    if (!formData.product_id || !formData.product_size_id) {
       toast({
         title: 'Erro',
         description: 'Produto e tamanho são obrigatórios.',
@@ -226,7 +235,7 @@ export default function ProductVariants() {
     setEditingVariant(variant);
     setFormData({
       product_id: variant.product_id,
-      size: variant.size,
+      product_size_id: variant.product_size_id,
       color_id: variant.color_id || 'none',
       stock_quantity: variant.stock_quantity,
       is_available: variant.is_available
@@ -242,7 +251,7 @@ export default function ProductVariants() {
 
   const openCreateDialog = () => {
     setEditingVariant(null);
-    setFormData({ product_id: '', size: '', color_id: 'none', stock_quantity: 0, is_available: true });
+    setFormData({ product_id: '', product_size_id: '', color_id: 'none', stock_quantity: 0, is_available: true });
     setIsDialogOpen(true);
   };
 
@@ -320,15 +329,15 @@ export default function ProductVariants() {
               <div>
                 <Label htmlFor="size">Tamanho *</Label>
                 <Select 
-                  value={formData.size} 
-                  onValueChange={(value) => setFormData({ ...formData, size: value })}
+                  value={formData.product_size_id} 
+                  onValueChange={(value) => setFormData({ ...formData, product_size_id: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um tamanho" />
                   </SelectTrigger>
                   <SelectContent>
                     {sizes?.map((size) => (
-                      <SelectItem key={size.id} value={size.name}>
+                      <SelectItem key={size.id} value={size.id}>
                         {size.name} ({size.dimensions})
                       </SelectItem>
                     ))}
@@ -383,11 +392,11 @@ export default function ProductVariants() {
                 <Label htmlFor="available">Disponível para venda</Label>
               </div>
               
-              {formData.product_id && formData.size && (
+              {formData.product_id && formData.product_size_id && (
                 <div className="p-3 bg-muted rounded-lg">
                   <Label className="text-sm font-medium">Código da Variante:</Label>
                   <p className="font-mono text-lg font-bold text-primary">
-                    {generateVariantCode(formData.product_id, formData.size, formData.color_id === 'none' ? undefined : formData.color_id || undefined)}
+                    {generateVariantCode(formData.product_id, formData.product_size_id, formData.color_id === 'none' ? undefined : formData.color_id || undefined)}
                   </p>
                 </div>
               )}
@@ -447,7 +456,7 @@ export default function ProductVariants() {
               
               <div className="flex items-center gap-2">
                 <Ruler className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Tamanho: {variant.size}</span>
+                <span className="text-sm">Tamanho: {variant.product_sizes?.name}</span>
               </div>
               
               {variant.colors && (

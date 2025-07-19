@@ -31,8 +31,11 @@ interface Product {
     };
   }>;
   product_prices: Array<{
-    size: string;
     price: number;
+    product_sizes?: {
+      name: string;
+      dimensions: string;
+    };
     sizes?: {
       name: string;
       dimensions: string;
@@ -77,7 +80,7 @@ export default function Catalog() {
   const fetchData = async () => {
     try {
       // Buscar dados em paralelo
-      const [productsResult, categoriesResult, colorsResult, sizesResult] = await Promise.all([
+      const [productsResult, categoriesResult, colorsResult] = await Promise.all([
         supabase
           .from('products')
           .select(`
@@ -89,7 +92,13 @@ export default function Catalog() {
               color_id,
               colors:color_id (name, hex_code)
             ),
-            product_prices (size, price)
+            product_prices (
+              price,
+              product_sizes (
+                name,
+                dimensions
+              )
+            )
           `)
           .eq('status', 'active')
           .order('created_at', { ascending: false }),
@@ -102,38 +111,28 @@ export default function Catalog() {
         supabase
           .from('colors')
           .select('*')
-          .order('name'),
-          
-        supabase
-          .from('sizes')
-          .select('*')
-          .order('display_order')
+          .order('name')
       ]);
 
       if (productsResult.error) throw productsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
       if (colorsResult.error) throw colorsResult.error;
-      if (sizesResult.error) throw sizesResult.error;
 
       // Processar produtos para incluir informações de dimensões
       const processedProducts = (productsResult.data || []).map(product => ({
         ...product,
-        product_prices: product.product_prices.map(price => {
-          const sizeInfo = sizesResult.data?.find(size => size.name === price.size);
-          return {
-            ...price,
-            sizes: sizeInfo ? {
-              name: sizeInfo.name,
-              dimensions: sizeInfo.dimensions
-            } : undefined
-          };
-        })
+        product_prices: product.product_prices.map(price => ({
+          ...price,
+          sizes: price.product_sizes ? {
+            name: price.product_sizes.name,
+            dimensions: price.product_sizes.dimensions
+          } : undefined
+        }))
       }));
 
       setProducts(processedProducts);
       setCategories(categoriesResult.data || []);
       setColors(colorsResult.data || []);
-      setSizes(sizesResult.data || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -494,18 +493,18 @@ export default function Catalog() {
                     <h3 className="text-lg font-semibold mb-3">Tamanhos e preços</h3>
                     <div className="space-y-2">
                       {selectedProduct.product_prices.map((price) => (
-                        <div
-                          key={price.size}
-                          onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
+                         <div
+                          key={price.sizes?.name || 'no-size'}
+                          onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
                           className={`cursor-pointer border rounded-lg p-3 transition-all duration-200 ${
-                            selectedSize === price.size 
+                            selectedSize === price.sizes?.name 
                               ? 'bg-pet-brown-medium text-white border-pet-brown-medium' 
                               : 'bg-background border-border hover:border-pet-gold'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <span className="font-bold text-lg">{price.size}</span>
+                              <span className="font-bold text-lg">{price.sizes?.name}</span>
                               {price.sizes?.dimensions && (
                                 <p className="text-sm opacity-75">
                                   {price.sizes.dimensions}
@@ -604,7 +603,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
     : product.product_images[0]?.image_url;
 
   const selectedPrice = selectedSize 
-    ? product.product_prices.find(p => p.size === selectedSize)?.price
+    ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price
     : null;
 
   return (
@@ -728,21 +727,21 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
             <div className="grid grid-cols-2 gap-2">
               {product.product_prices.map((price, index) => (
                 <div
-                  key={price.size}
-                  onClick={() => setSelectedSize(selectedSize === price.size ? '' : price.size)}
+                  key={price.sizes?.name || `price-${index}`}
+                  onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
                   style={{ animationDelay: `${index * 50}ms` }}
                   className={`
                     cursor-pointer border rounded-lg text-xs p-3 transition-all duration-300 ease-out
                     transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg
                     backdrop-blur-sm
-                    ${selectedSize === price.size 
+                    ${selectedSize === price.sizes?.name 
                       ? 'bg-pet-brown-medium text-white border-pet-brown-medium shadow-lg ring-2 ring-pet-brown-medium/30' 
                       : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'
                     }
                   `}
                 >
                   <div className="flex items-center justify-between leading-tight">
-                    <span className="font-semibold">{price.size}</span>
+                    <span className="font-semibold">{price.sizes?.name}</span>
                     <span className="font-bold">R$ {price.price.toFixed(2)}</span>
                   </div>
                   {price.sizes?.dimensions && (

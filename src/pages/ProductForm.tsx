@@ -116,12 +116,16 @@ export default function ProductForm() {
 
       if (pricesError) throw pricesError;
 
-      // Buscar preços com os novos tamanhos
-      const sizesResponse = await supabase.from('sizes').select('*').order('display_order');
+      // Buscar preços com os tamanhos do produto
+      const sizesResponse = await supabase
+        .from('product_sizes')
+        .select('*')
+        .eq('product_id', productId)
+        .order('display_order');
       const sizesData = sizesResponse.data || [];
       
       const updatedPrices = sizesData.map(size => {
-        const existingPrice = pricesData?.find(p => p.size === size.name);
+        const existingPrice = pricesData?.find(p => p.product_size_id === size.id);
         return {
           size_id: size.id,
           size_name: size.name,
@@ -169,28 +173,20 @@ export default function ProductForm() {
 
   const fetchData = async () => {
     try {
-      const [categoriesResult, colorsResult, sizesResult] = await Promise.all([
+      const [categoriesResult, colorsResult] = await Promise.all([
         supabase.from('categories').select('*').order('name'),
-        supabase.from('colors').select('*').order('name'),
-        supabase.from('sizes').select('*').order('display_order')
+        supabase.from('colors').select('*').order('name')
       ]);
 
       if (categoriesResult.error) throw categoriesResult.error;
       if (colorsResult.error) throw colorsResult.error;
-      if (sizesResult.error) throw sizesResult.error;
 
       setCategories(categoriesResult.data || []);
       setColors(colorsResult.data || []);
-      setSizes(sizesResult.data || []);
       
-      // Inicializar preços para os tamanhos disponíveis
+      // Para novos produtos, não inicializar preços ainda - será feito após salvar o produto
       if (!isEditing) {
-        const initialPrices = (sizesResult.data || []).map(size => ({
-          size_id: size.id,
-          size_name: size.name,
-          price: 0
-        }));
-        setPrices(initialPrices);
+        setPrices([]);
       }
       
       // Se for edição, carregar dados do produto
@@ -343,18 +339,54 @@ export default function ProductForm() {
         productId = product.id;
       }
       
-      // Inserir preços
-      const pricesData = prices.map(price => ({
-        product_id: productId,
-        size: price.size_name,
-        price: price.price
-      }));
-      
-      const { error: pricesError } = await supabase
-        .from('product_prices')
-        .insert(pricesData);
-      
-      if (pricesError) throw pricesError;
+      // Para novos produtos, criar tamanhos padrão e preços
+      if (!isEditing) {
+        // Criar tamanhos padrão para o produto
+        const defaultSizes = [
+          { name: 'P', dimensions: '50x40x17cm', width_cm: 50, height_cm: 40, depth_cm: 17, display_order: 1 },
+          { name: 'M', dimensions: '60x50x17cm', width_cm: 60, height_cm: 50, depth_cm: 17, display_order: 2 },
+          { name: 'G', dimensions: '70x60x17cm', width_cm: 70, height_cm: 60, depth_cm: 17, display_order: 3 },
+          { name: 'GG', dimensions: '80x70x17cm', width_cm: 80, height_cm: 70, depth_cm: 17, display_order: 4 }
+        ];
+
+        const { data: sizesData, error: sizesError } = await supabase
+          .from('product_sizes')
+          .insert(defaultSizes.map(size => ({
+            ...size,
+            product_id: productId
+          })))
+          .select();
+
+        if (sizesError) throw sizesError;
+
+        // Criar preços padrão para todos os tamanhos
+        const defaultPrices = sizesData?.map(size => ({
+          product_id: productId,
+          product_size_id: size.id,
+          price: 100 // Preço padrão
+        })) || [];
+
+        const { error: pricesError } = await supabase
+          .from('product_prices')
+          .insert(defaultPrices);
+
+        if (pricesError) throw pricesError;
+      } else {
+        // Para edição, apenas atualizar preços existentes se houver algum
+        if (prices.length > 0) {
+          const pricesData = prices.map(price => ({
+            product_id: productId,
+            product_size_id: price.size_id,
+            price: price.price
+          }));
+          
+          const { error: pricesError } = await supabase
+            .from('product_prices')
+            .insert(pricesData);
+          
+          if (pricesError) throw pricesError;
+        }
+      }
       
       // Upload de imagens (apenas se houver novas imagens)
       if (Object.values(selectedImages).some(files => files.length > 0)) {
