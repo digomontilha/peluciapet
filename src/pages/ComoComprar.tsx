@@ -170,7 +170,12 @@ export default function ComoComprar() {
                     <Mail className="h-6 w-6 text-pet-gold mr-3" />
                     <h3 className="text-xl font-bold text-primary">E-mail</h3>
                   </div>
-                  <p className="text-muted-foreground">contato@peluciapet.com.br</p>
+                  <a 
+                    href="mailto:contato@peluciapet.com.br" 
+                    className="text-muted-foreground hover:text-pet-gold transition-colors cursor-pointer"
+                  >
+                    contato@peluciapet.com.br
+                  </a>
                 </CardContent>
               </Card>
             </div>
