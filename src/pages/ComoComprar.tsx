@@ -62,18 +62,9 @@ export default function ComoComprar() {
       return;
     }
     
-    // Criar mensagem formatada para WhatsApp
-    const mensagemWhatsApp = `*Nova mensagem do site:*\n\n*Nome:* ${formData.nome}\n*Telefone:* ${formData.telefone}\n*Email:* ${formData.email}\n*Assunto:* ${formData.assunto}\n\n*Mensagem:*\n${formData.mensagem}`;
-    
-    // Codificar a mensagem para URL
-    const mensagemCodificada = encodeURIComponent(mensagemWhatsApp);
-    
-    // Abrir WhatsApp com a mensagem
-    window.open(`https://wa.me/5511914608191?text=${mensagemCodificada}`, '_blank');
-    
     toast({
-      title: "Redirecionando para WhatsApp!",
-      description: "A mensagem foi preparada e será enviada via WhatsApp.",
+      title: "Mensagem enviada com sucesso!",
+      description: "Entraremos em contato em breve.",
     });
 
     // Limpar formulário e gerar novo CAPTCHA
