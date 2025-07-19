@@ -35,13 +35,13 @@
     --input: 28 35% 85%;
     --ring: 45 65% 55%;
 
-    /* Cores adicionais da marca */
-    --pet-brown-dark: 30 65% 12%; /* #5C2C0D */
-    --pet-brown-medium: 30 45% 40%; /* #A0522D */
-    --pet-beige-light: 32 47% 97%; /* #FDF6ED */
-    --pet-beige-medium: 28 35% 75%; /* #EBC6A8 */
-    --pet-gold: 45 65% 55%; /* #D4A04C */
-    --pet-brown-outline: 30 70% 15%; /* #3B1F0F */
+    /* Cores exatas do logo PelúciaPet */
+    --pet-brown-dark: 22 67% 21%; /* #5C2C0D - Marrom escuro externo */
+    --pet-brown-medium: 19 58% 40%; /* #A0522D - Marrom médio interno */
+    --pet-beige-light: 36 60% 96%; /* #FDF6ED - Bege claro fundo */
+    --pet-beige-medium: 30 42% 79%; /* #EBC6A8 - Bege médio gato */
+    --pet-gold: 42 51% 55%; /* #D4A04C - Dourado suave ramos */
+    --pet-brown-outline: 25 71% 15%; /* #3B1F0F - Marrom escuro olhos/contornos */
 
     /* Gradientes da marca */
     --gradient-warm: linear-gradient(135deg, hsl(var(--pet-gold)), hsl(var(--pet-brown-medium)));
