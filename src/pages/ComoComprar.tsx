@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ComoComprar() {
   const { toast } = useToast();
@@ -18,6 +18,23 @@ export default function ComoComprar() {
     assunto: '',
     mensagem: ''
   });
+
+  // Estado do CAPTCHA
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
+  const [captchaInput, setCaptchaInput] = useState('');
+
+  // Gerar novo CAPTCHA
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    setCaptcha({ num1, num2, answer: num1 + num2 });
+    setCaptchaInput('');
+  };
+
+  // Gerar CAPTCHA inicial
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const handleWhatsApp = () => {
     window.open('https://wa.me/5511914608191', '_blank');
@@ -34,6 +51,17 @@ export default function ComoComprar() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Verificar CAPTCHA
+    if (parseInt(captchaInput) !== captcha.answer) {
+      toast({
+        title: "CAPTCHA incorreto!",
+        description: "Por favor, resolva a operação matemática corretamente.",
+        variant: "destructive"
+      });
+      generateCaptcha(); // Gerar novo CAPTCHA
+      return;
+    }
+    
     // Criar mensagem formatada para WhatsApp
     const mensagemWhatsApp = `*Nova mensagem do site:*\n\n*Nome:* ${formData.nome}\n*Telefone:* ${formData.telefone}\n*Email:* ${formData.email}\n*Assunto:* ${formData.assunto}\n\n*Mensagem:*\n${formData.mensagem}`;
     
@@ -48,7 +76,7 @@ export default function ComoComprar() {
       description: "A mensagem foi preparada e será enviada via WhatsApp.",
     });
 
-    // Limpar formulário
+    // Limpar formulário e gerar novo CAPTCHA
     setFormData({
       nome: '',
       telefone: '',
@@ -56,6 +84,7 @@ export default function ComoComprar() {
       assunto: '',
       mensagem: ''
     });
+    generateCaptcha();
   };
 
   return (
@@ -284,6 +313,27 @@ export default function ComoComprar() {
                       required 
                     />
                   </div>
+                  
+                  {/* CAPTCHA */}
+                  <div className="bg-muted/50 p-4 rounded-lg border">
+                    <label className="text-sm font-medium mb-2 block">
+                      Verificação de Segurança *
+                    </label>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg font-mono bg-background px-3 py-1 rounded border">
+                        {captcha.num1} + {captcha.num2} = ?
+                      </span>
+                    </div>
+                    <Input
+                      type="number"
+                      placeholder="Digite o resultado"
+                      value={captchaInput}
+                      onChange={(e) => setCaptchaInput(e.target.value)}
+                      className="w-32"
+                      required
+                    />
+                  </div>
+
                   <Button type="submit" className="w-full">
                     <Mail className="h-4 w-4 mr-2" />
                     Enviar Mensagem
