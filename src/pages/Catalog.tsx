@@ -257,7 +257,7 @@ export default function Catalog() {
               <Button
                 size="lg"
                 onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
-                className="bg-pet-gold hover:bg-pet-gold/90 text-white px-8 py-4 text-lg font-bold"
+                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-8 py-4 text-lg font-bold"
               >
                 <MessageCircle className="h-6 w-6 mr-3" />
                 Fale Conosco Agora
@@ -267,7 +267,7 @@ export default function Catalog() {
                 variant="outline"
                 size="lg"
                 onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
-                className="border-white text-white hover:bg-white/20 px-8 py-4 text-lg font-bold"
+                className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-8 py-4 text-lg font-bold"
               >
                 <Eye className="h-6 w-6 mr-3" />
                 Ver Produtos
