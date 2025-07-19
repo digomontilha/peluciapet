@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, ArrowLeft, User, Shield, Crown } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, User, Shield, Crown, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,9 @@ export default function UserManagement() {
   const [formData, setFormData] = useState({
     user_id: '',
     full_name: '',
-    role: 'admin'
+    role: 'admin',
+    password: '',
+    confirmPassword: ''
   });
 
   // Fetch admin users
@@ -51,6 +53,7 @@ export default function UserManagement() {
   const saveUserMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       if (editingUser) {
+        // Atualizar perfil do admin
         const { error } = await supabase
           .from('admin_profiles')
           .update({
@@ -59,10 +62,23 @@ export default function UserManagement() {
           })
           .eq('id', editingUser.id);
         if (error) throw error;
+
+        // Atualizar senha se fornecida
+        if (data.password) {
+          const { error: authError } = await supabase.auth.admin.updateUserById(
+            editingUser.user_id,
+            { password: data.password }
+          );
+          if (authError) throw authError;
+        }
       } else {
         const { error } = await supabase
           .from('admin_profiles')
-          .insert([data]);
+          .insert([{
+            user_id: data.user_id,
+            full_name: data.full_name,
+            role: data.role
+          }]);
         if (error) throw error;
       }
     },
@@ -70,7 +86,7 @@ export default function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setIsDialogOpen(false);
       setEditingUser(null);
-      setFormData({ user_id: '', full_name: '', role: 'admin' });
+      setFormData({ user_id: '', full_name: '', role: 'admin', password: '', confirmPassword: '' });
       toast({
         title: editingUser ? 'Usuário atualizado' : 'Usuário criado',
         description: editingUser ? 'O usuário admin foi atualizado com sucesso.' : 'O novo usuário admin foi criado com sucesso.'
@@ -131,6 +147,27 @@ export default function UserManagement() {
       return;
     }
 
+    // Validar senha se estiver editando e foi fornecida
+    if (editingUser && formData.password) {
+      if (formData.password.length < 6) {
+        toast({
+          title: 'Erro',
+          description: 'A senha deve ter pelo menos 6 caracteres.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        toast({
+          title: 'Erro',
+          description: 'As senhas não coincidem.',
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
     saveUserMutation.mutate(formData);
   };
 
@@ -139,7 +176,9 @@ export default function UserManagement() {
     setFormData({
       user_id: user.user_id,
       full_name: user.full_name || '',
-      role: user.role
+      role: user.role,
+      password: '',
+      confirmPassword: ''
     });
     setIsDialogOpen(true);
   };
@@ -152,7 +191,7 @@ export default function UserManagement() {
 
   const openCreateDialog = () => {
     setEditingUser(null);
-    setFormData({ user_id: '', full_name: '', role: 'admin' });
+    setFormData({ user_id: '', full_name: '', role: 'admin', password: '', confirmPassword: '' });
     setIsDialogOpen(true);
   };
 
@@ -266,6 +305,40 @@ export default function UserManagement() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {editingUser && (
+                <>
+                  <div className="space-y-2 pt-2 border-t">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Key className="h-4 w-4" />
+                      <Label className="text-sm font-medium">Alterar Senha (opcional)</Label>
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Nova Senha</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="Digite a nova senha (mínimo 6 caracteres)"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        placeholder="Confirme a nova senha"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Deixe os campos em branco para manter a senha atual
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
