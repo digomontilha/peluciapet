@@ -3,8 +3,9 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Users, Settings, Plus, Eye, Mail } from 'lucide-react';
+import { Package, Users, Settings, Plus, Eye, Mail, Bell } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ interface DashboardStats {
   activeProducts: number;
   totalCategories: number;
   totalColors: number;
+  pendingMessages: number;
 }
 
 export default function AdminDashboard() {
@@ -25,6 +27,7 @@ export default function AdminDashboard() {
     activeProducts: 0,
     totalCategories: 0,
     totalColors: 0,
+    pendingMessages: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
 
@@ -41,27 +44,33 @@ export default function AdminDashboard() {
 
     if (isAdmin) {
       fetchStats();
+      const cleanup = setupRealtimeSubscription();
+      
+      return cleanup;
     }
   }, [loading, isAdmin, navigate]);
 
   const fetchStats = async () => {
     try {
-      const [productsResult, categoriesResult, colorsResult] = await Promise.all([
+      const [productsResult, categoriesResult, colorsResult, messagesResult] = await Promise.all([
         supabase.from('products').select('id, status', { count: 'exact' }),
         supabase.from('categories').select('id', { count: 'exact' }),
         supabase.from('colors').select('id', { count: 'exact' }),
+        supabase.from('contact_messages').select('id', { count: 'exact' }).eq('status', 'pending'),
       ]);
 
       const totalProducts = productsResult.count || 0;
       const activeProducts = productsResult.data?.filter(p => p.status === 'active').length || 0;
       const totalCategories = categoriesResult.count || 0;
       const totalColors = colorsResult.count || 0;
+      const pendingMessages = messagesResult.count || 0;
 
       setStats({
         totalProducts,
         activeProducts,
         totalCategories,
         totalColors,
+        pendingMessages,
       });
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
@@ -73,6 +82,36 @@ export default function AdminDashboard() {
     } finally {
       setLoadingStats(false);
     }
+  };
+
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('contact-messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contact_messages'
+        },
+        (payload) => {
+          // Recarregar estatísticas quando houver mudanças
+          fetchStats();
+          
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "Nova mensagem de contato!",
+              description: "Uma nova mensagem foi recebida.",
+              variant: "default",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   };
 
   if (loading || !isAdmin) {
@@ -174,6 +213,8 @@ export default function AdminDashboard() {
             description="Gerenciar mensagens do formulário"
             icon={Mail}
             onClick={() => navigate('/admin/contacts')}
+            hasNotification={stats.pendingMessages > 0}
+            notificationCount={stats.pendingMessages}
           />
           <ActionCard
             title="Novo Produto"
@@ -254,26 +295,76 @@ interface ActionCardProps {
   icon: React.ElementType;
   onClick: () => void;
   variant?: 'default' | 'primary';
+  hasNotification?: boolean;
+  notificationCount?: number;
 }
 
-function ActionCard({ title, description, icon: Icon, onClick, variant = 'default' }: ActionCardProps) {
+function ActionCard({ 
+  title, 
+  description, 
+  icon: Icon, 
+  onClick, 
+  variant = 'default',
+  hasNotification = false,
+  notificationCount = 0
+}: ActionCardProps) {
+  const isNotificationCard = hasNotification && notificationCount > 0;
+  
   return (
     <Card 
-      className={`cursor-pointer hover:shadow-warm transition-all duration-300 border-0 ${
+      className={`cursor-pointer hover:shadow-warm transition-all duration-300 border-0 relative ${
         variant === 'primary' 
           ? 'bg-gradient-warm text-white hover:bg-gradient-elegant' 
+          : isNotificationCard
+          ? 'bg-orange-50 border-2 border-orange-200 hover:bg-orange-100'
           : 'bg-white/80 backdrop-blur hover:bg-white/90'
       }`}
       onClick={onClick}
     >
+      {isNotificationCard && (
+        <div className="absolute -top-2 -right-2 z-10">
+          <Badge variant="destructive" className="h-6 min-w-6 flex items-center justify-center rounded-full animate-pulse">
+            {notificationCount}
+          </Badge>
+        </div>
+      )}
+      
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
-          <Icon className={`h-8 w-8 ${variant === 'primary' ? 'text-white' : 'text-pet-gold'}`} />
+          <div className="relative">
+            <Icon className={`h-8 w-8 ${
+              variant === 'primary' 
+                ? 'text-white' 
+                : isNotificationCard 
+                ? 'text-orange-600' 
+                : 'text-pet-gold'
+            }`} />
+            {isNotificationCard && (
+              <Bell className="h-4 w-4 text-orange-600 absolute -top-1 -right-1 animate-pulse" />
+            )}
+          </div>
           <div>
-            <h3 className={`font-semibold mb-2 ${variant === 'primary' ? 'text-white' : 'text-primary'}`}>
+            <h3 className={`font-semibold mb-2 ${
+              variant === 'primary' 
+                ? 'text-white' 
+                : isNotificationCard 
+                ? 'text-orange-800' 
+                : 'text-primary'
+            }`}>
               {title}
+              {isNotificationCard && (
+                <span className="ml-2 text-orange-600 font-bold">
+                  ({notificationCount} nova{notificationCount > 1 ? 's' : ''})
+                </span>
+              )}
             </h3>
-            <p className={`text-sm ${variant === 'primary' ? 'text-white/90' : 'text-muted-foreground'}`}>
+            <p className={`text-sm ${
+              variant === 'primary' 
+                ? 'text-white/90' 
+                : isNotificationCard 
+                ? 'text-orange-700' 
+                : 'text-muted-foreground'
+            }`}>
               {description}
             </p>
           </div>
