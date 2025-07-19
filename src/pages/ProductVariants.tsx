@@ -59,7 +59,7 @@ export default function ProductVariants() {
   const [formData, setFormData] = useState({
     product_id: '',
     size: '',
-    color_id: '',
+    color_id: 'none',
     stock_quantity: 0,
     is_available: true
   });
@@ -140,11 +140,11 @@ export default function ProductVariants() {
   // Create/Update variant mutation
   const saveVariantMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const variantCode = generateVariantCode(data.product_id, data.size, data.color_id || undefined);
+      const variantCode = generateVariantCode(data.product_id, data.size, data.color_id === 'none' ? undefined : data.color_id || undefined);
       
       const variantData = {
         ...data,
-        color_id: data.color_id || null,
+        color_id: data.color_id === 'none' ? null : data.color_id || null,
         variant_code: variantCode
       };
 
@@ -165,7 +165,7 @@ export default function ProductVariants() {
       queryClient.invalidateQueries({ queryKey: ['product-variants'] });
       setIsDialogOpen(false);
       setEditingVariant(null);
-      setFormData({ product_id: '', size: '', color_id: '', stock_quantity: 0, is_available: true });
+      setFormData({ product_id: '', size: '', color_id: 'none', stock_quantity: 0, is_available: true });
       toast({
         title: editingVariant ? 'Variante atualizada' : 'Variante criada',
         description: editingVariant ? 'A variante foi atualizada com sucesso.' : 'A nova variante foi criada com sucesso.'
@@ -227,7 +227,7 @@ export default function ProductVariants() {
     setFormData({
       product_id: variant.product_id,
       size: variant.size,
-      color_id: variant.color_id || '',
+      color_id: variant.color_id || 'none',
       stock_quantity: variant.stock_quantity,
       is_available: variant.is_available
     });
@@ -242,7 +242,7 @@ export default function ProductVariants() {
 
   const openCreateDialog = () => {
     setEditingVariant(null);
-    setFormData({ product_id: '', size: '', color_id: '', stock_quantity: 0, is_available: true });
+    setFormData({ product_id: '', size: '', color_id: 'none', stock_quantity: 0, is_available: true });
     setIsDialogOpen(true);
   };
 
@@ -346,7 +346,7 @@ export default function ProductVariants() {
                     <SelectValue placeholder="Selecione uma cor (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sem cor específica</SelectItem>
+                    <SelectItem value="none">Sem cor específica</SelectItem>
                     {colors?.map((color) => (
                       <SelectItem key={color.id} value={color.id}>
                         <div className="flex items-center gap-2">
@@ -387,7 +387,7 @@ export default function ProductVariants() {
                 <div className="p-3 bg-muted rounded-lg">
                   <Label className="text-sm font-medium">Código da Variante:</Label>
                   <p className="font-mono text-lg font-bold text-primary">
-                    {generateVariantCode(formData.product_id, formData.size, formData.color_id || undefined)}
+                    {generateVariantCode(formData.product_id, formData.size, formData.color_id === 'none' ? undefined : formData.color_id || undefined)}
                   </p>
                 </div>
               )}
