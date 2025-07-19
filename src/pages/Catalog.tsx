@@ -275,7 +275,7 @@ export default function Catalog() {
             </div>
 
             {/* Subtítulo elegante */}
-            <p className="text-xl md:text-3xl text-white/95 mb-8 drop-shadow-lg leading-relaxed max-w-4xl mx-auto animate-fade-in">
+            <p className="text-xl md:text-3xl text-white/95 mb-8 leading-relaxed max-w-4xl mx-auto animate-fade-in">
               <span className="relative">
                 Produtos de luxo para o 
                 <span className="text-pet-gold font-bold animate-glow-pulse"> conforto supremo </span>
