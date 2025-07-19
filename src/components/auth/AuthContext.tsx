@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -17,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     // Configurar listener de autenticação
@@ -26,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Verificar se o usuário é admin
+          // Verificar se o usuário é admin ou super_admin
           setTimeout(async () => {
             try {
               const { data: adminProfile } = await supabase
@@ -35,14 +37,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .eq('user_id', session.user.id)
                 .maybeSingle();
               
-              setIsAdmin(!!adminProfile);
+              const hasAdminProfile = !!adminProfile;
+              const isSuperAdminUser = adminProfile?.role === 'super_admin';
+              
+              setIsAdmin(hasAdminProfile);
+              setIsSuperAdmin(isSuperAdminUser);
             } catch (error) {
               console.error('Erro ao verificar perfil admin:', error);
               setIsAdmin(false);
+              setIsSuperAdmin(false);
             }
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsSuperAdmin(false);
         }
         
         setLoading(false);
@@ -69,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     loading,
     isAdmin,
+    isSuperAdmin,
     signOut,
   };
 

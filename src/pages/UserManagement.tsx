@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/components/auth/AuthContext';
 import { Plus, Pencil, Trash2, ArrowLeft, User, Shield, Crown, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +26,7 @@ export default function UserManagement() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isAdmin, isSuperAdmin, loading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminProfile | null>(null);
   const [formData, setFormData] = useState({
@@ -35,6 +37,19 @@ export default function UserManagement() {
     password: '',
     confirmPassword: ''
   });
+
+  // Verificar se o usuário tem permissão para acessar esta página
+  useEffect(() => {
+    if (!loading && !isSuperAdmin) {
+      toast({
+        title: "Acesso negado",
+        description: "Apenas super administradores podem gerenciar usuários.",
+        variant: "destructive",
+      });
+      navigate('/admin');
+      return;
+    }
+  }, [loading, isSuperAdmin, navigate, toast]);
 
   // Fetch admin users
   const { data: adminUsers, isLoading } = useQuery({

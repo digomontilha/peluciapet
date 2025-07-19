@@ -20,7 +20,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
@@ -190,12 +190,14 @@ export default function AdminDashboard() {
             icon={Settings}
             onClick={() => navigate('/admin/sizes')}
           />
-          <ActionCard
-            title="Administradores"
-            description="Gerenciar usuários administrativos"
-            icon={Users}
-            onClick={() => navigate('/admin/users')}
-          />
+          {isSuperAdmin && (
+            <ActionCard
+              title="Administradores"
+              description="Gerenciar usuários administrativos"
+              icon={Users}
+              onClick={() => navigate('/admin/users')}
+            />
+          )}
           <ActionCard
             title="Códigos de Variantes"
             description="Gerenciar códigos únicos por tamanho e cor"
