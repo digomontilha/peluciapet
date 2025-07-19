@@ -774,7 +774,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
               size="sm"
               onClick={() => onWhatsApp(selectedSize, selectedColor)}
               className="
-                flex-1 bg-gradient-to-r from-pet-gold to-yellow-500 hover:from-yellow-500 hover:to-pet-gold
+                flex-1 bg-green-500 hover:bg-green-600 
                 text-white shadow-lg hover:shadow-xl
                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
                 border border-white/20
