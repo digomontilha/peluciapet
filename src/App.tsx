@@ -16,6 +16,7 @@ import ColorManagement from "./pages/ColorManagement";
 import UserManagement from "./pages/UserManagement";
 import ProductVariants from "./pages/ProductVariants";
 import ContactManagement from "./pages/ContactManagement";
+import ProductSizes from "./pages/ProductSizes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
