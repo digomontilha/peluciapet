@@ -31,6 +31,7 @@ export default function UserManagement() {
     user_id: '',
     full_name: '',
     role: 'admin',
+    email: '',
     password: '',
     confirmPassword: ''
   });
@@ -72,21 +73,35 @@ export default function UserManagement() {
           if (authError) throw authError;
         }
       } else {
-        const { error } = await supabase
+        // Criar novo usuário no Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: data.email,
+          password: data.password,
+          email_confirm: true,
+          user_metadata: {
+            full_name: data.full_name
+          }
+        });
+        
+        if (authError) throw authError;
+        if (!authData.user) throw new Error('Falha ao criar usuário');
+
+        // Criar perfil admin com o ID do usuário criado
+        const { error: profileError } = await supabase
           .from('admin_profiles')
           .insert([{
-            user_id: data.user_id,
+            user_id: authData.user.id,
             full_name: data.full_name,
             role: data.role
           }]);
-        if (error) throw error;
+        if (profileError) throw profileError;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setIsDialogOpen(false);
       setEditingUser(null);
-      setFormData({ user_id: '', full_name: '', role: 'admin', password: '', confirmPassword: '' });
+      setFormData({ user_id: '', full_name: '', role: 'admin', email: '', password: '', confirmPassword: '' });
       toast({
         title: editingUser ? 'Usuário atualizado' : 'Usuário criado',
         description: editingUser ? 'O usuário admin foi atualizado com sucesso.' : 'O novo usuário admin foi criado com sucesso.'
@@ -129,15 +144,6 @@ export default function UserManagement() {
   });
 
   const handleSave = () => {
-    if (!formData.user_id.trim()) {
-      toast({
-        title: 'Erro',
-        description: 'O ID do usuário é obrigatório.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
     if (!formData.full_name.trim()) {
       toast({
         title: 'Erro',
@@ -145,6 +151,45 @@ export default function UserManagement() {
         variant: 'destructive'
       });
       return;
+    }
+
+    // Validações para novo usuário
+    if (!editingUser) {
+      if (!formData.email.trim()) {
+        toast({
+          title: 'Erro',
+          description: 'O email é obrigatório.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      if (!formData.password.trim()) {
+        toast({
+          title: 'Erro',
+          description: 'A senha é obrigatória.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        toast({
+          title: 'Erro',
+          description: 'A senha deve ter pelo menos 6 caracteres.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        toast({
+          title: 'Erro',
+          description: 'As senhas não coincidem.',
+          variant: 'destructive'
+        });
+        return;
+      }
     }
 
     // Validar senha se estiver editando e foi fornecida
@@ -177,6 +222,7 @@ export default function UserManagement() {
       user_id: user.user_id,
       full_name: user.full_name || '',
       role: user.role,
+      email: '',
       password: '',
       confirmPassword: ''
     });
@@ -191,7 +237,7 @@ export default function UserManagement() {
 
   const openCreateDialog = () => {
     setEditingUser(null);
-    setFormData({ user_id: '', full_name: '', role: 'admin', password: '', confirmPassword: '' });
+    setFormData({ user_id: '', full_name: '', role: 'admin', email: '', password: '', confirmPassword: '' });
     setIsDialogOpen(true);
   };
 
@@ -269,21 +315,35 @@ export default function UserManagement() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="user_id">ID do Usuário *</Label>
-                <Input
-                  id="user_id"
-                  value={formData.user_id}
-                  onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                  placeholder="UUID do usuário do Supabase Auth"
-                  disabled={!!editingUser}
-                />
-                {editingUser && (
+              {editingUser && (
+                <div>
+                  <Label htmlFor="user_id">ID do Usuário *</Label>
+                  <Input
+                    id="user_id"
+                    value={formData.user_id}
+                    onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                    placeholder="UUID do usuário do Supabase Auth"
+                    disabled={true}
+                  />
                   <p className="text-xs text-muted-foreground mt-1">
                     O ID do usuário não pode ser alterado
                   </p>
-                )}
-              </div>
+                </div>
+              )}
+              
+              {!editingUser && (
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+              )}
+              
               <div>
                 <Label htmlFor="full_name">Nome Completo *</Label>
                 <Input
@@ -293,6 +353,7 @@ export default function UserManagement() {
                   placeholder="Nome completo do usuário"
                 />
               </div>
+              
               <div>
                 <Label htmlFor="role">Função</Label>
                 <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
@@ -305,6 +366,37 @@ export default function UserManagement() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {!editingUser && (
+                <>
+                  <div className="space-y-2 pt-2 border-t">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Key className="h-4 w-4" />
+                      <Label className="text-sm font-medium">Credenciais de Acesso</Label>
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Senha *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="Digite a senha (mínimo 6 caracteres)"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        placeholder="Confirme a senha"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
               
               {editingUser && (
                 <>
