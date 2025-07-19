@@ -233,8 +233,8 @@ export default function Catalog() {
           backgroundAttachment: 'fixed'
         }}
       >
-        {/* Overlay gradiente animado */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pet-brown-dark/90 via-pet-gold/60 to-pet-brown-medium/90 animate-glow-pulse"></div>
+        {/* Overlay gradiente sutil */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pet-brown-dark/40 via-transparent to-pet-brown-medium/30"></div>
         
         {/* Partículas flutuantes */}
         <div className="absolute inset-0 overflow-hidden">
