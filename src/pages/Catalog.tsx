@@ -736,7 +736,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
                     transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg
                     backdrop-blur-sm
                     ${selectedSize === price.size 
-                      ? 'bg-gradient-to-r from-pet-gold to-yellow-500 text-white border-pet-gold shadow-lg ring-2 ring-pet-gold/30' 
+                      ? 'bg-pet-brown-medium text-white border-pet-brown-medium shadow-lg ring-2 ring-pet-brown-medium/30' 
                       : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'
                     }
                   `}
