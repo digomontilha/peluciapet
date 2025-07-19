@@ -248,7 +248,7 @@ export default function Catalog() {
             </div>
 
             {/* Subtítulo simples */}
-            <p className="text-xl md:text-3xl text-white mb-8 leading-relaxed max-w-4xl mx-auto">
+            <p className="text-xl md:text-3xl text-pet-brown-dark mb-8 leading-relaxed max-w-4xl mx-auto">
               Produtos de luxo para o <span className="text-pet-gold font-bold">conforto supremo</span> do seu pet
             </p>
 
