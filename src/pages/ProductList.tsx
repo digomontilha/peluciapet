@@ -122,27 +122,29 @@ export default function ProductList() {
     <div className="min-h-screen bg-gradient-soft">
       <Header />
       
-      <div className="container py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container py-4 md:py-8 px-4">
+        <div className="flex flex-col gap-4 mb-6 md:mb-8 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-primary mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary mb-2">
               Gerenciar Produtos
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm md:text-base text-muted-foreground">
               Visualize, edite e organize todos os produtos da PelúciaPet
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-2 md:flex-row md:gap-3">
             <Button 
               variant="outline" 
               onClick={() => navigate('/admin')}
-              className="hover:bg-pet-beige-light transition-all duration-300"
+              className="hover:bg-pet-beige-light transition-all duration-300 text-sm"
+              size="sm"
             >
               Voltar ao Dashboard
             </Button>
             <Button 
               onClick={() => navigate('/admin/products/new')}
-              className="bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300"
+              className="bg-gradient-warm hover:bg-gradient-elegant transition-all duration-300 text-sm"
+              size="sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               Novo Produto
@@ -152,7 +154,7 @@ export default function ProductList() {
 
         {/* Filtros */}
         <Card className="mb-6 bg-white/80 backdrop-blur border-0 shadow-soft">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -197,96 +199,140 @@ export default function ProductList() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-4 md:gap-6">
             {filteredProducts.map((product) => (
               <Card key={product.id} className="bg-white/80 backdrop-blur border-0 shadow-soft hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    {/* Imagem do produto */}
-                    <div className="flex-shrink-0">
-                      {product.product_images && product.product_images.length > 0 ? (
-                        <img
-                          src={product.product_images[0].image_url}
-                          alt={product.product_images[0].alt_text || product.name}
-                          className="w-24 h-24 object-cover rounded-lg border-2 border-pet-beige-medium"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder.svg';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-24 h-24 bg-pet-beige-light rounded-lg border-2 border-pet-beige-medium flex items-center justify-center">
-                          <Package className="h-8 w-8 text-pet-brown-medium" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Informações do produto */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-primary truncate">
-                          {product.name}
-                        </h3>
-                        {product.product_code && (
-                          <Badge variant="outline" className="text-xs">
-                            {product.product_code}
-                          </Badge>
-                        )}
-                        <Badge 
-                          variant={product.status === 'active' ? 'default' : 'secondary'}
-                          className={product.status === 'active' ? 'bg-green-100 text-green-800' : ''}
-                        >
-                          {product.status === 'active' ? 'Ativo' : 'Inativo'}
-                        </Badge>
-                        {product.is_custom_order && (
-                          <Badge variant="outline" className="border-pet-gold text-pet-gold">
-                            Sob Encomenda
-                          </Badge>
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {/* Primeira linha mobile: Imagem e info básica */}
+                    <div className="flex gap-4">
+                      {/* Imagem do produto */}
+                      <div className="flex-shrink-0">
+                        {product.product_images && product.product_images.length > 0 ? (
+                          <img
+                            src={product.product_images[0].image_url}
+                            alt={product.product_images[0].alt_text || product.name}
+                            className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-lg border-2 border-pet-beige-medium"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-16 h-16 md:w-24 md:h-24 bg-pet-beige-light rounded-lg border-2 border-pet-beige-medium flex items-center justify-center">
+                            <Package className="h-6 w-6 md:h-8 md:w-8 text-pet-brown-medium" />
+                          </div>
                         )}
                       </div>
                       
+                      {/* Informações básicas do produto */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col gap-2">
+                          <h3 className="text-base md:text-lg font-semibold text-primary truncate">
+                            {product.name}
+                          </h3>
+                          
+                          {/* Badges */}
+                          <div className="flex flex-wrap gap-1 md:gap-2">
+                            {product.product_code && (
+                              <Badge variant="outline" className="text-xs">
+                                {product.product_code}
+                              </Badge>
+                            )}
+                            <Badge 
+                              variant={product.status === 'active' ? 'default' : 'secondary'}
+                              className={product.status === 'active' ? 'bg-green-100 text-green-800' : ''}
+                            >
+                              {product.status === 'active' ? 'Ativo' : 'Inativo'}
+                            </Badge>
+                            {product.is_custom_order && (
+                              <Badge variant="outline" className="border-pet-gold text-pet-gold text-xs">
+                                Sob Encomenda
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Ações - visível em desktop */}
+                      <div className="hidden md:flex flex-col gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/admin/products/${product.id}/edit`)}
+                          className="hover:bg-pet-beige-light transition-all duration-300"
+                          title="Editar produto"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/admin/variants?product=${product.id}`)}
+                          className="hover:bg-pet-beige-light transition-all duration-300"
+                          title="Gerenciar Variantes"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300"
+                          title="Excluir produto"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Segunda linha: Descrição e detalhes */}
+                    <div className="flex-1 space-y-2">
                       {product.description && (
-                        <p className="text-muted-foreground mb-2 line-clamp-2">
+                        <p className="text-sm text-muted-foreground line-clamp-2">
                           {product.description}
                         </p>
                       )}
                       
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-col gap-1 text-xs md:text-sm text-muted-foreground">
                         {product.categories && (
                           <span>Categoria: {product.categories.name}</span>
                         )}
-                        <span>
-                          Criado em: {new Date(product.created_at).toLocaleDateString('pt-BR')}
-                        </span>
-                        {product.product_images && (
-                          <span>{product.product_images.length} imagem(ns)</span>
-                        )}
+                        <div className="flex flex-col md:flex-row md:gap-4">
+                          <span>
+                            Criado em: {new Date(product.created_at).toLocaleDateString('pt-BR')}
+                          </span>
+                          {product.product_images && (
+                            <span>{product.product_images.length} imagem(ns)</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     
-                    {/* Ações */}
-                    <div className="flex flex-col gap-2 ml-4">
+                    {/* Ações mobile - embaixo */}
+                    <div className="flex md:hidden gap-2 pt-2 border-t border-gray-100">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => navigate(`/admin/products/${product.id}/edit`)}
-                        className="hover:bg-pet-beige-light transition-all duration-300"
+                        className="flex-1 hover:bg-pet-beige-light transition-all duration-300 text-xs"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => navigate(`/admin/variants?product=${product.id}`)}
-                        className="hover:bg-pet-beige-light transition-all duration-300"
-                        title="Gerenciar Variantes"
+                        className="flex-1 hover:bg-pet-beige-light transition-all duration-300 text-xs"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-4 w-4 mr-1" />
+                        Variantes
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300"
+                        className="hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300 text-xs"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
