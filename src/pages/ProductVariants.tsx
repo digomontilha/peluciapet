@@ -48,11 +48,6 @@ interface Color {
   hex_code: string;
 }
 
-interface Size {
-  id: string;
-  name: string;
-  dimensions: string;
-}
 
 export default function ProductVariants() {
   const navigate = useNavigate();

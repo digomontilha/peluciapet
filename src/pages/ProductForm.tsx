@@ -27,17 +27,11 @@ interface Color {
   hex_code: string;
 }
 
-interface Size {
-  id: string;
-  name: string;
-  dimensions: string;
-  display_order: number;
-}
-
 interface ProductPrice {
   size_id: string;
   size_name: string;
   price: number;
+  dimensions?: string; // Adicionar dimensões aos dados de preço
 }
 
 interface ProductVariant {
@@ -70,7 +64,7 @@ export default function ProductForm() {
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
-  const [sizes, setSizes] = useState<Size[]>([]);
+  
   const [selectedImages, setSelectedImages] = useState<{[colorId: string]: File[]}>({});
   const [existingImages, setExistingImages] = useState<{[colorId: string]: Array<{id: string; image_url: string; alt_text?: string}>}>({});
   const [saving, setSaving] = useState(false);
@@ -129,7 +123,8 @@ export default function ProductForm() {
         return {
           size_id: size.id,
           size_name: size.name,
-          price: existingPrice?.price || 0
+          price: existingPrice?.price || 0,
+          dimensions: size.dimensions // Incluir dimensões
         };
       });
 
@@ -585,7 +580,6 @@ export default function ProductForm() {
                 </div>
               ) : prices.length > 0 ? (
                 prices.map((price, index) => {
-                  const size = sizes.find(s => s.id === price.size_id);
                   return (
                     <div key={price.size_id} className="flex items-center space-x-4">
                       <div className="w-16">
@@ -593,7 +587,7 @@ export default function ProductForm() {
                           {price.size_name}
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {size?.dimensions}
+                          {price.dimensions}
                         </p>
                       </div>
                       <Input

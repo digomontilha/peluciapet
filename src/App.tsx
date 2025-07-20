@@ -10,7 +10,7 @@ import ComoComprar from "./pages/ComoComprar";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProductForm from "./pages/ProductForm";
 import ProductList from "./pages/ProductList";
-import SizeManagement from "./pages/SizeManagement";
+
 import CategoryManagement from "./pages/CategoryManagement";
 import ColorManagement from "./pages/ColorManagement";
 import UserManagement from "./pages/UserManagement";
@@ -36,7 +36,7 @@ const App = () => (
             <Route path="/admin/products" element={<ProductList />} />
             <Route path="/admin/products/new" element={<ProductForm />} />
             <Route path="/admin/products/:id/edit" element={<ProductForm />} />
-            <Route path="/admin/sizes" element={<SizeManagement />} />
+            
             <Route path="/admin/categories" element={<CategoryManagement />} />
             <Route path="/admin/colors" element={<ColorManagement />} />
             <Route path="/admin/users" element={<UserManagement />} />
