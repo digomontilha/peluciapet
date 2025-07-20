@@ -258,7 +258,7 @@ export type Database = {
           product_size_id: string | null
           stock_quantity: number | null
           updated_at: string
-          variant_code: string
+          variant_code: string | null
         }
         Insert: {
           color_id?: string | null
@@ -269,7 +269,7 @@ export type Database = {
           product_size_id?: string | null
           stock_quantity?: number | null
           updated_at?: string
-          variant_code: string
+          variant_code?: string | null
         }
         Update: {
           color_id?: string | null
@@ -280,7 +280,7 @@ export type Database = {
           product_size_id?: string | null
           stock_quantity?: number | null
           updated_at?: string
-          variant_code?: string
+          variant_code?: string | null
         }
         Relationships: [
           {
@@ -394,6 +394,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_auto_variant_code: {
+        Args: { p_product_id: string; p_color_id?: string }
+        Returns: string
+      }
       generate_variant_code: {
         Args: { product_code: string; size_name: string; color_name?: string }
         Returns: string

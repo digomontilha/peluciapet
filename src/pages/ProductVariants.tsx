@@ -130,27 +130,32 @@ export default function ProductVariants() {
     enabled: !!formData.product_id
   });
 
-  // Generate variant code
-  const generateVariantCode = (productId: string, sizeId: string, colorId?: string) => {
-    const product = products?.find(p => p.id === productId);
-    const size = sizes?.find(s => s.id === sizeId);
-    const color = colorId ? colors?.find(c => c.id === colorId) : null;
-    
-    if (!product || !size) return '';
-    
-    const sizePrefix = size.name.substring(0, 2).toUpperCase();
-    const colorPrefix = color ? color.name.substring(0, 2).toUpperCase() : '';
-    
-    return colorPrefix 
-      ? `${product.product_code}-${sizePrefix}-${colorPrefix}`
-      : `${product.product_code}-${sizePrefix}`;
+  // Generate variant code automatically
+  const generateVariantCode = async (productId: string, colorId?: string): Promise<string> => {
+    try {
+      const { data, error } = await supabase.rpc('generate_auto_variant_code', {
+        p_product_id: productId,
+        p_color_id: colorId || null
+      });
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating variant code:', error);
+      // Fallback para código simples se a função falhar
+      return `VAR-${Date.now()}`;
+    }
   };
 
   // Create/Update variant mutation
   const saveVariantMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const variantCode = generateVariantCode(data.product_id, data.product_size_id, data.color_id === 'none' ? undefined : data.color_id || undefined);
-      
+      // Gerar código automaticamente
+      const variantCode = await generateVariantCode(
+        data.product_id, 
+        data.color_id === 'none' ? undefined : data.color_id
+      );
+
       const variantData = {
         ...data,
         color_id: data.color_id === 'none' ? null : data.color_id || null,
@@ -396,7 +401,10 @@ export default function ProductVariants() {
                 <div className="p-3 bg-muted rounded-lg">
                   <Label className="text-sm font-medium">Código da Variante:</Label>
                   <p className="font-mono text-lg font-bold text-primary">
-                    {generateVariantCode(formData.product_id, formData.product_size_id, formData.color_id === 'none' ? undefined : formData.color_id || undefined)}
+                    Será gerado automaticamente
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Baseado na categoria, cor e numeração automática
                   </p>
                 </div>
               )}
