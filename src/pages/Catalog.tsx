@@ -187,7 +187,7 @@ export default function Catalog() {
             
             {/* Título principal simples */}
             <div>
-              <h1 className="text-5xl font-black mb-6 text-pet-brown-dark text-right md:text-8xl">
+              <h1 className="text-5xl font-black mb-6 text-primary text-right md:text-8xl">
                 Catálogo PelúciaPet
               </h1>
               
