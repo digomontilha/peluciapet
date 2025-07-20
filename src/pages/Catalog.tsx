@@ -62,6 +62,31 @@ export default function Catalog() {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [currentBanner, setCurrentBanner] = useState(banner);
+
+  // Hook para detectar tamanho da tela e trocar banner
+  useEffect(() => {
+    const updateBannerForScreen = () => {
+      const width = window.innerWidth;
+      
+      if (width < 640) {
+        // Mobile - banner otimizado para mobile
+        setCurrentBanner('/lovable-uploads/f1bc2af1-4de7-4662-a083-66c8e12c7983.png');
+      } else if (width < 1024) {
+        // Tablet - banner intermediário
+        setCurrentBanner(banner);
+      } else {
+        // Desktop - banner completo
+        setCurrentBanner(banner);
+      }
+    };
+
+    updateBannerForScreen();
+    window.addEventListener('resize', updateBannerForScreen);
+    
+    return () => window.removeEventListener('resize', updateBannerForScreen);
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -173,7 +198,7 @@ export default function Catalog() {
       
       {/* Hero Section - Responsivo */}
       <section className="relative min-h-[60vh] sm:min-h-[70vh] overflow-hidden" style={{
-      backgroundImage: `url(${banner})`,
+      backgroundImage: `url(${currentBanner})`,
       backgroundSize: 'cover',
       backgroundPosition: 'left center',
       backgroundAttachment: 'fixed',
