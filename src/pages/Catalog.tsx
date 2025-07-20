@@ -227,7 +227,7 @@ export default function Catalog() {
         }}
       >
         {/* Conteúdo principal simples */}
-        <div className="relative z-20 container min-h-[70vh] flex items-center justify-start">
+        <div className="relative z-20 container min-h-[70vh] flex items-center justify-center">
           <div className="text-center space-y-8">
             
             {/* Título principal simples */}
