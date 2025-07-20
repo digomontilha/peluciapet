@@ -185,14 +185,14 @@ export default function Catalog() {
         <div className="relative z-20 container min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center py-8 px-4">
           <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
             
-            {/* Título principal responsivo */}
+            {/* Título principal responsivo - texto menor para mobile */}
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black mb-4 sm:mb-6 text-primary leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-black mb-4 sm:mb-6 text-primary leading-tight px-2">
                 Catálogo PelúciaPet
               </h1>
               
               {/* Linha decorativa */}
-              <div className="w-20 sm:w-24 md:w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
+              <div className="w-16 sm:w-20 md:w-24 lg:w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
             </div>
 
             {/* Subtítulo responsivo */}
