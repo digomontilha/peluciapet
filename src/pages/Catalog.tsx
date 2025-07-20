@@ -222,7 +222,7 @@ export default function Catalog() {
         style={{
           backgroundImage: `url(${banner})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: 'left',
           backgroundAttachment: 'fixed'
         }}
       >
