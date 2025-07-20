@@ -226,48 +226,6 @@ export default function Catalog() {
           backgroundAttachment: 'fixed'
         }}
       >
-        {/* Conteúdo principal simples */}
-        <div className="relative z-20 container min-h-[70vh] flex items-center justify-start">
-          <div className="text-center space-y-8">
-            
-            {/* Título principal simples */}
-            <div>
-              <h1 className="text-5xl md:text-8xl font-black mb-6 text-pet-brown-dark">
-                Catálogo PelúciaPet
-              </h1>
-              
-              {/* Linha decorativa */}
-              <div className="w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
-            </div>
-
-            {/* Subtítulo simples */}
-            <p className="text-xl md:text-3xl text-pet-brown-dark mb-8 leading-relaxed max-w-4xl mx-auto">
-              Produtos de luxo para o <span className="text-primary font-bold">conforto supremo</span> do seu pet
-            </p>
-
-            {/* Botões simples */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Button
-                size="lg"
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
-                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-8 py-4 text-lg font-bold"
-              >
-                <MessageCircle className="h-6 w-6 mr-3" />
-                Fale Conosco Agora
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
-                className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-8 py-4 text-lg font-bold"
-              >
-                <Eye className="h-6 w-6 mr-3" />
-                Ver Produtos
-              </Button>
-            </div>
-          </div>
-        </div>
       </section>
 
       <div className="container py-12">
