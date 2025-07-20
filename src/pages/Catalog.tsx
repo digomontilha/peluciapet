@@ -11,7 +11,6 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 // import banner from '@/assets/pelucia-pet-banner.png';
 const banner = '/lovable-uploads/5a83c0d7-9107-43ae-aa06-700419a9adee.png';
-
 interface Product {
   id: string;
   name: string;
@@ -43,19 +42,16 @@ interface Product {
     };
   }>;
 }
-
 interface Category {
   id: string;
   name: string;
   icon: string;
 }
-
 interface Color {
   id: string;
   name: string;
   hex_code: string;
 }
-
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -66,18 +62,13 @@ export default function Catalog() {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
-
   useEffect(() => {
     fetchData();
   }, []);
-
   const fetchData = async () => {
     try {
       // Buscar dados em paralelo
-      const [productsResult, categoriesResult, colorsResult] = await Promise.all([
-        supabase
-          .from('products')
-          .select(`
+      const [productsResult, categoriesResult, colorsResult] = await Promise.all([supabase.from('products').select(`
             *,
             categories:category_id (name, icon),
             product_images (
@@ -93,21 +84,9 @@ export default function Catalog() {
                 dimensions
               )
             )
-          `)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false }),
-        
-        supabase
-          .from('categories')
-          .select('*')
-          .order('name'),
-          
-        supabase
-          .from('colors')
-          .select('*')
-          .order('name')
-      ]);
-
+          `).eq('status', 'active').order('created_at', {
+        ascending: false
+      }), supabase.from('categories').select('*').order('name'), supabase.from('colors').select('*').order('name')]);
       if (productsResult.error) throw productsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
       if (colorsResult.error) throw colorsResult.error;
@@ -123,7 +102,6 @@ export default function Catalog() {
           } : undefined
         }))
       }));
-
       setProducts(processedProducts);
       setCategories(categoriesResult.data || []);
       setColors(colorsResult.data || []);
@@ -132,31 +110,22 @@ export default function Catalog() {
       toast({
         title: "Erro ao carregar produtos",
         description: "Não foi possível carregar o catálogo.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
-  const filteredProducts = products.filter(product => 
-    selectedCategory === 'all' || product.categories?.name === selectedCategory
-  );
-
+  const filteredProducts = products.filter(product => selectedCategory === 'all' || product.categories?.name === selectedCategory);
   const generateWhatsAppLink = async (product: Product, size?: string, color?: string) => {
     let variantCode = '';
-    
+
     // Buscar código da variante específica
     if (size) {
       try {
-        const { data: variant } = await supabase
-          .from('product_variants')
-          .select('variant_code, product_sizes!inner(name)')
-          .eq('product_id', product.id)
-          .eq('product_sizes.name', size)
-          .eq('color_id', color || null)
-          .single();
-        
+        const {
+          data: variant
+        } = await supabase.from('product_variants').select('variant_code, product_sizes!inner(name)').eq('product_id', product.id).eq('product_sizes.name', size).eq('color_id', color || null).single();
         if (variant) {
           variantCode = variant.variant_code;
         }
@@ -165,42 +134,31 @@ export default function Catalog() {
         variantCode = product.id.substring(0, 8).toUpperCase();
       }
     }
-    
     const colorName = color ? colors.find(c => c.id === color)?.name : '';
     const sizeInfo = size ? `tamanho ${size}` : '';
     const colorInfo = colorName ? `cor ${colorName}` : '';
     const productInfo = [sizeInfo, colorInfo].filter(Boolean).join(', ');
     const codeInfo = variantCode ? `\nCódigo: ${variantCode}` : '';
-    
     const message = `Olá! Tenho interesse no produto: ${product.name}${productInfo ? ` (${productInfo})` : ''}${codeInfo}`;
     return `https://wa.me/5511914608191?text=${encodeURIComponent(message)}`;
   };
-
   const handleWhatsAppClick = async (product: Product, size?: string, color?: string) => {
     const link = await generateWhatsAppLink(product, size, color);
     window.open(link, '_blank');
   };
-
   const getProductImage = (product: Product, colorId?: string) => {
     if (!colorId) {
       return product.product_images[0]?.image_url || '/placeholder.svg';
     }
-    
     const colorImage = product.product_images.find(img => img.color_id === colorId);
     return colorImage?.image_url || product.product_images[0]?.image_url || '/placeholder.svg';
   };
-
   const getAvailableColors = (product: Product) => {
-    const colorIds = product.product_images
-      .map(img => img.color_id)
-      .filter(Boolean) as string[];
-    
+    const colorIds = product.product_images.map(img => img.color_id).filter(Boolean) as string[];
     return colors.filter(color => colorIds.includes(color.id));
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-soft">
+    return <div className="min-h-screen bg-gradient-soft">
         <Header />
         <div className="container py-16">
           <div className="text-center">
@@ -208,35 +166,29 @@ export default function Catalog() {
             <p className="mt-4 text-muted-foreground">Carregando catálogo...</p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-soft">
+  return <div className="min-h-screen bg-gradient-soft">
       <Header />
       
       {/* Hero Section - Limpo */}
-      <section 
-        className="relative min-h-[70vh] overflow-hidden"
-        style={{
-          backgroundImage: `url(${banner})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'left',
-          backgroundAttachment: 'fixed',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh'
-        }}
-      >
+      <section className="relative min-h-[70vh] overflow-hidden" style={{
+      backgroundImage: `url(${banner})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'left',
+      backgroundAttachment: 'fixed',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+
+    }}>
         {/* Conteúdo principal simples */}
         <div className="relative z-20 container min-h-[70vh] flex items-center justify-center">
           <div className="text-center space-y-8">
             
             {/* Título principal simples */}
             <div>
-              <h1 className="text-5xl md:text-8xl font-black mb-6 text-pet-brown-dark">
+              <h1 className="text-5xl font-black mb-6 text-pet-brown-dark text-right md:text-8xl">
                 Catálogo PelúciaPet
               </h1>
               
@@ -251,21 +203,14 @@ export default function Catalog() {
 
             {/* Botões simples */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Button
-                size="lg"
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
-                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-8 py-4 text-lg font-bold"
-              >
+              <Button size="lg" onClick={() => window.open('https://wa.me/5511914608191', '_blank')} className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-8 py-4 text-lg font-bold">
                 <MessageCircle className="h-6 w-6 mr-3" />
                 Fale Conosco Agora
               </Button>
 
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
-                className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-8 py-4 text-lg font-bold"
-              >
+              <Button variant="outline" size="lg" onClick={() => document.querySelector('.grid')?.scrollIntoView({
+              behavior: 'smooth'
+            })} className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-8 py-4 text-lg font-bold">
                 <Eye className="h-6 w-6 mr-3" />
                 Ver Produtos
               </Button>
@@ -283,11 +228,7 @@ export default function Catalog() {
             {/* Menu hambúrguer para mobile */}
             <Sheet open={isCategoryMenuOpen} onOpenChange={setIsCategoryMenuOpen}>
               <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="md:hidden flex items-center gap-2"
-                >
+                <Button variant="outline" size="sm" className="md:hidden flex items-center gap-2">
                   <Menu className="h-4 w-4" />
                   Categorias
                 </Button>
@@ -300,14 +241,10 @@ export default function Catalog() {
                   </SheetDescription>
                 </SheetHeader>
                 <div className="mt-6 space-y-3">
-                  <Button
-                    variant={selectedCategory === 'all' ? 'default' : 'ghost'}
-                    onClick={() => {
-                      setSelectedCategory('all');
-                      setIsCategoryMenuOpen(false);
-                    }}
-                    className="w-full justify-start text-left h-auto p-4 transition-all duration-300"
-                  >
+                  <Button variant={selectedCategory === 'all' ? 'default' : 'ghost'} onClick={() => {
+                  setSelectedCategory('all');
+                  setIsCategoryMenuOpen(false);
+                }} className="w-full justify-start text-left h-auto p-4 transition-all duration-300">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                         🏪
@@ -315,24 +252,17 @@ export default function Catalog() {
                       <span className="font-medium">Todos os produtos</span>
                     </div>
                   </Button>
-                  {categories.map((category) => (
-                    <Button
-                      key={category.id}
-                      variant={selectedCategory === category.name ? 'default' : 'ghost'}
-                      onClick={() => {
-                        setSelectedCategory(category.name);
-                        setIsCategoryMenuOpen(false);
-                      }}
-                      className="w-full justify-start text-left h-auto p-4 transition-all duration-300"
-                    >
+                  {categories.map(category => <Button key={category.id} variant={selectedCategory === category.name ? 'default' : 'ghost'} onClick={() => {
+                  setSelectedCategory(category.name);
+                  setIsCategoryMenuOpen(false);
+                }} className="w-full justify-start text-left h-auto p-4 transition-all duration-300">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                           {category.icon}
                         </div>
                         <span className="font-medium">{category.name}</span>
                       </div>
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </SheetContent>
             </Sheet>
@@ -340,24 +270,13 @@ export default function Catalog() {
           
           {/* Filtros em linha para desktop */}
           <div className="hidden md:flex flex-wrap gap-3">
-            <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory('all')}
-              className="transition-all duration-300 hover-scale"
-            >
+            <Button variant={selectedCategory === 'all' ? 'default' : 'outline'} onClick={() => setSelectedCategory('all')} className="transition-all duration-300 hover-scale">
               🏪 Todos os produtos
             </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.name ? 'default' : 'outline'}
-                onClick={() => setSelectedCategory(category.name)}
-                className="transition-all duration-300 hover-scale"
-              >
+            {categories.map(category => <Button key={category.id} variant={selectedCategory === category.name ? 'default' : 'outline'} onClick={() => setSelectedCategory(category.name)} className="transition-all duration-300 hover-scale">
                 <span className="mr-2">{category.icon}</span>
                 {category.name}
-              </Button>
-            ))}
+              </Button>)}
           </div>
           
           {/* Categoria selecionada para mobile */}
@@ -365,17 +284,13 @@ export default function Catalog() {
             <div className="bg-card rounded-lg p-3 border">
               <p className="text-sm text-muted-foreground mb-1">Categoria selecionada:</p>
               <div className="flex items-center gap-2">
-                {selectedCategory === 'all' ? (
-                  <>
+                {selectedCategory === 'all' ? <>
                     <span>🏪</span>
                     <span className="font-medium">Todos os produtos</span>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <span>{categories.find(c => c.name === selectedCategory)?.icon}</span>
                     <span className="font-medium">{selectedCategory}</span>
-                  </>
-                )}
+                  </>}
               </div>
             </div>
           </div>
@@ -383,42 +298,27 @@ export default function Catalog() {
 
         {/* Grid de produtos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              colors={colors}
-              onWhatsApp={(size, color) => 
-                handleWhatsAppClick(product, size, color)
-              }
-              onViewDetails={setSelectedProduct}
-            />
-          ))}
+          {filteredProducts.map(product => <ProductCard key={product.id} product={product} colors={colors} onWhatsApp={(size, color) => handleWhatsAppClick(product, size, color)} onViewDetails={setSelectedProduct} />)}
         </div>
 
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-16">
+        {filteredProducts.length === 0 && <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">
               Nenhum produto encontrado nesta categoria.
             </p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Modal de detalhes do produto */}
       <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {selectedProduct && (
-            <>
+          {selectedProduct && <>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-primary flex items-center justify-between">
                   {selectedProduct.name}
-                  {selectedProduct.is_custom_order && (
-                    <Badge className="bg-pet-gold text-white">
+                  {selectedProduct.is_custom_order && <Badge className="bg-pet-gold text-white">
                       <Tag className="h-3 w-3 mr-1" />
                       Sob encomenda
-                    </Badge>
-                  )}
+                    </Badge>}
                 </DialogTitle>
               </DialogHeader>
               
@@ -426,42 +326,24 @@ export default function Catalog() {
                 {/* Galeria de imagens */}
                 <div className="space-y-4">
                   <div className="aspect-square overflow-hidden rounded-lg">
-                    <img
-                      src={getProductImage(selectedProduct, selectedColor) || '/placeholder.svg'}
-                      alt={selectedProduct.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={getProductImage(selectedProduct, selectedColor) || '/placeholder.svg'} alt={selectedProduct.name} className="w-full h-full object-cover" />
                   </div>
                   
                   {/* Cores disponíveis */}
-                  {getAvailableColors(selectedProduct).length > 0 && (
-                    <div className="space-y-2">
+                  {getAvailableColors(selectedProduct).length > 0 && <div className="space-y-2">
                       <Label className="text-sm font-medium flex items-center">
                         <Palette className="h-3 w-3 mr-1" />
                         Cores disponíveis:
                       </Label>
                       <div className="flex flex-wrap gap-2">
-                        {getAvailableColors(selectedProduct).map((color) => (
-                          <button
-                            key={color.id}
-                            onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)}
-                            className={`w-8 h-8 rounded-full border-2 transition-all ${
-                              selectedColor === color.id 
-                                ? 'border-pet-brown-dark scale-110' 
-                                : 'border-gray-300 hover:border-pet-gold'
-                            }`}
-                            style={{ backgroundColor: color.hex_code }}
-                            title={color.name}
-                          />
-                        ))}
+                        {getAvailableColors(selectedProduct).map(color => <button key={color.id} onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor === color.id ? 'border-pet-brown-dark scale-110' : 'border-gray-300 hover:border-pet-gold'}`} style={{
+                    backgroundColor: color.hex_code
+                  }} title={color.name} />)}
                       </div>
-                      {selectedColor && (
-                        <p className="text-sm text-muted-foreground">
+                      {selectedColor && <p className="text-sm text-muted-foreground">
                           Cor selecionada: {colors.find(c => c.id === selectedColor)?.name}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                        </p>}
+                    </div>}
                 </div>
 
                 {/* Informações do produto */}
@@ -471,11 +353,9 @@ export default function Catalog() {
                     <p className="text-muted-foreground">
                       {selectedProduct.description}
                     </p>
-                    {selectedProduct.observations && (
-                      <p className="text-pet-gold mt-2 font-medium">
+                    {selectedProduct.observations && <p className="text-pet-gold mt-2 font-medium">
                         {selectedProduct.observations}
-                      </p>
-                    )}
+                      </p>}
                   </div>
 
                   <div>
@@ -490,49 +370,32 @@ export default function Catalog() {
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Tamanhos e preços</h3>
                     <div className="space-y-2">
-                      {selectedProduct.product_prices.map((price) => (
-                         <div
-                          key={price.sizes?.name || 'no-size'}
-                          onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
-                          className={`cursor-pointer border rounded-lg p-3 transition-all duration-200 ${
-                            selectedSize === price.sizes?.name 
-                              ? 'bg-pet-brown-medium text-white border-pet-brown-medium' 
-                              : 'bg-background border-border hover:border-pet-gold'
-                          }`}
-                        >
+                      {selectedProduct.product_prices.map(price => <div key={price.sizes?.name || 'no-size'} onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} className={`cursor-pointer border rounded-lg p-3 transition-all duration-200 ${selectedSize === price.sizes?.name ? 'bg-pet-brown-medium text-white border-pet-brown-medium' : 'bg-background border-border hover:border-pet-gold'}`}>
                           <div className="flex items-center justify-between">
                             <div>
                               <span className="font-bold text-lg">{price.sizes?.name}</span>
-                              {price.sizes?.dimensions && (
-                                <p className="text-sm opacity-75">
+                              {price.sizes?.dimensions && <p className="text-sm opacity-75">
                                   {price.sizes.dimensions}
-                                </p>
-                              )}
+                                </p>}
                             </div>
                             <span className="font-bold text-xl">
                               R$ {price.price.toFixed(2)}
                             </span>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </div>
 
                   {/* Botões de ação */}
                   <div className="flex gap-3 pt-4">
-                    <Button
-                      onClick={() => handleWhatsAppClick(selectedProduct, selectedSize, selectedColor)}
-                      className="flex-1 bg-green-500 hover:bg-green-600 text-white transition-all duration-300"
-                      size="lg"
-                    >
+                    <Button onClick={() => handleWhatsAppClick(selectedProduct, selectedSize, selectedColor)} className="flex-1 bg-green-500 hover:bg-green-600 text-white transition-all duration-300" size="lg">
                       <MessageCircle className="h-5 w-5 mr-2" />
                       Pedir via WhatsApp
                     </Button>
                   </div>
                 </div>
               </div>
-            </>
-          )}
+            </>}
         </DialogContent>
       </Dialog>
 
@@ -576,36 +439,27 @@ export default function Catalog() {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 }
-
 interface ProductCardProps {
   product: Product;
   colors: Color[];
   onWhatsApp: (size?: string, color?: string) => void;
   onViewDetails: (product: Product) => void;
 }
-
-function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCardProps) {
+function ProductCard({
+  product,
+  colors,
+  onWhatsApp,
+  onViewDetails
+}: ProductCardProps) {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
-
-  const availableColors = product.product_images
-    .map(img => img.color_id)
-    .filter(Boolean) as string[];
-
+  const availableColors = product.product_images.map(img => img.color_id).filter(Boolean) as string[];
   const productColors = colors.filter(color => availableColors.includes(color.id));
-  const currentImage = selectedColor 
-    ? product.product_images.find(img => img.color_id === selectedColor)?.image_url
-    : product.product_images[0]?.image_url;
-
-  const selectedPrice = selectedSize 
-    ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price
-    : null;
-
-  return (
-    <div className="group perspective-1000">
+  const currentImage = selectedColor ? product.product_images.find(img => img.color_id === selectedColor)?.image_url : product.product_images[0]?.image_url;
+  const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
+  return <div className="group perspective-1000">
       <Card className="
         relative overflow-hidden
         bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-xl
@@ -626,11 +480,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
               w-full h-full transform-gpu transition-all duration-700 ease-out
               group-hover:scale-110 group-hover:rotate-1
             ">
-              <img
-                src={currentImage || '/placeholder.svg'}
-                alt={product.name}
-                className="w-full h-full object-cover filter group-hover:brightness-110 transition-all duration-500"
-              />
+              <img src={currentImage || '/placeholder.svg'} alt={product.name} className="w-full h-full object-cover filter group-hover:brightness-110 transition-all duration-500" />
               
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -640,8 +490,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
             </div>
             
             {/* Floating badge */}
-            {product.is_custom_order && (
-              <Badge className="
+            {product.is_custom_order && <Badge className="
                 absolute top-3 right-3 
                 bg-pet-brown-medium 
                 text-white shadow-lg backdrop-blur-sm
@@ -651,12 +500,10 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
               ">
                 <Tag className="h-3 w-3 mr-1" />
                 Sob encomenda
-              </Badge>
-            )}
+              </Badge>}
             
             {/* Price preview floating */}
-            {selectedSize && selectedPrice && (
-              <div className="
+            {selectedSize && selectedPrice && <div className="
                 absolute bottom-3 left-3
                 bg-white/90 backdrop-blur-md rounded-full px-3 py-1
                 shadow-lg border border-white/30
@@ -666,8 +513,7 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
                 <span className="text-sm font-bold text-pet-brown-dark">
                   R$ {selectedPrice.toFixed(2)}
                 </span>
-              </div>
-            )}
+              </div>}
           </div>
         </CardHeader>
         
@@ -680,103 +526,69 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
             <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
               {product.description}
             </p>
-            {product.observations && (
-              <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>
-            )}
+            {product.observations && <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>}
           </div>
 
           {/* Color selector with enhanced 3D effects */}
-          {productColors.length > 0 && (
-            <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
+          {productColors.length > 0 && <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
               <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
                 <Palette className="h-3 w-3 mr-2" />
                 Cores disponíveis:
               </Label>
               <div className="flex flex-wrap gap-2">
-                {productColors.map((color) => (
-                  <button
-                    key={color.id}
-                    onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)}
-                    className={`
+                {productColors.map(color => <button key={color.id} onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} className={`
                       w-8 h-8 rounded-full border-2 transition-all duration-300 ease-out
                       transform hover:scale-125 hover:-translate-y-1
                       shadow-md hover:shadow-xl
-                      ${selectedColor === color.id 
-                        ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' 
-                        : 'border-white hover:border-pet-gold shadow-sm'
-                      }
-                    `}
-                    style={{ backgroundColor: color.hex_code }}
-                    title={color.name}
-                  />
-                ))}
+                      ${selectedColor === color.id ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' : 'border-white hover:border-pet-gold shadow-sm'}
+                    `} style={{
+              backgroundColor: color.hex_code
+            }} title={color.name} />)}
               </div>
-              {selectedColor && (
-                <p className="text-xs text-muted-foreground animate-fade-in">
+              {selectedColor && <p className="text-xs text-muted-foreground animate-fade-in">
                   Cor selecionada: {productColors.find(c => c.id === selectedColor)?.name}
-                </p>
-              )}
-            </div>
-          )}
+                </p>}
+            </div>}
 
           {/* Modern price grid */}
           <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
             <Label className="text-sm font-medium text-pet-brown-dark">Tamanhos e preços:</Label>
             <div className="grid grid-cols-2 gap-2">
-              {product.product_prices.map((price, index) => (
-                <div
-                  key={price.sizes?.name || `price-${index}`}
-                  onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  className={`
+              {product.product_prices.map((price, index) => <div key={price.sizes?.name || `price-${index}`} onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} style={{
+              animationDelay: `${index * 50}ms`
+            }} className={`
                     cursor-pointer border rounded-lg text-xs p-3 transition-all duration-300 ease-out
                     transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg
                     backdrop-blur-sm
-                    ${selectedSize === price.sizes?.name 
-                      ? 'bg-pet-brown-medium text-white border-pet-brown-medium shadow-lg ring-2 ring-pet-brown-medium/30' 
-                      : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'
-                    }
-                  `}
-                >
+                    ${selectedSize === price.sizes?.name ? 'bg-pet-brown-medium text-white border-pet-brown-medium shadow-lg ring-2 ring-pet-brown-medium/30' : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'}
+                  `}>
                   <div className="flex items-center justify-between leading-tight">
                     <span className="font-semibold">{price.sizes?.name}</span>
                     <span className="font-bold">R$ {price.price.toFixed(2)}</span>
                   </div>
-                  {price.sizes?.dimensions && (
-                    <div className="text-xs opacity-75 leading-tight mt-1">
+                  {price.sizes?.dimensions && <div className="text-xs opacity-75 leading-tight mt-1">
                       {price.sizes.dimensions}
-                    </div>
-                  )}
-                </div>
-              ))}
+                    </div>}
+                </div>)}
             </div>
           </div>
 
           {/* Enhanced action buttons */}
           <div className="flex gap-3 pt-2 transform transition-all duration-300 group-hover:translate-y-[-1px]">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onViewDetails(product)}
-              className="
+            <Button variant="outline" size="sm" onClick={() => onViewDetails(product)} className="
                 flex-1 border-pet-gold/30 text-pet-brown-dark hover:bg-pet-gold/10
                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
                 shadow-sm hover:shadow-md backdrop-blur-sm
-              "
-            >
+              ">
               <Eye className="h-4 w-4 mr-2" />
               Ver Detalhes
             </Button>
-            <Button
-              size="sm"
-              onClick={() => onWhatsApp(selectedSize, selectedColor)}
-              className="
+            <Button size="sm" onClick={() => onWhatsApp(selectedSize, selectedColor)} className="
                 flex-1 bg-green-500 hover:bg-green-600 
                 text-white shadow-lg hover:shadow-xl
                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
                 border border-white/20
-              "
-            >
+              ">
               <MessageCircle className="h-4 w-4 mr-2" />
               Pedir Agora
             </Button>
@@ -786,10 +598,14 @@ function ProductCard({ product, colors, onWhatsApp, onViewDetails }: ProductCard
         {/* Bottom glow effect */}
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-pet-gold/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </Card>
-    </div>
-  );
+    </div>;
 }
-
-function Label({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function Label({
+  children,
+  className = ''
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <label className={`text-sm font-medium ${className}`}>{children}</label>;
 }
