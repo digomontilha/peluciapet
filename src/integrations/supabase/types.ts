@@ -394,6 +394,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_auto_product_code: {
+        Args: { p_category_id: string }
+        Returns: string
+      }
       generate_auto_variant_code: {
         Args: { p_product_id: string; p_color_id?: string }
         Returns: string

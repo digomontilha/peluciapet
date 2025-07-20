@@ -328,10 +328,22 @@ export default function ProductForm() {
         await supabase.from('product_prices').delete().eq('product_id', id);
         
       } else {
+        // Gerar código do produto automaticamente
+        const { data: generatedCode, error: codeError } = await supabase.rpc('generate_auto_product_code', {
+          p_category_id: productData.category_id
+        });
+        
+        if (codeError) throw codeError;
+        
+        const productDataWithCode = {
+          ...productData,
+          product_code: generatedCode
+        };
+        
         // Criar novo produto
         const { data: product, error: productError } = await supabase
           .from('products')
-          .insert(productData)
+          .insert(productDataWithCode)
           .select()
           .single();
         
@@ -462,20 +474,14 @@ export default function ProductForm() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="product_code">Código do Produto *</Label>
-                <Input
-                  id="product_code"
-                  value={productData.product_code}
-                  onChange={(e) => setProductData(prev => ({ ...prev, product_code: e.target.value.toUpperCase() }))}
-                  placeholder="Ex: CAM001, ROU001"
-                  className="border-pet-beige-medium focus:border-pet-gold font-mono"
-                  maxLength={10}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Código único do produto (máx. 10 caracteres). Será usado para gerar códigos de variantes.
-                </p>
-              </div>
+
+              {!isEditing && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    💡 O código do produto será gerado automaticamente baseado na categoria selecionada
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição</Label>
