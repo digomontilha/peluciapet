@@ -171,46 +171,55 @@ export default function Catalog() {
   return <div className="min-h-screen bg-gradient-soft">
       <Header />
       
-      {/* Hero Section - Limpo */}
-      <section className="relative min-h-[70vh] overflow-hidden" style={{
+      {/* Hero Section - Responsivo */}
+      <section className="relative min-h-[60vh] sm:min-h-[70vh] overflow-hidden" style={{
       backgroundImage: `url(${banner})`,
       backgroundSize: 'cover',
-      backgroundPosition: 'left',
+      backgroundPosition: 'left center',
       backgroundAttachment: 'fixed',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-        {/* Conteúdo principal simples */}
-        <div className="relative z-20 container min-h-[70vh] flex items-center justify-center py-0 my-[60px]">
-          <div className="text-center space-y-8">
+        {/* Conteúdo principal responsivo */}
+        <div className="relative z-20 container min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center py-8 px-4">
+          <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
             
-            {/* Título principal simples */}
+            {/* Título principal responsivo */}
             <div>
-              <h1 className="text-5xl font-black mb-6 text-primary text-right md:text-8xl">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black mb-4 sm:mb-6 text-primary leading-tight">
                 Catálogo PelúciaPet
               </h1>
               
               {/* Linha decorativa */}
-              <div className="w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
+              <div className="w-20 sm:w-24 md:w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
             </div>
 
-            {/* Subtítulo simples */}
-            <p className="text-xl md:text-3xl text-primary mb-8 leading-relaxed max-w-4xl mx-auto">
+            {/* Subtítulo responsivo */}
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-primary mb-6 sm:mb-8 leading-relaxed px-2">
               Produtos de luxo para o <span className="text-primary font-bold">conforto supremo</span> do seu pet
             </p>
 
-            {/* Botões simples */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Button size="lg" onClick={() => window.open('https://wa.me/5511914608191', '_blank')} className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-8 py-4 text-lg font-bold">
-                <MessageCircle className="h-6 w-6 mr-3" />
+            {/* Botões responsivos */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4">
+              <Button 
+                size="lg" 
+                onClick={() => window.open('https://wa.me/5511914608191', '_blank')} 
+                className="w-full sm:w-auto bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold min-h-[48px]"
+              >
+                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
                 Fale Conosco Agora
               </Button>
 
-              <Button variant="outline" size="lg" onClick={() => document.querySelector('.grid')?.scrollIntoView({
-              behavior: 'smooth'
-            })} className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-8 py-4 text-lg font-bold">
-                <Eye className="h-6 w-6 mr-3" />
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => document.querySelector('.grid')?.scrollIntoView({
+                  behavior: 'smooth'
+                })} 
+                className="w-full sm:w-auto border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold min-h-[48px]"
+              >
+                <Eye className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
                 Ver Produtos
               </Button>
             </div>
