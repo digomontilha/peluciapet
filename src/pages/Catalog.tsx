@@ -180,10 +180,9 @@ export default function Catalog() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
-
     }}>
         {/* Conteúdo principal simples */}
-        <div className="relative z-20 container min-h-[70vh] flex items-center justify-center">
+        <div className="relative z-20 container min-h-[70vh] flex items-center justify-center py-0 my-[60px]">
           <div className="text-center space-y-8">
             
             {/* Título principal simples */}
