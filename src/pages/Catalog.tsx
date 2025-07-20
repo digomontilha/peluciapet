@@ -157,9 +157,9 @@ export default function Catalog() {
       try {
         const { data: variant } = await supabase
           .from('product_variants')
-          .select('variant_code')
+          .select('variant_code, product_sizes!inner(name)')
           .eq('product_id', product.id)
-          .eq('size', size)
+          .eq('product_sizes.name', size)
           .eq('color_id', color || null)
           .single();
         
