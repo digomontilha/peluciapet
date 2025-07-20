@@ -223,7 +223,11 @@ export default function Catalog() {
           backgroundImage: `url(${banner})`,
           backgroundSize: 'cover',
           backgroundPosition: 'left',
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: 'fixed',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh'
         }}
       >
         {/* Conteúdo principal simples */}
