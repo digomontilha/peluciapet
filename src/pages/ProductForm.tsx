@@ -533,7 +533,20 @@ export default function ProductForm() {
           {/* Preços */}
           <Card className="bg-white/80 backdrop-blur border-0 shadow-soft">
             <CardHeader>
-              <CardTitle className="text-primary">Preços por Tamanho</CardTitle>
+              <CardTitle className="text-primary flex items-center justify-between">
+                Preços por Tamanho
+                {isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/admin/products/${id}/sizes`)}
+                    className="flex items-center"
+                  >
+                    <Package2 className="h-4 w-4 mr-1" />
+                    Gerenciar Tamanhos
+                  </Button>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {prices.map((price, index) => {
