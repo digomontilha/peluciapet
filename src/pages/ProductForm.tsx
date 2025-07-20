@@ -555,35 +555,71 @@ export default function ProductForm() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {prices.map((price, index) => {
-                const size = sizes.find(s => s.id === price.size_id);
-                return (
-                  <div key={price.size_id} className="flex items-center space-x-4">
-                    <div className="w-16">
-                      <Badge className="bg-pet-gold text-white font-bold">
-                        {price.size_name}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {size?.dimensions}
-                      </p>
-                    </div>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={price.price}
-                      onChange={(e) => {
-                        const newPrices = [...prices];
-                        newPrices[index].price = parseFloat(e.target.value) || 0;
-                        setPrices(newPrices);
-                      }}
-                      placeholder="0.00"
-                      className="border-pet-beige-medium focus:border-pet-gold"
-                    />
-                    <span className="text-muted-foreground">R$</span>
+              {!isEditing ? (
+                <div className="p-6 bg-muted rounded-lg text-center">
+                  <Package2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-primary mb-2">
+                    Tamanhos e Preços
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Os tamanhos padrão (P, M, G, GG) serão criados automaticamente após salvar o produto. 
+                    Você poderá definir os preços específicos para cada tamanho na próxima etapa.
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    {['P', 'M', 'G', 'GG'].map((size, index) => (
+                      <div key={size} className="bg-white rounded-lg p-3 border">
+                        <Badge className="bg-pet-gold text-white font-bold mb-2">
+                          {size}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground">
+                          {
+                            index === 0 ? '50x40x17cm' :
+                            index === 1 ? '60x50x17cm' :
+                            index === 2 ? '70x60x17cm' :
+                            '80x70x17cm'
+                          }
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
+                </div>
+              ) : prices.length > 0 ? (
+                prices.map((price, index) => {
+                  const size = sizes.find(s => s.id === price.size_id);
+                  return (
+                    <div key={price.size_id} className="flex items-center space-x-4">
+                      <div className="w-16">
+                        <Badge className="bg-pet-gold text-white font-bold">
+                          {price.size_name}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {size?.dimensions}
+                        </p>
+                      </div>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={price.price}
+                        onChange={(e) => {
+                          const newPrices = [...prices];
+                          newPrices[index].price = parseFloat(e.target.value) || 0;
+                          setPrices(newPrices);
+                        }}
+                        placeholder="0.00"
+                        className="border-pet-beige-medium focus:border-pet-gold"
+                      />
+                      <span className="text-muted-foreground">R$</span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="p-6 bg-muted rounded-lg text-center">
+                  <p className="text-muted-foreground">
+                    Nenhum tamanho configurado para este produto.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
