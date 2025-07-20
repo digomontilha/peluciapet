@@ -26,14 +26,14 @@ BEGIN
   -- Buscar o próximo número sequencial para esta categoria
   SELECT COALESCE(MAX(
     CAST(
-      SUBSTRING(product_code FROM LENGTH(category_prefix) + 1) AS INTEGER
+      SUBSTRING(p.product_code FROM LENGTH(category_prefix) + 1) AS INTEGER
     )
   ), 0) + 1
   INTO next_number
   FROM products p
   JOIN categories c ON p.category_id = c.id
   WHERE UPPER(LEFT(REGEXP_REPLACE(c.name, '[^A-Za-z0-9]', '', 'g'), 3)) = LEFT(category_prefix, 3)
-  AND product_code ~ ('^' || category_prefix || '[0-9]+$');
+  AND p.product_code ~ ('^' || category_prefix || '[0-9]+$');
   
   -- Se não encontrou nenhum, começar com 1
   IF next_number IS NULL THEN
