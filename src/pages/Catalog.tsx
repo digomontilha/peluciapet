@@ -71,7 +71,7 @@ export default function Catalog() {
       
       if (width < 640) {
         // Mobile - banner otimizado para mobile
-        setCurrentBanner('/lovable-uploads/f1bc2af1-4de7-4662-a083-66c8e12c7983.png');
+        setCurrentBanner('/lovable-uploads/84a52df5-5030-496c-b1cf-a6e3be3a91ad.png');
       } else if (width < 1024) {
         // Tablet - banner intermediário
         setCurrentBanner(banner);
