@@ -397,11 +397,11 @@ export default function Catalog() {
                       <div className="flex flex-wrap gap-3">
                         {selectedProduct.product_images.map((image, index) => (
                           <div key={index} className="relative group">
-                            <img
-                              src={image.image_url}
-                              alt={`${selectedProduct.name} - Cor ${index + 1}`}
-                              className="w-20 h-20 rounded-xl border-3 border-gray-200 object-cover cursor-pointer hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                            />
+                             <img
+                               src={image.image_url}
+                               alt={`${selectedProduct.name} - Cor ${index + 1}`}
+                               className="w-20 h-20 rounded-xl border-3 border-gray-200 object-cover cursor-pointer hover:border-orange-300 transition-all duration-200 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15),0_0_0_1px_rgba(255,255,255,0.1)] hover:shadow-[inset_0_1px_2px_rgba(0,0,0,0.15),0_6px_12px_rgba(0,0,0,0.2),0_0_0_1px_rgba(255,255,255,0.2)] transform hover:scale-105"
+                             />
                             {/* Stock indicator */}
                             {image.stock_quantity && image.stock_quantity <= 2 && (
                               <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
