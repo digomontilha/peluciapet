@@ -1,59 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Design system PelúciaPet - Cores oficiais da marca */
+/* Design system PelúciaPet - Tons quentes e luxuosos */
 
 @layer base {
   :root {
-    /* Cores da marca PelúciaPet */
-    --background: 32 47% 97%; /* Bege claro #FDF6ED */
-    --foreground: 30 65% 12%; /* Marrom escuro #5C2C0D */
+    /* Paleta de cores luxuosa inspirada na imagem */
+    --background: 25 100% 96%; /* Pêssego claro #FEF8F0 */
+    --foreground: 20 30% 20%; /* Marrom escuro para texto */
 
-    --card: 32 47% 97%;
-    --card-foreground: 30 65% 12%;
+    --card: 0 0% 100%; /* Branco puro para cards */
+    --card-foreground: 20 30% 20%;
 
-    --popover: 32 47% 97%;
-    --popover-foreground: 30 65% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 30% 20%;
 
-    --primary: 30 65% 12%; /* Marrom escuro #5C2C0D */
-    --primary-foreground: 32 47% 97%; /* Bege claro */
+    --primary: 142 50% 45%; /* Verde vibrante dos botões */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 45% 40%; /* Marrom médio #A0522D */
-    --secondary-foreground: 32 47% 97%;
+    --secondary: 35 45% 85%; /* Bege suave */
+    --secondary-foreground: 20 30% 20%;
 
-    --muted: 28 35% 75%; /* Bege médio #EBC6A8 */
-    --muted-foreground: 30 65% 12%;
+    --muted: 25 30% 90%; /* Cinza quente */
+    --muted-foreground: 20 15% 50%;
 
-    --accent: 45 65% 55%; /* Dourado #D4A04C */
-    --accent-foreground: 30 65% 12%;
+    --accent: 24 85% 60%; /* Laranja suave */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 32 47% 97%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 28 35% 85%;
-    --input: 28 35% 85%;
-    --ring: 45 65% 55%;
+    --border: 25 30% 88%; /* Borda suave */
+    --input: 25 30% 92%;
+    --ring: 142 50% 45%;
 
-    /* Cores exatas do logo PelúciaPet */
-    --pet-brown-dark: 22 67% 21%; /* #5C2C0D - Marrom escuro externo */
-    --pet-brown-medium: 19 58% 40%; /* #A0522D - Marrom médio interno */
-    --pet-beige-light: 36 60% 96%; /* #FDF6ED - Bege claro fundo */
-    --pet-beige-medium: 30 42% 79%; /* #EBC6A8 - Bege médio gato */
-    --pet-gold: 42 51% 55%; /* #D4A04C - Dourado suave ramos */
-    --pet-brown-outline: 25 71% 15%; /* #3B1F0F - Marrom escuro olhos/contornos */
+    /* Cores específicas do tema luxo pet */
+    --pet-peach: 25 100% 92%; /* Pêssego principal */
+    --pet-cream: 35 50% 95%; /* Creme */
+    --pet-warm-orange: 24 85% 60%; /* Laranja quente */
+    --pet-success: 142 50% 45%; /* Verde dos botões */
+    --pet-neutral: 35 20% 75%; /* Bege neutro */
+    --pet-brown-soft: 25 25% 65%; /* Marrom suave */
 
-    /* Gradientes da marca */
-    --gradient-warm: linear-gradient(135deg, hsl(var(--pet-gold)), hsl(var(--pet-brown-medium)));
-    --gradient-soft: linear-gradient(180deg, hsl(var(--pet-beige-light)), hsl(var(--pet-beige-medium)));
-    --gradient-elegant: linear-gradient(45deg, hsl(var(--pet-brown-dark)), hsl(var(--pet-brown-medium)));
+    /* Gradientes elegantes */
+    --gradient-warm: linear-gradient(135deg, hsl(25 100% 96%), hsl(25 80% 88%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(25 20% 96%));
+    --gradient-button-success: linear-gradient(135deg, hsl(142 50% 45%), hsl(142 60% 40%));
+    --gradient-button-secondary: linear-gradient(135deg, hsl(35 45% 85%), hsl(35 35% 80%));
 
-    /* Sombras elegantes */
-    --shadow-warm: 0 10px 30px -10px hsl(var(--pet-brown-medium) / 0.3);
-    --shadow-soft: 0 4px 20px -8px hsl(var(--pet-brown-dark) / 0.2);
-    --shadow-gold: 0 0 40px hsl(var(--pet-gold) / 0.3);
-    --shadow-elegant: 0 25px 50px -12px hsl(var(--pet-brown-dark) / 0.25);
-    --shadow-glow: 0 35px 60px -12px hsl(var(--pet-gold) / 0.4);
+    /* Sombras suaves e elegantes */
+    --shadow-card: 0 8px 32px -8px hsl(25 30% 60% / 0.15);
+    --shadow-button: 0 4px 16px -4px hsl(142 50% 45% / 0.3);
+    --shadow-hover: 0 12px 40px -12px hsl(25 30% 60% / 0.25);
+    --shadow-warm: 0 6px 24px -6px hsl(24 85% 60% / 0.2);
 
     /* Animações suaves */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -124,6 +126,9 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Quicksand', 'Poppins', sans-serif;
+    background: var(--gradient-warm);
+    min-height: 100vh;
   }
 }
 

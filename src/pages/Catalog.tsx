@@ -163,137 +163,120 @@ export default function Catalog() {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-soft">
+  return <div className="min-h-screen bg-gradient-warm font-quicksand">
       <Header />
-      
-      {/* Hero Section - Responsivo */}
-      <section className="relative min-h-[60vh] sm:min-h-[70vh] overflow-hidden" style={{
-      backgroundImage: `url(${currentBanner})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'left center',
-      backgroundAttachment: 'fixed',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-        {/* Conteúdo principal responsivo */}
-        <div className="relative z-20 container min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center py-8 px-4">
-          <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-            
-            {/* Título principal responsivo - texto menor para mobile */}
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-black mb-4 sm:mb-6 text-primary leading-tight px-2">
-                Catálogo PelúciaPet
-              </h1>
-              
-              {/* Linha decorativa */}
-              <div className="w-16 sm:w-20 md:w-24 lg:w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
-            </div>
 
-            {/* Subtítulo responsivo */}
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-primary mb-6 sm:mb-8 leading-relaxed px-2">
-              Produtos de luxo para o <span className="text-primary font-bold">conforto supremo</span> do seu pet
-            </p>
-
-            {/* Botões responsivos */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4">
-              <Button 
-                size="lg" 
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')} 
-                className="w-full sm:w-auto bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold min-h-[48px]"
-              >
-                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
-                Fale Conosco Agora
-              </Button>
-
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={() => document.querySelector('.grid')?.scrollIntoView({
-                  behavior: 'smooth'
-                })} 
-                className="w-full sm:w-auto border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold min-h-[48px]"
-              >
-                <Eye className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
-                Ver Produtos
-              </Button>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-12">
+        {/* Título da seção */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4 font-poppins">
+            Categorias
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Descubra nossa coleção exclusiva de produtos premium para seu melhor amigo
+          </p>
         </div>
-      </section>
 
-      <div className="container py-12">
-        {/* Filtros de categoria */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-primary">Categorias</h2>
+        {/* Filtros de categoria - Design luxuoso */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-semibold text-foreground font-poppins">Escolha uma categoria</h2>
             
             {/* Menu hambúrguer para mobile */}
             <Sheet open={isCategoryMenuOpen} onOpenChange={setIsCategoryMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden flex items-center gap-2">
+                <Button variant="premium" size="sm" className="md:hidden flex items-center gap-2">
                   <Menu className="h-4 w-4" />
                   Categorias
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80">
+              <SheetContent side="left" className="w-80 bg-gradient-card">
                 <SheetHeader>
-                  <SheetTitle className="text-xl font-bold text-primary">Categorias</SheetTitle>
-                  <SheetDescription>
+                  <SheetTitle className="text-xl font-bold text-foreground font-poppins">Categorias</SheetTitle>
+                  <SheetDescription className="text-muted-foreground">
                     Escolha uma categoria para filtrar os produtos
                   </SheetDescription>
                 </SheetHeader>
-                <div className="mt-6 space-y-3">
-                  <Button variant={selectedCategory === 'all' ? 'default' : 'ghost'} onClick={() => {
-                  setSelectedCategory('all');
-                  setIsCategoryMenuOpen(false);
-                }} className="w-full justify-start text-left h-auto p-4 transition-all duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <div className="mt-8 space-y-3">
+                  <Button 
+                    variant={selectedCategory === 'all' ? 'success' : 'ghost'} 
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setIsCategoryMenuOpen(false);
+                    }} 
+                    className="w-full justify-start text-left h-auto p-5 transition-all duration-300 rounded-2xl"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-pet-success/10 rounded-xl flex items-center justify-center text-lg">
                         🏪
                       </div>
-                      <span className="font-medium">Todos os produtos</span>
+                      <span className="font-semibold">Todos os produtos</span>
                     </div>
                   </Button>
-                  {categories.map(category => <Button key={category.id} variant={selectedCategory === category.name ? 'default' : 'ghost'} onClick={() => {
-                  setSelectedCategory(category.name);
-                  setIsCategoryMenuOpen(false);
-                }} className="w-full justify-start text-left h-auto p-4 transition-all duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  {categories.map(category => 
+                    <Button 
+                      key={category.id} 
+                      variant={selectedCategory === category.name ? 'success' : 'ghost'} 
+                      onClick={() => {
+                        setSelectedCategory(category.name);
+                        setIsCategoryMenuOpen(false);
+                      }} 
+                      className="w-full justify-start text-left h-auto p-5 transition-all duration-300 rounded-2xl"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-pet-success/10 rounded-xl flex items-center justify-center text-lg">
                           {category.icon}
                         </div>
-                        <span className="font-medium">{category.name}</span>
+                        <span className="font-semibold">{category.name}</span>
                       </div>
-                    </Button>)}
+                    </Button>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
           </div>
           
-          {/* Filtros em linha para desktop */}
-          <div className="hidden md:flex flex-wrap gap-3">
-            <Button variant={selectedCategory === 'all' ? 'default' : 'outline'} onClick={() => setSelectedCategory('all')} className="transition-all duration-300 hover-scale">
-              🏪 Todos os produtos
+          {/* Filtros em linha para desktop - Design luxuoso */}
+          <div className="hidden md:flex flex-wrap gap-4 justify-center">
+            <Button 
+              variant={selectedCategory === 'all' ? 'success' : 'premium'} 
+              onClick={() => setSelectedCategory('all')} 
+              className="transition-all duration-300 text-base px-8 py-4 h-16 rounded-2xl"
+              size="lg"
+            >
+              <span className="text-xl mr-3">🏪</span>
+              <span>Todos os produtos</span>
             </Button>
-            {categories.map(category => <Button key={category.id} variant={selectedCategory === category.name ? 'default' : 'outline'} onClick={() => setSelectedCategory(category.name)} className="transition-all duration-300 hover-scale">
-                <span className="mr-2">{category.icon}</span>
-                {category.name}
-              </Button>)}
+            {categories.map(category => 
+              <Button 
+                key={category.id} 
+                variant={selectedCategory === category.name ? 'success' : 'premium'} 
+                onClick={() => setSelectedCategory(category.name)} 
+                className="transition-all duration-300 text-base px-8 py-4 h-16 rounded-2xl"
+                size="lg"
+              >
+                <span className="text-xl mr-3">{category.icon}</span>
+                <span>{category.name}</span>
+              </Button>
+            )}
           </div>
           
           {/* Categoria selecionada para mobile */}
-          <div className="md:hidden mt-4">
-            <div className="bg-card rounded-lg p-3 border">
-              <p className="text-sm text-muted-foreground mb-1">Categoria selecionada:</p>
-              <div className="flex items-center gap-2">
-                {selectedCategory === 'all' ? <>
-                    <span>🏪</span>
-                    <span className="font-medium">Todos os produtos</span>
-                  </> : <>
-                    <span>{categories.find(c => c.name === selectedCategory)?.icon}</span>
-                    <span className="font-medium">{selectedCategory}</span>
-                  </>}
+          <div className="md:hidden mt-6">
+            <div className="bg-gradient-card rounded-2xl p-4 shadow-card border border-pet-neutral/20">
+              <p className="text-sm text-muted-foreground mb-2 font-medium">Categoria selecionada:</p>
+              <div className="flex items-center gap-3">
+                {selectedCategory === 'all' ? (
+                  <>
+                    <span className="text-lg">🏪</span>
+                    <span className="font-semibold text-foreground">Todos os produtos</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-lg">{categories.find(c => c.name === selectedCategory)?.icon}</span>
+                    <span className="font-semibold text-foreground">{selectedCategory}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -445,115 +428,109 @@ function ProductCard({
   const availableImages = product.product_images.filter(img => img.is_available !== false);
   const currentImage = availableImages[selectedImageIndex]?.image_url || availableImages[0]?.image_url;
   const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
-  return <div className="group perspective-1000">
+  return <div className="group">
       <Card className="
-        relative overflow-hidden
-        bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-xl
-        border border-white/20 shadow-2xl
-        transform-gpu transition-all duration-500 ease-out
-        hover:scale-[1.02] hover:-translate-y-2
-        hover:rotate-x-2 hover:rotate-y-1
-        hover:shadow-3xl hover:shadow-pet-gold/20
-        before:absolute before:inset-0 before:bg-gradient-to-br before:from-pet-gold/5 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
+        relative overflow-hidden h-full
+        bg-gradient-card shadow-card hover:shadow-hover
+        border border-pet-neutral/20 rounded-3xl
+        transition-all duration-500 ease-out
+        hover:scale-[1.02] hover:-translate-y-1
+        font-quicksand
       ">
-        {/* Glassmorphism overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
         
         <CardHeader className="p-0 relative">
-          <div className="relative aspect-square overflow-hidden">
-            {/* 3D Image container */}
-            <div className="
-              w-full h-full transform-gpu transition-all duration-700 ease-out
-              group-hover:scale-110 group-hover:rotate-1
-            ">
-              <img src={currentImage || '/placeholder.svg'} alt={product.name} className="w-full h-full object-cover filter group-hover:brightness-110 transition-all duration-500" />
-              
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out opacity-0 group-hover:opacity-100" />
-            </div>
+          <div className="relative aspect-square overflow-hidden rounded-t-3xl">
+            <img 
+              src={currentImage || '/placeholder.svg'} 
+              alt={product.name} 
+              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105" 
+            />
             
-            {/* Floating badge */}
-            {product.is_custom_order && <Badge className="
-                absolute top-3 right-3 
-                bg-pet-brown-medium 
-                text-white shadow-lg backdrop-blur-sm
-                transform transition-all duration-300
-                group-hover:scale-110 group-hover:-translate-y-1
-                border border-white/30
+            {/* Overlay suave */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-500" />
+            
+            {/* Badge de encomenda */}
+            {product.is_custom_order && 
+              <Badge className="
+                absolute top-4 right-4 
+                bg-pet-warm-orange text-white shadow-md
+                rounded-full px-3 py-1
+                font-medium text-xs
               ">
                 <Tag className="h-3 w-3 mr-1" />
                 Sob encomenda
-              </Badge>}
-            
-            {/* Price preview floating */}
-            {selectedSize && selectedPrice && <div className="
-                absolute bottom-3 left-3
-                bg-white/90 backdrop-blur-md rounded-full px-3 py-1
-                shadow-lg border border-white/30
-                transform transition-all duration-300
-                translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100
-              ">
-                <span className="text-sm font-bold text-pet-brown-dark">
-                  R$ {selectedPrice.toFixed(2)}
-                </span>
-              </div>}
+              </Badge>
+            }
           </div>
         </CardHeader>
         
-        <CardContent className="p-5 space-y-4 relative z-20">
-          {/* Title with 3D effect */}
-          <div className="transform transition-all duration-300 group-hover:translate-y-[-2px]">
-            <h3 className="font-bold text-lg text-primary mb-2 leading-tight">
+        <CardContent className="p-6 space-y-4">
+          {/* Título e descrição */}
+          <div>
+            <h3 className="font-poppins font-bold text-xl text-foreground mb-2 leading-tight">
               {product.name}
             </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
               {product.description}
             </p>
-            {product.observations && <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>}
+            {product.observations && 
+              <p className="text-xs text-pet-warm-orange mt-2 font-medium">
+                {product.observations}
+              </p>
+            }
           </div>
 
-          {/* Modern price grid */}
-          <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
-            <Label className="text-sm font-medium text-pet-brown-dark">Tamanhos e preços:</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {product.product_prices.map((price, index) => <div key={price.sizes?.name || `price-${index}`} onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} style={{
-              animationDelay: `${index * 50}ms`
-            }} className={`
-                    cursor-pointer border rounded-lg text-xs p-3 transition-all duration-300 ease-out
-                    transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg
-                    backdrop-blur-sm
-                    ${selectedSize === price.sizes?.name ? 'bg-pet-brown-medium text-white border-pet-brown-medium shadow-lg ring-2 ring-pet-brown-medium/30' : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'}
-                  `}>
-                  <div className="flex items-center justify-between leading-tight">
-                    <span className="font-semibold">{price.sizes?.name}</span>
-                    <span className="font-bold">R$ {price.price.toFixed(2)}</span>
+          {/* Seção de tamanhos e preços */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-foreground font-poppins">
+              Tamanhos e preços
+            </Label>
+            <div className="space-y-2">
+              {product.product_prices.map((price, index) => 
+                <div 
+                  key={price.sizes?.name || `price-${index}`} 
+                  onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} 
+                  className={`
+                    cursor-pointer p-4 rounded-xl transition-all duration-300
+                    ${selectedSize === price.sizes?.name 
+                      ? 'bg-pet-success text-white shadow-md ring-2 ring-pet-success/30' 
+                      : 'bg-card hover:bg-secondary border border-pet-neutral/30 hover:border-pet-success/50'
+                    }
+                  `}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-semibold text-sm">{price.sizes?.name}</span>
+                      {price.sizes?.dimensions && 
+                        <p className="text-xs opacity-75 mt-1">
+                          {price.sizes.dimensions}
+                        </p>
+                      }
+                    </div>
+                    <span className="font-bold text-lg">
+                      R$ {price.price.toFixed(2)}
+                    </span>
                   </div>
-                  {price.sizes?.dimensions && <div className="text-xs opacity-75 leading-tight mt-1">
-                      {price.sizes.dimensions}
-                    </div>}
-                </div>)}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Enhanced action buttons */}
-          <div className="flex gap-3 pt-2 transform transition-all duration-300 group-hover:translate-y-[-1px]">
-            <Button variant="outline" size="sm" onClick={() => onViewDetails(product)} className="
-                flex-1 border-pet-gold/30 text-pet-brown-dark hover:bg-pet-gold/10
-                transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
-                shadow-sm hover:shadow-md backdrop-blur-sm
-              ">
+          {/* Botões de ação */}
+          <div className="flex gap-3 pt-2">
+            <Button 
+              variant="secondary" 
+              onClick={() => onViewDetails(product)} 
+              className="flex-1"
+            >
               <Eye className="h-4 w-4 mr-2" />
               Ver Detalhes
             </Button>
-            <Button size="sm" onClick={() => onWhatsApp(selectedSize)} className="
-                flex-1 bg-green-500 hover:bg-green-600 
-                text-white shadow-lg hover:shadow-xl
-                transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
-                border border-white/20
-              ">
+            <Button 
+              variant="success" 
+              onClick={() => onWhatsApp(selectedSize)} 
+              className="flex-1"
+            >
               <MessageCircle className="h-4 w-4 mr-2" />
               Pedir Agora
             </Button>
