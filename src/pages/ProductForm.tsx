@@ -59,7 +59,7 @@ export default function ProductForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<Array<{id: string; image_url: string; alt_text?: string}>>([]);
+  const [existingImages, setExistingImages] = useState<Array<{id: string; image_url: string; alt_text?: string; stock_quantity: number; is_available: boolean}>>([]);
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [showVariants, setShowVariants] = useState(false);
@@ -135,7 +135,9 @@ export default function ProductForm() {
       const images = imagesData?.map(image => ({
         id: image.id,
         image_url: image.image_url,
-        alt_text: image.alt_text
+        alt_text: image.alt_text,
+        stock_quantity: image.stock_quantity || 0,
+        is_available: image.is_available !== false
       })) || [];
 
       setExistingImages(images);
@@ -228,6 +230,46 @@ export default function ProductForm() {
     }
   };
 
+  const updateImageStock = async (imageId: string, newStock: number) => {
+    try {
+      const isAvailable = newStock > 0;
+      
+      const { error } = await supabase
+        .from('product_images')
+        .update({ 
+          stock_quantity: newStock,
+          is_available: isAvailable
+        })
+        .eq('id', imageId);
+
+      if (error) throw error;
+
+      // Atualizar o estado local
+      setExistingImages(prevImages =>
+        prevImages.map(img =>
+          img.id === imageId
+            ? { ...img, stock_quantity: newStock, is_available: isAvailable }
+            : img
+        )
+      );
+
+      if (newStock === 0) {
+        toast({
+          title: "Estoque zerado",
+          description: "Imagem marcada como indisponível.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar estoque:', error);
+      toast({
+        title: "Erro ao atualizar estoque",
+        description: "Não foi possível atualizar o estoque da imagem.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const uploadProductImages = async (productId: string) => {
     const uploadPromises: Promise<any>[] = [];
     
@@ -249,7 +291,9 @@ export default function ProductForm() {
               product_id: productId,
               image_url: urlData.publicUrl,
               alt_text: `${productData.name}`,
-              display_order: index
+              display_order: index,
+              stock_quantity: 5, // Estoque padrão para novas imagens
+              is_available: true
             });
           })
       );
@@ -617,26 +661,57 @@ export default function ProductForm() {
               {/* Imagens existentes */}
               {existingImages.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-xs text-muted-foreground mb-2">Imagens atuais:</p>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                  <p className="text-xs text-muted-foreground mb-2">Imagens atuais com controle de estoque:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {existingImages.map((image) => (
-                      <div key={image.id} className="relative">
-                        <img
-                          src={image.image_url}
-                          alt={image.alt_text || `Imagem do produto`}
-                          className="w-full h-16 object-cover rounded border-2 border-pet-beige-medium"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder.svg';
-                          }}
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                          onClick={() => removeExistingImage(image.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                      <div key={image.id} className="relative border rounded-lg p-3 space-y-2">
+                        <div className="relative">
+                          <img
+                            src={image.image_url}
+                            alt={image.alt_text || `Imagem do produto`}
+                            className={`w-full h-20 object-cover rounded ${
+                              !image.is_available ? 'opacity-50 grayscale' : ''
+                            }`}
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                          {!image.is_available && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
+                              <span className="text-white text-xs font-bold">INDISPONÍVEL</span>
+                            </div>
+                          )}
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                            onClick={() => removeExistingImage(image.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label className="text-xs font-medium">Estoque</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              value={image.stock_quantity}
+                              onChange={(e) => {
+                                const newStock = parseInt(e.target.value) || 0;
+                                updateImageStock(image.id, newStock);
+                              }}
+                              className="h-8 text-sm"
+                            />
+                            <Badge 
+                              variant={image.is_available ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {image.is_available ? "Disponível" : "Esgotado"}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

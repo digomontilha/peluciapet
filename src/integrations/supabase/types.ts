@@ -133,7 +133,9 @@ export type Database = {
           display_order: number | null
           id: string
           image_url: string
+          is_available: boolean | null
           product_id: string
+          stock_quantity: number | null
         }
         Insert: {
           alt_text?: string | null
@@ -142,7 +144,9 @@ export type Database = {
           display_order?: number | null
           id?: string
           image_url: string
+          is_available?: boolean | null
           product_id: string
+          stock_quantity?: number | null
         }
         Update: {
           alt_text?: string | null
@@ -151,7 +155,9 @@ export type Database = {
           display_order?: number | null
           id?: string
           image_url?: string
+          is_available?: boolean | null
           product_id?: string
+          stock_quantity?: number | null
         }
         Relationships: [
           {

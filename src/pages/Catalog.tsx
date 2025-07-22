@@ -24,6 +24,8 @@ interface Product {
   product_images: Array<{
     image_url: string;
     alt_text?: string;
+    stock_quantity?: number;
+    is_available?: boolean;
   }>;
   product_prices: Array<{
     price: number;
@@ -78,7 +80,9 @@ export default function Catalog() {
             categories:category_id (name, icon),
             product_images (
               image_url,
-              alt_text
+              alt_text,
+              stock_quantity,
+              is_available
             ),
             product_prices (
               price,
@@ -436,7 +440,10 @@ function ProductCard({
 }: ProductCardProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
-  const currentImage = product.product_images[selectedImageIndex]?.image_url || product.product_images[0]?.image_url;
+  
+  // Filtrar apenas imagens disponíveis
+  const availableImages = product.product_images.filter(img => img.is_available !== false);
+  const currentImage = availableImages[selectedImageIndex]?.image_url || availableImages[0]?.image_url;
   const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
   return <div className="group perspective-1000">
       <Card className="
@@ -552,15 +559,15 @@ function ProductCard({
             </Button>
           </div>
 
-          {/* Miniaturas das imagens */}
-          {product.product_images.length > 1 && (
+          {/* Miniaturas das imagens disponíveis */}
+          {availableImages.length > 1 && (
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
                 <Eye className="h-3 w-3 mr-2" />
                 Imagens disponíveis:
               </Label>
               <div className="flex flex-wrap gap-2">
-                {product.product_images.map((image, index) => (
+                {availableImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -579,6 +586,10 @@ function ProductCard({
                         e.currentTarget.src = '/placeholder.svg';
                       }}
                     />
+                    {/* Indicador de estoque baixo */}
+                    {image.stock_quantity && image.stock_quantity <= 2 && (
+                      <div className="absolute bottom-0 right-0 w-2 h-2 bg-red-500 rounded-full"></div>
+                    )}
                   </button>
                 ))}
               </div>
