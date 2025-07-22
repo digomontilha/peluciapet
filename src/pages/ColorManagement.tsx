@@ -249,12 +249,11 @@ export default function ColorManagement() {
           <div key={color.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
             <div className="flex items-center gap-3">
               <div 
-                className="w-12 h-12 rounded-full border border-border"
+                className="w-8 h-8 rounded-full border border-border"
                 style={{ backgroundColor: color.hex_code }}
               />
               <div>
                 <h3 className="font-medium">{color.name}</h3>
-                <p className="text-sm text-muted-foreground">{color.hex_code}</p>
               </div>
             </div>
             <div className="flex gap-2">
