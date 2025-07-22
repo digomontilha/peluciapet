@@ -477,22 +477,22 @@ function ProductCard({
         
         {/* Sizes and Prices */}
         <div className="mb-6">
-          <h4 className="font-semibold mb-4 text-gray-700 text-sm uppercase tracking-wide">Tamanhos e preços:</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <h4 className="font-semibold mb-3 text-gray-700 text-sm uppercase tracking-wide">Tamanhos e preços:</h4>
+          <div className="grid grid-cols-2 gap-2">
             {product.product_prices.map((price, index) => (
               <div 
                 key={price.sizes?.name || `price-${index}`} 
                 onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
                 className={`
-                  cursor-pointer rounded-xl p-4 border transition-all duration-300 hover:shadow-md
+                  cursor-pointer rounded-lg p-3 border transition-all duration-300 hover:shadow-sm
                   ${selectedSize === price.sizes?.name 
-                    ? 'bg-orange-100 border-orange-300 shadow-md' 
+                    ? 'bg-orange-100 border-orange-300' 
                     : 'bg-gray-50 border-gray-200 hover:border-orange-200'}
                 `}
               >
-                <div className="font-bold text-gray-800 text-lg">{price.sizes?.name}</div>
-                <div className="text-xs text-gray-500 mb-2">{price.sizes?.dimensions}</div>
-                <div className="font-bold text-emerald-600 text-lg">R$ {price.price.toFixed(2)}</div>
+                <div className="font-bold text-gray-800 text-base">{price.sizes?.name}</div>
+                <div className="text-xs text-gray-500 mb-1">{price.sizes?.dimensions}</div>
+                <div className="font-bold text-emerald-600 text-base">R$ {price.price.toFixed(2)}</div>
               </div>
             ))}
           </div>
