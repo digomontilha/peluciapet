@@ -9,7 +9,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Package, Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Package, Plus, Search, Edit, Trash2, Eye, Power, PowerOff } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -100,6 +100,36 @@ export default function ProductList() {
       toast({
         title: "Erro ao excluir produto",
         description: "Não foi possível excluir o produto.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleProductStatus = async (productId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const actionText = newStatus === 'active' ? 'ativar' : 'desativar';
+    
+    if (!confirm(`Tem certeza que deseja ${actionText} este produto?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ status: newStatus })
+        .eq('id', productId);
+
+      if (error) throw error;
+
+      toast({
+        title: `Produto ${newStatus === 'active' ? 'ativado' : 'desativado'}`,
+        description: `O produto foi ${newStatus === 'active' ? 'ativado e voltará a aparecer' : 'desativado e foi removido'} do catálogo.`,
+      });
+
+      fetchProducts();
+    } catch (error) {
+      console.error('Erro ao alterar status do produto:', error);
+      toast({
+        title: "Erro ao alterar status",
+        description: "Não foi possível alterar o status do produto.",
         variant: "destructive",
       });
     }
@@ -276,6 +306,18 @@ export default function ProductList() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleToggleProductStatus(product.id, product.status)}
+                          className={product.status === 'active' 
+                            ? "hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300"
+                            : "hover:bg-green-50 hover:border-green-200 hover:text-green-600 transition-all duration-300"
+                          }
+                          title={product.status === 'active' ? 'Desativar produto' : 'Ativar produto'}
+                        >
+                          {product.status === 'active' ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleDeleteProduct(product.id)}
                           className="hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300"
                           title="Excluir produto"
@@ -309,14 +351,14 @@ export default function ProductList() {
                     </div>
                     
                     {/* Ações mobile - embaixo */}
-                    <div className="flex md:hidden gap-2 pt-2 border-t border-gray-100">
+                    <div className="flex md:hidden gap-1 pt-2 border-t border-gray-100">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => navigate(`/admin/products/${product.id}/edit`)}
                         className="flex-1 hover:bg-pet-beige-light transition-all duration-300 text-xs"
                       >
-                        <Edit className="h-4 w-4 mr-1" />
+                        <Edit className="h-3 w-3 mr-1" />
                         Editar
                       </Button>
                       <Button
@@ -325,8 +367,30 @@ export default function ProductList() {
                         onClick={() => navigate(`/admin/variants?product=${product.id}`)}
                         className="flex-1 hover:bg-pet-beige-light transition-all duration-300 text-xs"
                       >
-                        <Eye className="h-4 w-4 mr-1" />
+                        <Eye className="h-3 w-3 mr-1" />
                         Variantes
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleProductStatus(product.id, product.status)}
+                        className={`flex-1 text-xs transition-all duration-300 ${
+                          product.status === 'active' 
+                            ? "hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+                            : "hover:bg-green-50 hover:border-green-200 hover:text-green-600"
+                        }`}
+                      >
+                        {product.status === 'active' ? (
+                          <>
+                            <PowerOff className="h-3 w-3 mr-1" />
+                            Desativar
+                          </>
+                        ) : (
+                          <>
+                            <Power className="h-3 w-3 mr-1" />
+                            Ativar
+                          </>
+                        )}
                       </Button>
                       <Button
                         variant="outline"
@@ -334,7 +398,7 @@ export default function ProductList() {
                         onClick={() => handleDeleteProduct(product.id)}
                         className="hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300 text-xs"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
