@@ -564,7 +564,7 @@ function ProductCard({
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
                 <Eye className="h-3 w-3 mr-2" />
-                Cores disponíveis:
+                Imagens disponíveis:
               </Label>
               <div className="flex flex-wrap gap-2">
                 {availableImages.map((image, index) => (
