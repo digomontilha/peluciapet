@@ -400,7 +400,34 @@ export default function Catalog() {
                              <img
                                src={image.image_url}
                                alt={`${selectedProduct.name} - Cor ${index + 1}`}
-                               className="w-20 h-20 rounded-xl object-cover cursor-pointer transition-all duration-300 border-4 border-gray-300 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-2px_4px_rgba(0,0,0,0.2)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.3),inset_0_3px_6px_rgba(255,255,255,0.4),inset_0_-3px_6px_rgba(0,0,0,0.3)] hover:border-orange-400 hover:scale-110 hover:-translate-y-1"
+                               className="w-20 h-20 rounded-xl object-cover cursor-pointer transition-all duration-300 border-[3px] border-solid border-gray-400 hover:border-orange-400"
+                               style={{
+                                 boxShadow: `
+                                   0 6px 12px rgba(0, 0, 0, 0.15),
+                                   inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                                   inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+                                   0 0 0 1px rgba(255, 255, 255, 0.2)
+                                 `,
+                                 transform: 'translateZ(0)'
+                               }}
+                               onMouseEnter={(e) => {
+                                 e.currentTarget.style.boxShadow = `
+                                   0 10px 20px rgba(0, 0, 0, 0.25),
+                                   inset 0 3px 6px rgba(255, 255, 255, 0.5),
+                                   inset 0 -3px 6px rgba(0, 0, 0, 0.3),
+                                   0 0 0 2px rgba(255, 255, 255, 0.3)
+                                 `;
+                                 e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
+                               }}
+                               onMouseLeave={(e) => {
+                                 e.currentTarget.style.boxShadow = `
+                                   0 6px 12px rgba(0, 0, 0, 0.15),
+                                   inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                                   inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+                                   0 0 0 1px rgba(255, 255, 255, 0.2)
+                                 `;
+                                 e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                               }}
                              />
                             {/* Stock indicator */}
                             {image.stock_quantity && image.stock_quantity <= 2 && (
