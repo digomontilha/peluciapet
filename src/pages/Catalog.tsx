@@ -445,162 +445,118 @@ function ProductCard({
   const availableImages = product.product_images.filter(img => img.is_available !== false);
   const currentImage = availableImages[selectedImageIndex]?.image_url || availableImages[0]?.image_url;
   const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
-  return <div className="group perspective-1000">
-      <Card className="
-        relative overflow-hidden
-        bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-xl
-        border border-white/20 shadow-2xl
-        transform-gpu transition-all duration-500 ease-out
-        hover:scale-[1.02] hover:-translate-y-2
-        hover:rotate-x-2 hover:rotate-y-1
-        hover:shadow-3xl hover:shadow-pet-gold/20
-        before:absolute before:inset-0 before:bg-gradient-to-br before:from-pet-gold/5 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
-      ">
-        {/* Glassmorphism overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
+  return (
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 group">
+      {/* Product Image */}
+      <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-orange-50 to-peach-50">
+        <img 
+          src={currentImage || '/placeholder.svg'} 
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
         
-        <CardHeader className="p-0 relative">
-          <div className="relative aspect-square overflow-hidden">
-            {/* 3D Image container */}
-            <div className="
-              w-full h-full transform-gpu transition-all duration-700 ease-out
-              group-hover:scale-110 group-hover:rotate-1
-            ">
-              <img src={currentImage || '/placeholder.svg'} alt={product.name} className="w-full h-full object-cover filter group-hover:brightness-110 transition-all duration-500" />
-              
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out opacity-0 group-hover:opacity-100" />
-            </div>
-            
-            {/* Floating badge */}
-            {product.is_custom_order && <Badge className="
-                absolute top-3 right-3 
-                bg-pet-brown-medium 
-                text-white shadow-lg backdrop-blur-sm
-                transform transition-all duration-300
-                group-hover:scale-110 group-hover:-translate-y-1
-                border border-white/30
-              ">
-                <Tag className="h-3 w-3 mr-1" />
-                Sob encomenda
-              </Badge>}
-            
-            {/* Price preview floating */}
-            {selectedSize && selectedPrice && <div className="
-                absolute bottom-3 left-3
-                bg-white/90 backdrop-blur-md rounded-full px-3 py-1
-                shadow-lg border border-white/30
-                transform transition-all duration-300
-                translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100
-              ">
-                <span className="text-sm font-bold text-pet-brown-dark">
-                  R$ {selectedPrice.toFixed(2)}
-                </span>
-              </div>}
-          </div>
-        </CardHeader>
+        {/* Custom Order Badge */}
+        {product.is_custom_order && (
+          <Badge className="absolute top-3 right-3 bg-orange-500 text-white">
+            <Tag className="h-3 w-3 mr-1" />
+            Sob encomenda
+          </Badge>
+        )}
+      </div>
+
+      {/* Product Content */}
+      <div className="p-6">
+        {/* Product Title */}
+        <h3 className="font-bold text-xl mb-3 text-gray-800">{product.name}</h3>
+        <p className="text-gray-600 text-sm mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
         
-        <CardContent className="p-5 space-y-4 relative z-20">
-          {/* Title with 3D effect */}
-          <div className="transform transition-all duration-300 group-hover:translate-y-[-2px]">
-            <h3 className="font-bold text-lg text-primary mb-2 leading-tight">
-              {product.name}
-            </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-              {product.description}
-            </p>
-            {product.observations && <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>}
+        {/* Observations */}
+        {product.observations && (
+          <p className="text-orange-600 text-sm mb-4 font-medium">{product.observations}</p>
+        )}
+        
+        {/* Sizes and Prices */}
+        <div className="mb-6">
+          <h4 className="font-semibold mb-4 text-gray-700 text-sm uppercase tracking-wide">Tamanhos e preços:</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {product.product_prices.map((price, index) => (
+              <div 
+                key={price.sizes?.name || `price-${index}`} 
+                onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
+                className={`
+                  cursor-pointer rounded-xl p-4 border transition-all duration-300 hover:shadow-md
+                  ${selectedSize === price.sizes?.name 
+                    ? 'bg-orange-100 border-orange-300 shadow-md' 
+                    : 'bg-gray-50 border-gray-200 hover:border-orange-200'}
+                `}
+              >
+                <div className="font-bold text-gray-800 text-lg">{price.sizes?.name}</div>
+                <div className="text-xs text-gray-500 mb-2">{price.sizes?.dimensions}</div>
+                <div className="font-bold text-emerald-600 text-lg">R$ {price.price.toFixed(2)}</div>
+              </div>
+            ))}
           </div>
-
-          {/* Modern price grid */}
-          <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
-            <Label className="text-sm font-medium text-pet-brown-dark">Tamanhos e preços:</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {product.product_prices.map((price, index) => <div key={price.sizes?.name || `price-${index}`} onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} style={{
-              animationDelay: `${index * 50}ms`
-            }} className={`
-                    cursor-pointer border rounded-lg text-xs p-3 transition-all duration-300 ease-out
-                    transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg
-                    backdrop-blur-sm
-                    ${selectedSize === price.sizes?.name ? 'bg-pet-brown-medium text-white border-pet-brown-medium shadow-lg ring-2 ring-pet-brown-medium/30' : 'bg-white/80 border-gray-200 hover:border-pet-gold hover:bg-white/90 shadow-sm'}
-                  `}>
-                  <div className="flex items-center justify-between leading-tight">
-                    <span className="font-semibold">{price.sizes?.name}</span>
-                    <span className="font-bold">R$ {price.price.toFixed(2)}</span>
-                  </div>
-                  {price.sizes?.dimensions && <div className="text-xs opacity-75 leading-tight mt-1">
-                      {price.sizes.dimensions}
-                    </div>}
-                </div>)}
-            </div>
-          </div>
-
-          {/* Enhanced action buttons */}
-          <div className="flex gap-3 pt-2 transform transition-all duration-300 group-hover:translate-y-[-1px]">
-            <Button variant="outline" size="sm" onClick={() => onViewDetails(product)} className="
-                flex-1 border-pet-gold/30 text-pet-brown-dark hover:bg-pet-gold/10
-                transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
-                shadow-sm hover:shadow-md backdrop-blur-sm
-              ">
-              <Eye className="h-4 w-4 mr-2" />
-              Ver Detalhes
-            </Button>
-            <Button size="sm" onClick={() => onWhatsApp(selectedSize)} className="
-                flex-1 bg-green-500 hover:bg-green-600 
-                text-white shadow-lg hover:shadow-xl
-                transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5
-                border border-white/20
-              ">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Pedir Agora
-            </Button>
-          </div>
-
-          {/* Miniaturas das imagens disponíveis */}
-          {availableImages.length > 1 && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
-                <Eye className="h-3 w-3 mr-2" />
-                Imagens disponíveis:
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {availableImages.map((image, index) => (
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => onViewDetails(product)} 
+            className="flex-1 border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-xl h-12"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Ver Detalhes
+          </Button>
+          <Button 
+            onClick={() => onWhatsApp(selectedSize)} 
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl h-12 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Pedir Agora
+          </Button>
+        </div>
+        
+        {/* Available Images */}
+        {availableImages.length > 1 && (
+          <div>
+            <h4 className="font-semibold mb-3 flex items-center text-gray-700 text-sm uppercase tracking-wide">
+              <Eye className="w-4 h-4 mr-2" />
+              Cores disponíveis:
+            </h4>
+            <div className="flex flex-wrap gap-3">
+              {availableImages.map((image, index) => (
+                <div key={index} className="relative group">
                   <button
-                    key={index}
                     onClick={() => setSelectedImageIndex(index)}
                     className={`
-                      relative w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-300
+                      w-16 h-16 rounded-xl border-3 object-cover cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md
                       ${selectedImageIndex === index 
-                        ? 'border-pet-brown-dark scale-105 shadow-lg' 
-                        : 'border-gray-200 hover:border-pet-gold'}
+                        ? 'border-orange-300 scale-105' 
+                        : 'border-gray-200 hover:border-orange-200'}
                     `}
                   >
                     <img
                       src={image.image_url}
-                      alt={`${product.name} - Imagem ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      alt={`${product.name} - Cor ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}
                     />
-                    {/* Indicador de estoque baixo */}
-                    {image.stock_quantity && image.stock_quantity <= 2 && (
-                      <div className="absolute bottom-0 right-0 w-2 h-2 bg-red-500 rounded-full"></div>
-                    )}
                   </button>
-                ))}
-              </div>
+                  {/* Stock indicator */}
+                  {image.stock_quantity && image.stock_quantity <= 2 && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+                  )}
+                </div>
+              ))}
             </div>
-          )}
-        </CardContent>
-        
-        {/* Bottom glow effect */}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-pet-gold/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      </Card>
-    </div>;
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 function Label({
   children,
