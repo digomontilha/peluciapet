@@ -69,16 +69,8 @@ export default function Catalog() {
     const updateBannerForScreen = () => {
       const width = window.innerWidth;
       
-      if (width < 640) {
-        // Mobile - banner otimizado para mobile
-        setCurrentBanner('/lovable-uploads/84a52df5-5030-496c-b1cf-a6e3be3a91ad.png');
-      } else if (width < 1024) {
-        // Tablet - banner intermediário
-        setCurrentBanner(banner);
-      } else {
-        // Desktop - banner completo
-        setCurrentBanner(banner);
-      }
+      // Usar o mesmo banner para todas as resoluções
+      setCurrentBanner('/lovable-uploads/0f657d4e-81af-4ebf-9fcb-96c97eae066a.png');
     };
 
     updateBannerForScreen();
