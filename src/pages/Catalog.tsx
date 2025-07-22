@@ -337,12 +337,14 @@ export default function Catalog() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Descrição</h3>
-                    <p className="text-muted-foreground">
+                    <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
                       {selectedProduct.description}
-                    </p>
-                    {selectedProduct.observations && <p className="text-pet-gold mt-2 font-medium">
+                    </div>
+                    {selectedProduct.observations && (
+                      <p className="text-orange-600 mt-3 font-medium whitespace-pre-line">
                         {selectedProduct.observations}
-                      </p>}
+                      </p>
+                    )}
                   </div>
 
                   <div>
