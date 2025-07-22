@@ -18,10 +18,6 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				'quicksand': ['Quicksand', 'sans-serif'],
-				'poppins': ['Poppins', 'sans-serif'],
-			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -66,25 +62,29 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Cores do tema luxo pet
-				'pet-peach': 'hsl(var(--pet-peach))',
-				'pet-cream': 'hsl(var(--pet-cream))',
-				'pet-warm-orange': 'hsl(var(--pet-warm-orange))',
-				'pet-success': 'hsl(var(--pet-success))',
-				'pet-neutral': 'hsl(var(--pet-neutral))',
-				'pet-brown-soft': 'hsl(var(--pet-brown-soft))'
+				// Cores específicas da PelúciaPet
+				'pet-brown': {
+					dark: 'hsl(var(--pet-brown-dark))',
+					medium: 'hsl(var(--pet-brown-medium))',
+					outline: 'hsl(var(--pet-brown-outline))'
+				},
+				'pet-beige': {
+					light: 'hsl(var(--pet-beige-light))',
+					medium: 'hsl(var(--pet-beige-medium))'
+				},
+				'pet-gold': 'hsl(var(--pet-gold))'
 			},
 			backgroundImage: {
 				'gradient-warm': 'var(--gradient-warm)',
-				'gradient-card': 'var(--gradient-card)',
-				'gradient-button-success': 'var(--gradient-button-success)',
-				'gradient-button-secondary': 'var(--gradient-button-secondary)'
+				'gradient-soft': 'var(--gradient-soft)',
+				'gradient-elegant': 'var(--gradient-elegant)'
 			},
 			boxShadow: {
-				'card': 'var(--shadow-card)',
-				'button': 'var(--shadow-button)',
-				'hover': 'var(--shadow-hover)',
 				'warm': 'var(--shadow-warm)',
+				'soft': 'var(--shadow-soft)',
+				'gold': 'var(--shadow-gold)',
+				'elegant': 'var(--shadow-elegant)',
+				'glow': 'var(--shadow-glow)',
 				'3xl': '0 35px 60px -12px rgba(0, 0, 0, 0.25)'
 			},
 			transitionTimingFunction: {
