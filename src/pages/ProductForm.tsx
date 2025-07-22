@@ -21,11 +21,6 @@ interface Category {
   icon: string;
 }
 
-interface Color {
-  id: string;
-  name: string;
-  hex_code: string;
-}
 
 interface ProductPrice {
   size_id: string;
@@ -37,7 +32,6 @@ interface ProductPrice {
 interface ProductVariant {
   id?: string;
   size: string;
-  color_id?: string;
   variant_code: string;
   stock_quantity: number;
   is_available: boolean;
@@ -63,14 +57,12 @@ export default function ProductForm() {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   
   const [categories, setCategories] = useState<Category[]>([]);
-  const [colors, setColors] = useState<Color[]>([]);
   
-  const [selectedImages, setSelectedImages] = useState<{[colorId: string]: File[]}>({});
-  const [existingImages, setExistingImages] = useState<{[colorId: string]: Array<{id: string; image_url: string; alt_text?: string}>}>({});
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<Array<{id: string; image_url: string; alt_text?: string}>>([]);
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [showVariants, setShowVariants] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState<string>('');
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -139,21 +131,14 @@ export default function ProductForm() {
 
       if (imagesError) throw imagesError;
 
-      // Agrupar imagens por cor
-      const imagesByColor: {[colorId: string]: Array<{id: string; image_url: string; alt_text?: string}>} = {};
-      imagesData?.forEach(image => {
-        const colorId = image.color_id || 'no-color';
-        if (!imagesByColor[colorId]) {
-          imagesByColor[colorId] = [];
-        }
-        imagesByColor[colorId].push({
-          id: image.id,
-          image_url: image.image_url,
-          alt_text: image.alt_text
-        });
-      });
+      // Converter para array simples
+      const images = imagesData?.map(image => ({
+        id: image.id,
+        image_url: image.image_url,
+        alt_text: image.alt_text
+      })) || [];
 
-      setExistingImages(imagesByColor);
+      setExistingImages(images);
 
     } catch (error) {
       console.error('Erro ao carregar produto:', error);
@@ -168,16 +153,11 @@ export default function ProductForm() {
 
   const fetchData = async () => {
     try {
-      const [categoriesResult, colorsResult] = await Promise.all([
-        supabase.from('categories').select('*').order('name'),
-        supabase.from('colors').select('*').order('name')
-      ]);
+      const categoriesResult = await supabase.from('categories').select('*').order('name');
 
       if (categoriesResult.error) throw categoriesResult.error;
-      if (colorsResult.error) throw colorsResult.error;
 
       setCategories(categoriesResult.data || []);
-      setColors(colorsResult.data || []);
       
       // Para novos produtos, não inicializar preços ainda - será feito após salvar o produto
       if (!isEditing) {
@@ -192,7 +172,7 @@ export default function ProductForm() {
       console.error('Erro ao carregar dados:', error);
       toast({
         title: "Erro ao carregar dados",
-        description: "Não foi possível carregar categorias e cores.",
+        description: "Não foi possível carregar categorias.",
         variant: "destructive",
       });
     } finally {
@@ -200,7 +180,7 @@ export default function ProductForm() {
     }
   };
 
-  const handleImageUpload = (colorId: string, files: FileList | null) => {
+  const handleImageUpload = (files: FileList | null) => {
     if (!files) return;
     
     const validFiles = Array.from(files).filter(file => 
@@ -215,20 +195,14 @@ export default function ProductForm() {
       });
     }
     
-    setSelectedImages(prev => ({
-      ...prev,
-      [colorId]: [...(prev[colorId] || []), ...validFiles]
-    }));
+    setSelectedImages([...selectedImages, ...validFiles]);
   };
 
-  const removeImage = (colorId: string, index: number) => {
-    setSelectedImages(prev => ({
-      ...prev,
-      [colorId]: prev[colorId]?.filter((_, i) => i !== index) || []
-    }));
+  const removeImage = (index: number) => {
+    setSelectedImages(selectedImages.filter((_, i) => i !== index));
   };
 
-  const removeExistingImage = async (imageId: string, colorId: string) => {
+  const removeExistingImage = async (imageId: string) => {
     try {
       const { error } = await supabase
         .from('product_images')
@@ -238,10 +212,7 @@ export default function ProductForm() {
       if (error) throw error;
 
       // Atualizar o estado local
-      setExistingImages(prev => ({
-        ...prev,
-        [colorId]: prev[colorId]?.filter(img => img.id !== imageId) || []
-      }));
+      setExistingImages(existingImages.filter(img => img.id !== imageId));
 
       toast({
         title: "Imagem removida",
@@ -260,32 +231,29 @@ export default function ProductForm() {
   const uploadProductImages = async (productId: string) => {
     const uploadPromises: Promise<any>[] = [];
     
-    for (const [colorId, files] of Object.entries(selectedImages)) {
-      files.forEach((file, index) => {
-        const fileName = `${productId}/${colorId}/${Date.now()}-${index}-${file.name}`;
-        
-        uploadPromises.push(
-          supabase.storage
-            .from('product-images')
-            .upload(fileName, file)
-            .then(async ({ data, error }) => {
-              if (error) throw error;
-              
-              const { data: urlData } = supabase.storage
-                .from('product-images')
-                .getPublicUrl(fileName);
-              
-              return supabase.from('product_images').insert({
-                product_id: productId,
-                color_id: colorId,
-                image_url: urlData.publicUrl,
-                alt_text: `${productData.name} - ${colors.find(c => c.id === colorId)?.name}`,
-                display_order: index
-              });
-            })
-        );
-      });
-    }
+    selectedImages.forEach((file, index) => {
+      const fileName = `${productId}/${Date.now()}-${index}-${file.name}`;
+      
+      uploadPromises.push(
+        supabase.storage
+          .from('product-images')
+          .upload(fileName, file)
+          .then(async ({ data, error }) => {
+            if (error) throw error;
+            
+            const { data: urlData } = supabase.storage
+              .from('product-images')
+              .getPublicUrl(fileName);
+            
+            return supabase.from('product_images').insert({
+              product_id: productId,
+              image_url: urlData.publicUrl,
+              alt_text: `${productData.name}`,
+              display_order: index
+            });
+          })
+      );
+    });
     
     await Promise.all(uploadPromises);
   };
@@ -396,7 +364,7 @@ export default function ProductForm() {
       }
       
       // Upload de imagens (apenas se houver novas imagens)
-      if (Object.values(selectedImages).some(files => files.length > 0)) {
+      if (selectedImages.length > 0) {
         await uploadProductImages(productId);
       }
       
@@ -623,155 +591,84 @@ export default function ProductForm() {
           <CardHeader>
             <CardTitle className="text-primary">Imagens do Produto</CardTitle>
             <p className="text-sm text-muted-foreground">
-              <strong className="text-pet-gold">NOVO!</strong> Adicione imagens reais da caminha em cada cor disponível. 
-              Estas imagens serão exibidas como miniaturas no catálogo quando o cliente escolher as cores do produto.
-              Máximo 5MB por imagem.
+              Adicione imagens do produto. Máximo 5MB por imagem.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Seletor de Cor */}
-            <div className="space-y-2">
-              <Label htmlFor="color-selector">Selecionar Cor</Label>
-              <Select 
-                value={selectedColorId} 
-                onValueChange={setSelectedColorId}
+            <div className="space-y-3">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => handleImageUpload(e.target.files)}
+                className="hidden"
+                id="upload-images"
+              />
+              <Label
+                htmlFor="upload-images"
+                className="flex items-center justify-center w-full h-20 border-2 border-dashed border-pet-beige-medium rounded-lg cursor-pointer hover:border-pet-gold transition-colors"
               >
-                <SelectTrigger className="border-pet-beige-medium focus:border-pet-gold">
-                  <SelectValue placeholder="Escolha uma cor para gerenciar imagens" />
-                </SelectTrigger>
-                <SelectContent>
-                  {colors.map((color) => (
-                    <SelectItem key={color.id} value={color.id}>
-                      <div className="flex items-center justify-center">
-                        <div
-                          className="w-6 h-6 rounded-full border border-gray-300"
-                          style={{ backgroundColor: color.hex_code }}
-                        />
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Área de upload e visualização para a cor selecionada */}
-            {selectedColorId && (
-              <div className="border rounded-lg p-4 border-pet-beige-medium">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div
-                    className="w-6 h-6 rounded-full border-2 border-gray-300"
-                    style={{ backgroundColor: colors.find(c => c.id === selectedColorId)?.hex_code }}
-                  />
-                  <Label className="font-medium">
-                    {colors.find(c => c.id === selectedColorId)?.name}
-                  </Label>
+                <div className="text-center">
+                  <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Clique para adicionar imagens</span>
                 </div>
-                
-                {/* Orientação visual */}
-                <div className="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                  <div className="flex gap-4 items-center">
-                    <div className="shrink-0 flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-gray-200">
-                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                          <img 
-                            src="/placeholder.svg" 
-                            alt="Exemplo de miniatura" 
-                            className="w-8 h-8 opacity-50"
-                          />
-                        </div>
-                      </div>
-                      <div className="text-amber-800 text-sm">→</div>
-                      <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-gray-200">
-                        <img 
-                          src="/placeholder.svg" 
-                          alt="Exemplo de miniatura" 
-                          className="w-full h-full object-cover"
+              </Label>
+              
+              {/* Imagens existentes */}
+              {existingImages.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2">Imagens atuais:</p>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                    {existingImages.map((image) => (
+                      <div key={image.id} className="relative">
+                        <img
+                          src={image.image_url}
+                          alt={image.alt_text || `Imagem do produto`}
+                          className="w-full h-16 object-cover rounded border-2 border-pet-beige-medium"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }}
                         />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                          onClick={() => removeExistingImage(image.id)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
-                    </div>
-                    <div className="text-sm text-amber-800">
-                      As imagens serão exibidas como miniaturas no catálogo no lugar dos círculos de cor.
-                      Adicione imagens reais da caminha na cor selecionada.
-                    </div>
+                    ))}
                   </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => handleImageUpload(selectedColorId, e.target.files)}
-                    className="hidden"
-                    id={`upload-${selectedColorId}`}
-                  />
-                  <Label
-                    htmlFor={`upload-${selectedColorId}`}
-                    className="flex items-center justify-center w-full h-20 border-2 border-dashed border-pet-beige-medium rounded-lg cursor-pointer hover:border-pet-gold transition-colors"
-                  >
-                    <div className="text-center">
-                      <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Clique para adicionar imagens</span>
-                    </div>
-                  </Label>
-                  
-                  {/* Imagens existentes */}
-                  {existingImages[selectedColorId] && existingImages[selectedColorId].length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs text-muted-foreground mb-2">Imagens atuais:</p>
-                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {existingImages[selectedColorId].map((image) => (
-                          <div key={image.id} className="relative">
-                            <img
-                              src={image.image_url}
-                              alt={image.alt_text || `Imagem ${colors.find(c => c.id === selectedColorId)?.name}`}
-                              className="w-full h-16 object-cover rounded border-2 border-pet-beige-medium"
-                              onError={(e) => {
-                                e.currentTarget.src = '/placeholder.svg';
-                              }}
-                            />
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                              onClick={() => removeExistingImage(image.id, selectedColorId)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              )}
 
-                  {/* Novas imagens selecionadas */}
-                  {selectedImages[selectedColorId] && selectedImages[selectedColorId].length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">Novas imagens a serem adicionadas:</p>
-                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {selectedImages[selectedColorId].map((file, index) => (
-                          <div key={index} className="relative">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={`Preview ${index}`}
-                              className="w-full h-16 object-cover rounded border-2 border-green-300"
-                            />
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                              onClick={() => removeImage(selectedColorId, index)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
+              {/* Novas imagens selecionadas */}
+              {selectedImages.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Novas imagens a serem adicionadas:</p>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                    {selectedImages.map((file, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${index}`}
+                          className="w-full h-16 object-cover rounded border-2 border-green-300"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -784,7 +681,7 @@ export default function ProductForm() {
                 Gestão de Variantes e Estoque
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Gerencie códigos únicos e controle de estoque para cada combinação de tamanho e cor.
+                Gerencie códigos únicos e controle de estoque para cada combinação de tamanho.
               </p>
             </CardHeader>
             <CardContent>
@@ -794,7 +691,7 @@ export default function ProductForm() {
                     Produto: <span className="text-primary">{productData.product_code}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    As variantes são geradas automaticamente baseadas no código do produto, tamanho e cor.
+                    As variantes são geradas automaticamente baseadas no código do produto e tamanho.
                   </p>
                 </div>
                 <Button

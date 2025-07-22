@@ -24,11 +24,6 @@ interface Product {
   product_images: Array<{
     image_url: string;
     alt_text?: string;
-    color_id?: string;
-    colors?: {
-      name: string;
-      hex_code: string;
-    };
   }>;
   product_prices: Array<{
     price: number;
@@ -47,18 +42,11 @@ interface Category {
   name: string;
   icon: string;
 }
-interface Color {
-  id: string;
-  name: string;
-  hex_code: string;
-}
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [colors, setColors] = useState<Color[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
@@ -85,14 +73,12 @@ export default function Catalog() {
   const fetchData = async () => {
     try {
       // Buscar dados em paralelo
-      const [productsResult, categoriesResult, colorsResult] = await Promise.all([supabase.from('products').select(`
+      const [productsResult, categoriesResult] = await Promise.all([supabase.from('products').select(`
             *,
             categories:category_id (name, icon),
             product_images (
               image_url,
-              alt_text,
-              color_id,
-              colors:color_id (name, hex_code)
+              alt_text
             ),
             product_prices (
               price,
@@ -103,10 +89,9 @@ export default function Catalog() {
             )
           `).eq('status', 'active').order('created_at', {
         ascending: false
-      }), supabase.from('categories').select('*').order('name'), supabase.from('colors').select('*').order('name')]);
+      }), supabase.from('categories').select('*').order('name')]);
       if (productsResult.error) throw productsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
-      if (colorsResult.error) throw colorsResult.error;
 
       // Processar produtos para incluir informações de dimensões
       const processedProducts = (productsResult.data || []).map(product => ({
@@ -121,7 +106,6 @@ export default function Catalog() {
       }));
       setProducts(processedProducts);
       setCategories(categoriesResult.data || []);
-      setColors(colorsResult.data || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -134,7 +118,7 @@ export default function Catalog() {
     }
   };
   const filteredProducts = products.filter(product => selectedCategory === 'all' || product.categories?.name === selectedCategory);
-  const generateWhatsAppLink = async (product: Product, size?: string, color?: string) => {
+  const generateWhatsAppLink = async (product: Product, size?: string) => {
     let variantCode = '';
 
     // Buscar código da variante específica
@@ -142,7 +126,7 @@ export default function Catalog() {
       try {
         const {
           data: variant
-        } = await supabase.from('product_variants').select('variant_code, product_sizes!inner(name)').eq('product_id', product.id).eq('product_sizes.name', size).eq('color_id', color || null).single();
+        } = await supabase.from('product_variants').select('variant_code, product_sizes!inner(name)').eq('product_id', product.id).eq('product_sizes.name', size).single();
         if (variant) {
           variantCode = variant.variant_code;
         }
@@ -151,28 +135,18 @@ export default function Catalog() {
         variantCode = product.id.substring(0, 8).toUpperCase();
       }
     }
-    const colorName = color ? colors.find(c => c.id === color)?.name : '';
     const sizeInfo = size ? `tamanho ${size}` : '';
-    const colorInfo = colorName ? `cor ${colorName}` : '';
-    const productInfo = [sizeInfo, colorInfo].filter(Boolean).join(', ');
+    const productInfo = sizeInfo;
     const codeInfo = variantCode ? `\nCódigo: ${variantCode}` : '';
     const message = `Olá! Tenho interesse no produto: ${product.name}${productInfo ? ` (${productInfo})` : ''}${codeInfo}`;
     return `https://wa.me/5511914608191?text=${encodeURIComponent(message)}`;
   };
-  const handleWhatsAppClick = async (product: Product, size?: string, color?: string) => {
-    const link = await generateWhatsAppLink(product, size, color);
+  const handleWhatsAppClick = async (product: Product, size?: string) => {
+    const link = await generateWhatsAppLink(product, size);
     window.open(link, '_blank');
   };
-  const getProductImage = (product: Product, colorId?: string) => {
-    if (!colorId) {
-      return product.product_images[0]?.image_url || '/placeholder.svg';
-    }
-    const colorImage = product.product_images.find(img => img.color_id === colorId);
-    return colorImage?.image_url || product.product_images[0]?.image_url || '/placeholder.svg';
-  };
-  const getAvailableColors = (product: Product) => {
-    const colorIds = product.product_images.map(img => img.color_id).filter(Boolean) as string[];
-    return colors.filter(color => colorIds.includes(color.id));
+  const getProductImage = (product: Product) => {
+    return product.product_images[0]?.image_url || '/placeholder.svg';
   };
   if (loading) {
     return <div className="min-h-screen bg-gradient-soft">
@@ -323,7 +297,7 @@ export default function Catalog() {
 
         {/* Grid de produtos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map(product => <ProductCard key={product.id} product={product} colors={colors} onWhatsApp={(size, color) => handleWhatsAppClick(product, size, color)} onViewDetails={setSelectedProduct} />)}
+          {filteredProducts.map(product => <ProductCard key={product.id} product={product} onWhatsApp={(size) => handleWhatsAppClick(product, size)} onViewDetails={setSelectedProduct} />)}
         </div>
 
         {filteredProducts.length === 0 && <div className="text-center py-16">
@@ -351,54 +325,8 @@ export default function Catalog() {
                 {/* Galeria de imagens */}
                 <div className="space-y-4">
                   <div className="aspect-square overflow-hidden rounded-lg">
-                    <img src={getProductImage(selectedProduct, selectedColor) || '/placeholder.svg'} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                    <img src={getProductImage(selectedProduct) || '/placeholder.svg'} alt={selectedProduct.name} className="w-full h-full object-cover" />
                   </div>
-                  
-                  {/* Cores disponíveis com miniaturas de imagens */}
-                  {getAvailableColors(selectedProduct).length > 0 && <div className="space-y-2">
-                      <Label className="text-sm font-medium flex items-center">
-                        <Palette className="h-3 w-3 mr-1" />
-                        Cores disponíveis:
-                      </Label>
-                      <div className="flex flex-wrap gap-3">
-                        {getAvailableColors(selectedProduct).map(color => {
-                          // Encontrar a imagem para esta cor
-                          const colorImage = selectedProduct.product_images.find(img => img.color_id === color.id);
-                          
-                          return (
-                            <button 
-                              key={color.id} 
-                              onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} 
-                              className={`relative w-16 h-16 rounded-lg border-2 transition-all overflow-hidden ${
-                                selectedColor === color.id 
-                                  ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' 
-                                  : 'border-gray-200 hover:border-pet-gold shadow-sm'
-                              }`}
-                              title={color.name}
-                            >
-                              {/* Miniatura da imagem */}
-                              <img 
-                                src={colorImage?.image_url || '/placeholder.svg'} 
-                                alt={`${selectedProduct.name} - ${color.name}`} 
-                                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/placeholder.svg';
-                                }}
-                              />
-                              
-                              {/* Indicador de cor no canto inferior direito */}
-                              <div 
-                                className="absolute bottom-0 right-0 w-4 h-4 rounded-tl-md border border-white/50"
-                                style={{ backgroundColor: color.hex_code }}
-                              />
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {selectedColor && <p className="text-sm text-muted-foreground">
-                          Cor selecionada: {colors.find(c => c.id === selectedColor)?.name}
-                        </p>}
-                    </div>}
                 </div>
 
                 {/* Informações do produto */}
@@ -443,7 +371,7 @@ export default function Catalog() {
 
                   {/* Botões de ação */}
                   <div className="flex gap-3 pt-4">
-                    <Button onClick={() => handleWhatsAppClick(selectedProduct, selectedSize, selectedColor)} className="flex-1 bg-green-500 hover:bg-green-600 text-white transition-all duration-300" size="lg">
+                    <Button onClick={() => handleWhatsAppClick(selectedProduct, selectedSize)} className="flex-1 bg-green-500 hover:bg-green-600 text-white transition-all duration-300" size="lg">
                       <MessageCircle className="h-5 w-5 mr-2" />
                       Pedir via WhatsApp
                     </Button>
@@ -498,21 +426,16 @@ export default function Catalog() {
 }
 interface ProductCardProps {
   product: Product;
-  colors: Color[];
-  onWhatsApp: (size?: string, color?: string) => void;
+  onWhatsApp: (size?: string) => void;
   onViewDetails: (product: Product) => void;
 }
 function ProductCard({
   product,
-  colors,
   onWhatsApp,
   onViewDetails
 }: ProductCardProps) {
-  const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
-  const availableColors = product.product_images.map(img => img.color_id).filter(Boolean) as string[];
-  const productColors = colors.filter(color => availableColors.includes(color.id));
-  const currentImage = selectedColor ? product.product_images.find(img => img.color_id === selectedColor)?.image_url : product.product_images[0]?.image_url;
+  const currentImage = product.product_images[0]?.image_url;
   const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
   return <div className="group perspective-1000">
       <Card className="
@@ -584,55 +507,6 @@ function ProductCard({
             {product.observations && <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>}
           </div>
 
-          {/* Color selector with thumbnail images */}
-          {productColors.length > 0 && <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
-              <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
-                <Palette className="h-3 w-3 mr-2" />
-                Cores disponíveis:
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {productColors.map(color => {
-                  // Encontrar a imagem para esta cor
-                  const colorImage = product.product_images.find(img => img.color_id === color.id);
-                  
-                  return (
-                    <button 
-                      key={color.id} 
-                      onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} 
-                      className={`
-                        relative w-10 h-10 rounded-lg overflow-hidden border-2 transition-all duration-300 ease-out
-                        transform hover:scale-125 hover:-translate-y-1
-                        shadow-md hover:shadow-xl
-                        ${selectedColor === color.id 
-                          ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' 
-                          : 'border-white hover:border-pet-gold shadow-sm'}
-                      `} 
-                      title={color.name}
-                    >
-                      {/* Miniatura da imagem */}
-                      <img 
-                        src={colorImage?.image_url || '/placeholder.svg'} 
-                        alt={`${product.name} - ${color.name}`} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = '/placeholder.svg';
-                        }}
-                      />
-                      
-                      {/* Indicador de cor no canto inferior direito */}
-                      <div 
-                        className="absolute bottom-0 right-0 w-3 h-3 rounded-tl-md border border-white/50"
-                        style={{ backgroundColor: color.hex_code }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-              {selectedColor && <p className="text-xs text-muted-foreground animate-fade-in">
-                  Cor selecionada: {productColors.find(c => c.id === selectedColor)?.name}
-                </p>}
-            </div>}
-
           {/* Modern price grid */}
           <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
             <Label className="text-sm font-medium text-pet-brown-dark">Tamanhos e preços:</Label>
@@ -666,7 +540,7 @@ function ProductCard({
               <Eye className="h-4 w-4 mr-2" />
               Ver Detalhes
             </Button>
-            <Button size="sm" onClick={() => onWhatsApp(selectedSize, selectedColor)} className="
+            <Button size="sm" onClick={() => onWhatsApp(selectedSize)} className="
                 flex-1 bg-green-500 hover:bg-green-600 
                 text-white shadow-lg hover:shadow-xl
                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-0.5

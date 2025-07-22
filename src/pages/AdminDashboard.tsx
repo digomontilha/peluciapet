@@ -15,7 +15,6 @@ interface DashboardStats {
   totalProducts: number;
   activeProducts: number;
   totalCategories: number;
-  totalColors: number;
   pendingMessages: number;
 }
 
@@ -26,7 +25,6 @@ export default function AdminDashboard() {
     totalProducts: 0,
     activeProducts: 0,
     totalCategories: 0,
-    totalColors: 0,
     pendingMessages: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
@@ -52,24 +50,21 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [productsResult, categoriesResult, colorsResult, messagesResult] = await Promise.all([
+      const [productsResult, categoriesResult, messagesResult] = await Promise.all([
         supabase.from('products').select('id, status', { count: 'exact' }),
         supabase.from('categories').select('id', { count: 'exact' }),
-        supabase.from('colors').select('id', { count: 'exact' }),
         supabase.from('contact_messages').select('id', { count: 'exact' }).eq('status', 'pending'),
       ]);
 
       const totalProducts = productsResult.count || 0;
       const activeProducts = productsResult.data?.filter(p => p.status === 'active').length || 0;
       const totalCategories = categoriesResult.count || 0;
-      const totalColors = colorsResult.count || 0;
       const pendingMessages = messagesResult.count || 0;
 
       setStats({
         totalProducts,
         activeProducts,
         totalCategories,
-        totalColors,
         pendingMessages,
       });
     } catch (error) {
@@ -137,7 +132,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatCard
             title="Total de Produtos"
             value={stats.totalProducts}
@@ -156,12 +151,6 @@ export default function AdminDashboard() {
             icon={Settings}
             loading={loadingStats}
           />
-          <StatCard
-            title="Cores Disponíveis"
-            value={stats.totalColors}
-            icon={Package}
-            loading={loadingStats}
-          />
         </div>
 
         {/* Ações principais */}
@@ -178,12 +167,6 @@ export default function AdminDashboard() {
             icon={Settings}
             onClick={() => navigate('/admin/categories')}
           />
-          <ActionCard
-            title="Cores"
-            description="Gerenciar paleta de cores"
-            icon={Package}
-            onClick={() => navigate('/admin/colors')}
-          />
           {isSuperAdmin && (
             <ActionCard
               title="Administradores"
@@ -194,7 +177,7 @@ export default function AdminDashboard() {
           )}
           <ActionCard
             title="Códigos de Variantes"
-            description="Gerenciar códigos únicos por tamanho e cor"
+            description="Gerenciar códigos únicos por tamanho"
             icon={Package}
             onClick={() => navigate('/admin/variants')}
           />
