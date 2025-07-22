@@ -58,7 +58,6 @@ export default function ProductVariants() {
   const [formData, setFormData] = useState({
     product_id: '',
     product_size_id: '',
-    color_id: 'none',
     stock_quantity: 0,
     is_available: true
   });
@@ -126,11 +125,11 @@ export default function ProductVariants() {
   });
 
   // Generate variant code automatically
-  const generateVariantCode = async (productId: string, colorId?: string): Promise<string> => {
+  const generateVariantCode = async (productId: string): Promise<string> => {
     try {
       const { data, error } = await supabase.rpc('generate_auto_variant_code', {
         p_product_id: productId,
-        p_color_id: colorId || null
+        p_color_id: null
       });
       
       if (error) throw error;
@@ -146,14 +145,11 @@ export default function ProductVariants() {
   const saveVariantMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       // Gerar código automaticamente
-      const variantCode = await generateVariantCode(
-        data.product_id, 
-        data.color_id === 'none' ? undefined : data.color_id
-      );
+      const variantCode = await generateVariantCode(data.product_id);
 
       const variantData = {
         ...data,
-        color_id: data.color_id === 'none' ? null : data.color_id || null,
+        color_id: null,
         variant_code: variantCode
       };
 
@@ -174,7 +170,7 @@ export default function ProductVariants() {
       queryClient.invalidateQueries({ queryKey: ['product-variants'] });
       setIsDialogOpen(false);
       setEditingVariant(null);
-      setFormData({ product_id: '', product_size_id: '', color_id: 'none', stock_quantity: 0, is_available: true });
+      setFormData({ product_id: '', product_size_id: '', stock_quantity: 0, is_available: true });
       toast({
         title: editingVariant ? 'Variante atualizada' : 'Variante criada',
         description: editingVariant ? 'A variante foi atualizada com sucesso.' : 'A nova variante foi criada com sucesso.'
@@ -236,7 +232,6 @@ export default function ProductVariants() {
     setFormData({
       product_id: variant.product_id,
       product_size_id: variant.product_size_id,
-      color_id: variant.color_id || 'none',
       stock_quantity: variant.stock_quantity,
       is_available: variant.is_available
     });
@@ -251,7 +246,7 @@ export default function ProductVariants() {
 
   const openCreateDialog = () => {
     setEditingVariant(null);
-    setFormData({ product_id: '', product_size_id: '', color_id: 'none', stock_quantity: 0, is_available: true });
+    setFormData({ product_id: '', product_size_id: '', stock_quantity: 0, is_available: true });
     setIsDialogOpen(true);
   };
 
@@ -285,7 +280,7 @@ export default function ProductVariants() {
 
       <div className="flex justify-between items-center mb-6">
         <p className="text-muted-foreground">
-          Gerencie códigos únicos para cada combinação de produto, tamanho e cor
+          Gerencie códigos únicos para cada combinação de produto e tamanho
         </p>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -346,32 +341,6 @@ export default function ProductVariants() {
               </div>
               
               <div>
-                <Label htmlFor="color">Cor (opcional)</Label>
-                <Select 
-                  value={formData.color_id} 
-                  onValueChange={(value) => setFormData({ ...formData, color_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma cor (opcional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sem cor específica</SelectItem>
-                    {colors?.map((color) => (
-                      <SelectItem key={color.id} value={color.id}>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-4 h-4 rounded-full border"
-                            style={{ backgroundColor: color.hex_code }}
-                          />
-                          {color.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
                 <Label htmlFor="stock">Quantidade em Estoque</Label>
                 <Input
                   id="stock"
@@ -399,7 +368,7 @@ export default function ProductVariants() {
                     Será gerado automaticamente
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Baseado na categoria, cor e numeração automática
+                    Baseado na categoria e numeração automática
                   </p>
                 </div>
               )}
@@ -461,19 +430,6 @@ export default function ProductVariants() {
                 <Ruler className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Tamanho: {variant.product_sizes?.name}</span>
               </div>
-              
-              {variant.colors && (
-                <div className="flex items-center gap-2">
-                  <Palette className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-4 h-4 rounded-full border"
-                      style={{ backgroundColor: variant.colors.hex_code }}
-                    />
-                    <span className="text-sm">{variant.colors.name}</span>
-                  </div>
-                </div>
-              )}
               
               <div className="flex items-center justify-between pt-2">
                 <div className="text-sm">
