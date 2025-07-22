@@ -623,7 +623,9 @@ export default function ProductForm() {
           <CardHeader>
             <CardTitle className="text-primary">Imagens do Produto</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Selecione uma cor para visualizar e gerenciar suas imagens. Máximo 5MB por imagem.
+              <strong className="text-pet-gold">NOVO!</strong> Adicione imagens reais da caminha em cada cor disponível. 
+              Estas imagens serão exibidas como miniaturas no catálogo quando o cliente escolher as cores do produto.
+              Máximo 5MB por imagem.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -664,6 +666,35 @@ export default function ProductForm() {
                   <Label className="font-medium">
                     {colors.find(c => c.id === selectedColorId)?.name}
                   </Label>
+                </div>
+                
+                {/* Orientação visual */}
+                <div className="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                  <div className="flex gap-4 items-center">
+                    <div className="shrink-0 flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-gray-200">
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <img 
+                            src="/placeholder.svg" 
+                            alt="Exemplo de miniatura" 
+                            className="w-8 h-8 opacity-50"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-amber-800 text-sm">→</div>
+                      <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-gray-200">
+                        <img 
+                          src="/placeholder.svg" 
+                          alt="Exemplo de miniatura" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm text-amber-800">
+                      As imagens serão exibidas como miniaturas no catálogo no lugar dos círculos de cor.
+                      Adicione imagens reais da caminha na cor selecionada.
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-3">

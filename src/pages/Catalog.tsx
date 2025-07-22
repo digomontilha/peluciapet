@@ -354,16 +354,46 @@ export default function Catalog() {
                     <img src={getProductImage(selectedProduct, selectedColor) || '/placeholder.svg'} alt={selectedProduct.name} className="w-full h-full object-cover" />
                   </div>
                   
-                  {/* Cores disponíveis */}
+                  {/* Cores disponíveis com miniaturas de imagens */}
                   {getAvailableColors(selectedProduct).length > 0 && <div className="space-y-2">
                       <Label className="text-sm font-medium flex items-center">
                         <Palette className="h-3 w-3 mr-1" />
                         Cores disponíveis:
                       </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {getAvailableColors(selectedProduct).map(color => <button key={color.id} onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor === color.id ? 'border-pet-brown-dark scale-110' : 'border-gray-300 hover:border-pet-gold'}`} style={{
-                    backgroundColor: color.hex_code
-                  }} title={color.name} />)}
+                      <div className="flex flex-wrap gap-3">
+                        {getAvailableColors(selectedProduct).map(color => {
+                          // Encontrar a imagem para esta cor
+                          const colorImage = selectedProduct.product_images.find(img => img.color_id === color.id);
+                          
+                          return (
+                            <button 
+                              key={color.id} 
+                              onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} 
+                              className={`relative w-16 h-16 rounded-lg border-2 transition-all overflow-hidden ${
+                                selectedColor === color.id 
+                                  ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' 
+                                  : 'border-gray-200 hover:border-pet-gold shadow-sm'
+                              }`}
+                              title={color.name}
+                            >
+                              {/* Miniatura da imagem */}
+                              <img 
+                                src={colorImage?.image_url || '/placeholder.svg'} 
+                                alt={`${selectedProduct.name} - ${color.name}`} 
+                                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/placeholder.svg';
+                                }}
+                              />
+                              
+                              {/* Indicador de cor no canto inferior direito */}
+                              <div 
+                                className="absolute bottom-0 right-0 w-4 h-4 rounded-tl-md border border-white/50"
+                                style={{ backgroundColor: color.hex_code }}
+                              />
+                            </button>
+                          );
+                        })}
                       </div>
                       {selectedColor && <p className="text-sm text-muted-foreground">
                           Cor selecionada: {colors.find(c => c.id === selectedColor)?.name}
@@ -554,21 +584,49 @@ function ProductCard({
             {product.observations && <p className="text-xs text-pet-gold mt-2 font-medium">{product.observations}</p>}
           </div>
 
-          {/* Color selector with enhanced 3D effects */}
+          {/* Color selector with thumbnail images */}
           {productColors.length > 0 && <div className="space-y-3 transform transition-all duration-300 group-hover:translate-y-[-1px]">
               <Label className="text-sm font-medium flex items-center text-pet-brown-dark">
                 <Palette className="h-3 w-3 mr-2" />
                 Cores disponíveis:
               </Label>
               <div className="flex flex-wrap gap-2">
-                {productColors.map(color => <button key={color.id} onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} className={`
-                      w-8 h-8 rounded-full border-2 transition-all duration-300 ease-out
-                      transform hover:scale-125 hover:-translate-y-1
-                      shadow-md hover:shadow-xl
-                      ${selectedColor === color.id ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' : 'border-white hover:border-pet-gold shadow-sm'}
-                    `} style={{
-              backgroundColor: color.hex_code
-            }} title={color.name} />)}
+                {productColors.map(color => {
+                  // Encontrar a imagem para esta cor
+                  const colorImage = product.product_images.find(img => img.color_id === color.id);
+                  
+                  return (
+                    <button 
+                      key={color.id} 
+                      onClick={() => setSelectedColor(selectedColor === color.id ? '' : color.id)} 
+                      className={`
+                        relative w-10 h-10 rounded-lg overflow-hidden border-2 transition-all duration-300 ease-out
+                        transform hover:scale-125 hover:-translate-y-1
+                        shadow-md hover:shadow-xl
+                        ${selectedColor === color.id 
+                          ? 'border-pet-brown-dark scale-110 shadow-lg ring-2 ring-pet-gold/30' 
+                          : 'border-white hover:border-pet-gold shadow-sm'}
+                      `} 
+                      title={color.name}
+                    >
+                      {/* Miniatura da imagem */}
+                      <img 
+                        src={colorImage?.image_url || '/placeholder.svg'} 
+                        alt={`${product.name} - ${color.name}`} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                      
+                      {/* Indicador de cor no canto inferior direito */}
+                      <div 
+                        className="absolute bottom-0 right-0 w-3 h-3 rounded-tl-md border border-white/50"
+                        style={{ backgroundColor: color.hex_code }}
+                      />
+                    </button>
+                  );
+                })}
               </div>
               {selectedColor && <p className="text-xs text-muted-foreground animate-fade-in">
                   Cor selecionada: {productColors.find(c => c.id === selectedColor)?.name}
