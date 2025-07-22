@@ -181,7 +181,10 @@ export default function ColorManagement() {
         </p>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreateDialog} className="flex items-center gap-2">
+            <Button 
+              onClick={openCreateDialog} 
+              className="flex items-center gap-2 bg-[#49341F] hover:bg-[#3a2a19] text-white"
+            >
               <Plus className="h-4 w-4" />
               Nova Cor
             </Button>
@@ -198,9 +201,9 @@ export default function ColorManagement() {
                 }
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 py-2">
               <div>
-                <Label htmlFor="name">Nome *</Label>
+                <Label htmlFor="name" className="mb-2 block">Nome <span className="text-destructive">*</span></Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -209,7 +212,7 @@ export default function ColorManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="hex_code">Código Hexadecimal *</Label>
+                <Label htmlFor="hex_code" className="mb-2 block">Código Hexadecimal <span className="text-destructive">*</span></Label>
                 <div className="flex gap-2">
                   <Input
                     id="hex_code"
@@ -225,11 +228,15 @@ export default function ColorManagement() {
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleSave} disabled={saveColorMutation.isPending}>
+              <Button 
+                onClick={handleSave} 
+                disabled={saveColorMutation.isPending}
+                className="bg-[#49341F] hover:bg-[#3a2a19] text-white"
+              >
                 {saveColorMutation.isPending ? 'Salvando...' : 'Salvar'}
               </Button>
             </DialogFooter>
@@ -237,41 +244,39 @@ export default function ColorManagement() {
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {colors?.map((color) => (
-          <Card key={color.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-8 h-8 rounded-full border border-border"
-                    style={{ backgroundColor: color.hex_code }}
-                  />
-                  <div>
-                    <CardTitle className="text-lg">{color.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{color.hex_code}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(color)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(color.id)}
-                    disabled={deleteColorMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+          <div key={color.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-12 h-12 rounded-full border border-border"
+                style={{ backgroundColor: color.hex_code }}
+              />
+              <div>
+                <h3 className="font-medium">{color.name}</h3>
+                <p className="text-sm text-muted-foreground">{color.hex_code}</p>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleEdit(color)}
+                className="h-9 w-9"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDelete(color.id)}
+                disabled={deleteColorMutation.isPending}
+                className="h-9 w-9 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -281,7 +286,10 @@ export default function ColorManagement() {
           <p className="text-muted-foreground mb-4">
             Nenhuma cor encontrada
           </p>
-          <Button onClick={openCreateDialog} className="flex items-center gap-2 mx-auto">
+          <Button 
+            onClick={openCreateDialog} 
+            className="flex items-center gap-2 mx-auto bg-[#49341F] hover:bg-[#3a2a19] text-white"
+          >
             <Plus className="h-4 w-4" />
             Criar primeira cor
           </Button>
