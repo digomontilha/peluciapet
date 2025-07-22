@@ -248,10 +248,6 @@ export default function ColorManagement() {
         {colors?.map((color) => (
           <div key={color.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
             <div className="flex items-center gap-3">
-              <div 
-                className="w-8 h-8 rounded-full border border-border"
-                style={{ backgroundColor: color.hex_code }}
-              />
               <div>
                 <h3 className="font-medium">{color.name}</h3>
               </div>
