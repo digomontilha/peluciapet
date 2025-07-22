@@ -379,11 +379,36 @@ export default function Catalog() {
 
                   {/* Botões de ação */}
                   <div className="flex gap-3 pt-4">
-                    <Button onClick={() => handleWhatsAppClick(selectedProduct, selectedSize)} className="flex-1 bg-green-500 hover:bg-green-600 text-white transition-all duration-300" size="lg">
+                    <Button onClick={() => handleWhatsAppClick(selectedProduct, selectedSize)} className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl h-12 shadow-lg hover:shadow-xl transition-all duration-200" size="lg">
                       <MessageCircle className="h-5 w-5 mr-2" />
                       Pedir via WhatsApp
                     </Button>
                   </div>
+
+                  {/* Cores disponíveis */}
+                  {selectedProduct.product_images && selectedProduct.product_images.length > 1 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3 flex items-center">
+                        <Eye className="w-5 h-5 mr-2" />
+                        Cores disponíveis:
+                      </h3>
+                      <div className="flex flex-wrap gap-3">
+                        {selectedProduct.product_images.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={image.image_url}
+                              alt={`${selectedProduct.name} - Cor ${index + 1}`}
+                              className="w-20 h-20 rounded-xl border-3 border-gray-200 object-cover cursor-pointer hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                            />
+                            {/* Stock indicator */}
+                            {image.stock_quantity && image.stock_quantity <= 2 && (
+                              <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </>}
