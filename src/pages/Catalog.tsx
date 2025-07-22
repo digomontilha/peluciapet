@@ -356,20 +356,24 @@ export default function Catalog() {
                   {/* Tabela de preços detalhada */}
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Tamanhos e preços</h3>
-                    <div className="space-y-2">
-                      {selectedProduct.product_prices.map(price => <div key={price.sizes?.name || 'no-size'} onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} className={`cursor-pointer border rounded-lg p-3 transition-all duration-200 ${selectedSize === price.sizes?.name ? 'bg-pet-brown-medium text-white border-pet-brown-medium' : 'bg-background border-border hover:border-pet-gold'}`}>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <span className="font-bold text-lg">{price.sizes?.name}</span>
-                              {price.sizes?.dimensions && <p className="text-sm opacity-75">
-                                  {price.sizes.dimensions}
-                                </p>}
-                            </div>
-                            <span className="font-bold text-xl">
-                              R$ {price.price.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>)}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedProduct.product_prices.map(price => (
+                        <div 
+                          key={price.sizes?.name || 'no-size'} 
+                          onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} 
+                          className={`cursor-pointer rounded-xl p-4 border transition-all duration-300 hover:shadow-md ${
+                            selectedSize === price.sizes?.name 
+                              ? 'bg-orange-100 border-orange-300 shadow-md' 
+                              : 'bg-gray-50 border-gray-200 hover:border-orange-200'
+                          }`}
+                        >
+                          <div className="font-bold text-gray-800 text-lg">{price.sizes?.name}</div>
+                          {price.sizes?.dimensions && (
+                            <div className="text-xs text-gray-500 mb-2">{price.sizes.dimensions}</div>
+                          )}
+                          <div className="font-bold text-emerald-600 text-xl">R$ {price.price.toFixed(2)}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
