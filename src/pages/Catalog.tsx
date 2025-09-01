@@ -506,7 +506,7 @@ function ProductCard({
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 group">
       {/* Product Image */}
-      <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-orange-50 to-peach-50">
+      <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-orange-50 to-peach-50">
         <img 
           src={currentImage || '/placeholder.svg'} 
           alt={product.name}
@@ -588,7 +588,7 @@ function ProductCard({
                   <button
                     onClick={() => setSelectedImageIndex(index)}
                     className={`
-                      w-12 h-12 rounded-xl border-3 object-cover cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md
+                      w-10 h-10 rounded-lg border-2 object-cover cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md
                       ${selectedImageIndex === index 
                         ? 'border-orange-300 scale-105' 
                         : 'border-gray-200 hover:border-orange-200'}
@@ -597,7 +597,7 @@ function ProductCard({
                     <img
                       src={image.image_url}
                       alt={`${product.name} - Cor ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-md"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}
