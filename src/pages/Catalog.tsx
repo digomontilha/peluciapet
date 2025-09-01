@@ -300,7 +300,7 @@ export default function Catalog() {
         </div>
 
         {/* Grid de produtos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
           {filteredProducts.map(product => <ProductCard key={product.id} product={product} onWhatsApp={(size) => handleWhatsAppClick(product, size)} onViewDetails={setSelectedProduct} />)}
         </div>
 
@@ -504,9 +504,9 @@ function ProductCard({
   const currentImage = availableImages[selectedImageIndex]?.image_url || availableImages[0]?.image_url;
   const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 group">
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 group">
       {/* Product Image */}
-      <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-orange-50 to-peach-50">
+      <div className="aspect-[3/2] relative overflow-hidden bg-gradient-to-br from-orange-50 to-peach-50">
         <img 
           src={currentImage || '/placeholder.svg'} 
           alt={product.name}
@@ -515,80 +515,82 @@ function ProductCard({
         
         {/* Custom Order Badge */}
         {product.is_custom_order && (
-          <Badge className="absolute top-3 right-3 bg-orange-500 text-white">
-            <Tag className="h-3 w-3 mr-1" />
+          <Badge className="absolute top-1 right-1 bg-orange-500 text-white text-xs">
+            <Tag className="h-2 w-2 mr-1" />
             Sob encomenda
           </Badge>
         )}
       </div>
 
       {/* Product Content */}
-      <div className="p-4">
+      <div className="p-2">
         {/* Product Title */}
-        <h3 className="font-bold text-lg mb-2 text-gray-800">{product.name}</h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
+        <h3 className="font-bold text-sm mb-1 text-gray-800 line-clamp-1">{product.name}</h3>
+        <p className="text-gray-600 text-xs mb-2 line-clamp-1 leading-relaxed">{product.description}</p>
         
         {/* Observations */}
         {product.observations && (
-          <p className="text-orange-600 text-sm mb-3 font-medium">{product.observations}</p>
+          <p className="text-orange-600 text-xs mb-2 font-medium line-clamp-1">{product.observations}</p>
         )}
         
         {/* Sizes and Prices */}
-        <div className="mb-4">
-          <h4 className="font-semibold mb-2 text-gray-700 text-sm uppercase tracking-wide">Tamanhos e preços:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {product.product_prices.map((price, index) => (
+        <div className="mb-2">
+          <h4 className="font-semibold mb-1 text-gray-700 text-xs uppercase tracking-wide">Tamanhos:</h4>
+          <div className="grid grid-cols-1 gap-1">
+            {product.product_prices.slice(0, 2).map((price, index) => (
               <div 
                 key={price.sizes?.name || `price-${index}`} 
                 onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
                 className={`
-                  cursor-pointer rounded-lg p-2 border transition-all duration-300 hover:shadow-sm
+                  cursor-pointer rounded-md p-1 border transition-all duration-300
                   ${selectedSize === price.sizes?.name 
                     ? 'bg-orange-100 border-orange-300' 
                     : 'bg-gray-50 border-gray-200 hover:border-orange-200'}
                 `}
               >
-                <div className="font-bold text-gray-800 text-sm">{price.sizes?.name}</div>
-                <div className="text-xs text-gray-500 mb-1">{price.sizes?.dimensions}</div>
-                <div className="font-bold text-emerald-600 text-sm">R$ {price.price.toFixed(2)}</div>
+                <div className="font-bold text-gray-800 text-xs">{price.sizes?.name}</div>
+                <div className="font-bold text-emerald-600 text-xs">R$ {price.price.toFixed(2)}</div>
               </div>
             ))}
+            {product.product_prices.length > 2 && (
+              <div className="text-xs text-gray-500 text-center">+{product.product_prices.length - 2} tamanhos</div>
+            )}
           </div>
         </div>
         
         {/* Action Buttons */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-1 mb-2">
           <Button 
             variant="outline" 
             onClick={() => onViewDetails(product)} 
-            className="flex-1 border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-xl h-10"
+            className="flex-1 border border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-lg h-7 text-xs px-2"
           >
-            <Eye className="w-4 h-4 mr-1" />
-            Ver Detalhes
+            <Eye className="w-3 h-3 mr-1" />
+            Ver
           </Button>
           <Button 
             onClick={() => onWhatsApp(selectedSize)} 
-            className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl h-10 shadow-lg hover:shadow-xl transition-all duration-200"
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-lg h-7 text-xs px-2"
           >
-            <MessageCircle className="w-4 h-4 mr-1" />
-            Pedir Agora
+            <MessageCircle className="w-3 h-3 mr-1" />
+            Pedir
           </Button>
         </div>
         
         {/* Available Images */}
         {availableImages.length > 1 && (
           <div>
-            <h4 className="font-semibold mb-2 flex items-center text-gray-700 text-sm uppercase tracking-wide">
-              <Eye className="w-4 h-4 mr-2" />
-              Cores disponíveis:
+            <h4 className="font-semibold mb-1 flex items-center text-gray-700 text-xs uppercase tracking-wide">
+              <Palette className="w-3 h-3 mr-1" />
+              Cores:
             </h4>
-            <div className="flex flex-wrap gap-2">
-              {availableImages.map((image, index) => (
+            <div className="flex flex-wrap gap-1">
+              {availableImages.slice(0, 4).map((image, index) => (
                 <div key={index} className="relative group">
                   <button
                     onClick={() => setSelectedImageIndex(index)}
                     className={`
-                      w-12 h-12 rounded-xl border-3 object-cover cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md
+                      w-6 h-6 rounded-md border object-cover cursor-pointer transition-all duration-200
                       ${selectedImageIndex === index 
                         ? 'border-orange-300 scale-105' 
                         : 'border-gray-200 hover:border-orange-200'}
@@ -597,7 +599,7 @@ function ProductCard({
                     <img
                       src={image.image_url}
                       alt={`${product.name} - Cor ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-sm"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}
@@ -605,10 +607,15 @@ function ProductCard({
                   </button>
                   {/* Stock indicator */}
                   {image.stock_quantity && image.stock_quantity <= 2 && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
                   )}
                 </div>
               ))}
+              {availableImages.length > 4 && (
+                <div className="w-6 h-6 rounded-md border border-gray-200 bg-gray-100 flex items-center justify-center">
+                  <span className="text-xs text-gray-600">+{availableImages.length - 4}</span>
+                </div>
+              )}
             </div>
           </div>
         )}
