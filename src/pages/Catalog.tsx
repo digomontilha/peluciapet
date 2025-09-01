@@ -563,14 +563,14 @@ function ProductCard({
           <Button 
             variant="outline" 
             onClick={() => onViewDetails(product)} 
-            className="flex-1 border border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-lg h-7 text-xs px-2"
+            className="flex-1 border border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-lg h-8 text-xs px-1"
           >
             <Eye className="w-3 h-3 mr-1" />
             Ver
           </Button>
           <Button 
             onClick={() => onWhatsApp(selectedSize)} 
-            className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-lg h-7 text-xs px-2"
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-lg h-8 text-xs px-1"
           >
             <MessageCircle className="w-3 h-3 mr-1" />
             Pedir
