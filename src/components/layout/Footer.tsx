@@ -35,11 +35,11 @@ export function Footer() {
             <h4 className="font-semibold text-pet-gold">Contato</h4>
             <div className="space-y-2">
               <button 
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+                onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
                 className="flex items-center space-x-2 text-sm hover:text-pet-gold transition-colors cursor-pointer"
               >
                 <Phone className="h-4 w-4 text-pet-gold" />
-                <span>(11) 91460-8191</span>
+                <span>(11) 93741-3939</span>
               </button>
               <button 
                 onClick={() => window.open('mailto:contato@peluciapet.com.br', '_blank')}

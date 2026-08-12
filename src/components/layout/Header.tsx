@@ -80,7 +80,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+            onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
             className="hover:bg-pet-gold hover:text-white transition-all duration-300"
           >
             <Heart className="h-4 w-4 mr-2" />
@@ -129,7 +129,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+            onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
             className="p-2 hover:bg-pet-gold hover:text-white transition-all duration-300"
           >
             <Heart className="h-4 w-4" />
@@ -198,7 +198,7 @@ export function Header() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      window.open('https://wa.me/5511914608191', '_blank');
+                      window.open('https://wa.me/5511937413939', '_blank');
                       setIsMobileMenuOpen(false);
                     }}
                     className="w-full justify-start h-12 border-pet-gold text-pet-gold hover:bg-pet-gold hover:text-white"
@@ -206,7 +206,7 @@ export function Header() {
                     <Heart className="h-5 w-5 mr-3" />
                     <div>
                       <div className="font-medium">Contato via WhatsApp</div>
-                      <div className="text-xs opacity-75">(11) 91460-8191</div>
+                      <div className="text-xs opacity-75">(11) 93741-3939</div>
                     </div>
                   </Button>
                 </div>
