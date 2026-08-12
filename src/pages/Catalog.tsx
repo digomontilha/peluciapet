@@ -567,7 +567,14 @@ function ProductCard({
   const hasPriceRange = minPrice !== maxPrice;
 
   return (
-    <div className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-pet-gold/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+    <div
+      onClick={() => onViewDetails(product)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewDetails(product); } }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver detalhes de ${product.name}`}
+      className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-pet-gold/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+    >
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-pet-beige-light via-pet-beige-medium/30 to-pet-beige-medium">
         <img
@@ -638,7 +645,7 @@ function ProductCard({
           <h3 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-pet-brown-dark transition-colors">
             {product.name}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-1">
+          <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
             {product.description}
           </p>
         </div>
@@ -670,14 +677,14 @@ function ProductCard({
         <div className="flex gap-1.5 pt-1">
           <Button
             variant="outline"
-            onClick={() => onViewDetails(product)}
+            onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
             className="flex-1 h-9 text-xs font-semibold border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white rounded-xl transition-all duration-200"
           >
             <Eye className="w-3.5 h-3.5 mr-1" />
             Detalhes
           </Button>
           <Button
-            onClick={() => onWhatsApp()}
+            onClick={(e) => { e.stopPropagation(); onWhatsApp(); }}
             className="flex-1 h-9 text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
             <MessageCircle className="w-3.5 h-3.5 mr-1" />
