@@ -99,9 +99,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/20 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-white/70">
-          <p>© 2025 PelúciaPet. Todos os direitos reservados.</p>
-          <p className="text-xs">CNPJ XX.XXX.XXX/0001-XX</p>
+        <div className="border-t border-white/20 mt-10 pt-6 text-center">
+          <p className="text-sm text-white/70">
+            © 2025 PelúciaPet. Todos os direitos reservados.
+          </p>
         </div>
       </div>
     </footer>
