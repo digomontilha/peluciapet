@@ -532,29 +532,27 @@ export default function Catalog() {
         </div>
       </section>
 
-      {/* Trust Bar - sinais de confianca */}
+      {/* Trust Bar - sinais de confianca (todos verificaveis, sem numeros inventados) */}
       <section className="bg-pet-brown-dark text-white py-10">
         <div className="container">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
             <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">2.500+</div>
-              <div className="text-xs sm:text-sm text-white/80">Pets dormindo feliz</div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-center gap-1">
-                <span className="text-pet-gold text-lg">★</span>
-                <span className="text-2xl sm:text-3xl font-serif font-bold">4.9</span>
-                <span className="text-white/60 text-sm">/5</span>
-              </div>
-              <div className="text-xs sm:text-sm text-white/80">47 avaliações</div>
-            </div>
-            <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">5 dias</div>
-              <div className="text-xs sm:text-sm text-white/80">Entrega SP capital</div>
+              <div className="text-xs sm:text-sm text-white/80">Entrega</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">100%</div>
               <div className="text-xs sm:text-sm text-white/80">Compra segura</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">1 ano</div>
+              <div className="text-xs sm:text-sm text-white/80">Garantia</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-center">
+                <MessageCircle className="h-7 w-7 sm:h-8 sm:w-8 text-emerald-400" />
+              </div>
+              <div className="text-xs sm:text-sm text-white/80">Atendimento WhatsApp</div>
             </div>
           </div>
         </div>
