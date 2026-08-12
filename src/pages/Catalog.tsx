@@ -215,7 +215,7 @@ export default function Catalog() {
 
             {/* Sub: beneficios especificos */}
             <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-white/90 leading-snug px-2 drop-shadow">
-              Antialergicas, lavaveis na maquina e com garantia de 1 ano
+              Antialergicas, lavaveis na maquina e com garantia de 1 mes
             </p>
 
             {/* CTA unico forte */}
@@ -545,7 +545,7 @@ export default function Catalog() {
               <div className="text-xs sm:text-sm text-white/80">Compra segura</div>
             </div>
             <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">1 ano</div>
+              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">1 mes</div>
               <div className="text-xs sm:text-sm text-white/80">Garantia</div>
             </div>
             <div className="space-y-1">
