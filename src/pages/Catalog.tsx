@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { MessageCircle, Eye, Palette, Tag, X, Heart, Menu } from 'lucide-react';
+import { MessageCircle, Eye, Tag, Heart, Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
@@ -155,10 +154,27 @@ export default function Catalog() {
   if (loading) {
     return <div className="min-h-screen bg-gradient-soft">
         <Header />
-        <div className="container py-16">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pet-gold mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Carregando catálogo...</p>
+        <div className="container py-12">
+          {/* Skeleton grid */}
+          <div className="mb-10">
+            <div className="h-8 w-64 bg-muted rounded-lg animate-pulse mb-2" />
+            <div className="h-4 w-48 bg-muted/60 rounded animate-pulse" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-card rounded-2xl overflow-hidden border border-border/50">
+                <div className="aspect-square bg-muted animate-pulse" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-muted rounded animate-pulse" />
+                  <div className="h-3 w-3/4 bg-muted/60 rounded animate-pulse" />
+                  <div className="h-5 w-1/2 bg-muted rounded animate-pulse mt-3" />
+                  <div className="flex gap-1.5 pt-2">
+                    <div className="h-9 flex-1 bg-muted/60 rounded-xl animate-pulse" />
+                    <div className="h-9 flex-1 bg-muted/60 rounded-xl animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>;
@@ -175,6 +191,9 @@ export default function Catalog() {
       alignItems: 'center',
       justifyContent: 'center'
     }}>
+        {/* Gradient overlay pra legibilidade do texto sobre o pattern */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/5 to-black/20 pointer-events-none" />
+
         {/* Conteúdo principal responsivo */}
         <div className="relative z-20 container min-h-[120px] sm:min-h-[170px] lg:min-h-[210px] flex items-center justify-center py-2 sm:py-3 lg:py-4 px-4">
           <div className="text-center space-y-1.5 sm:space-y-2 max-w-4xl mx-auto">
@@ -223,12 +242,15 @@ export default function Catalog() {
         {/* Filtros de categoria */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-primary">Categorias</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Explore por categoria</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">Encontre o produto perfeito pro seu pet</p>
+            </div>
             
             {/* Menu hambúrguer para mobile */}
             <Sheet open={isCategoryMenuOpen} onOpenChange={setIsCategoryMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden flex items-center gap-2">
+                <Button variant="outline" size="sm" className="md:hidden rounded-full gap-2 border-pet-brown-dark/20 hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white">
                   <Menu className="h-4 w-4" />
                   Categorias
                 </Button>
@@ -240,72 +262,92 @@ export default function Catalog() {
                     Escolha uma categoria para filtrar os produtos
                   </SheetDescription>
                 </SheetHeader>
-                <div className="mt-6 space-y-3">
-                  <Button variant={selectedCategory === 'all' ? 'default' : 'ghost'} onClick={() => {
-                  setSelectedCategory('all');
-                  setIsCategoryMenuOpen(false);
-                }} className="w-full justify-start text-left h-auto p-4 transition-all duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                        🏪
-                      </div>
-                      <span className="font-medium">Todos os produtos</span>
-                    </div>
-                  </Button>
-                  {categories.map(category => <Button key={category.id} variant={selectedCategory === category.name ? 'default' : 'ghost'} onClick={() => {
-                  setSelectedCategory(category.name);
-                  setIsCategoryMenuOpen(false);
-                }} className="w-full justify-start text-left h-auto p-4 transition-all duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                          {category.icon}
-                        </div>
-                        <span className="font-medium">{category.name}</span>
-                      </div>
-                    </Button>)}
+                <div className="mt-6 space-y-2">
+                  <button
+                    onClick={() => { setSelectedCategory('all'); setIsCategoryMenuOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${selectedCategory === 'all'
+                      ? 'bg-pet-brown-dark text-white shadow-md'
+                      : 'hover:bg-muted'}`}
+                  >
+                    <span className="text-xl" aria-hidden>🏪</span>
+                    <span className="font-medium">Todos os produtos</span>
+                  </button>
+                  {categories.map(category => (
+                    <button
+                      key={category.id}
+                      onClick={() => { setSelectedCategory(category.name); setIsCategoryMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${selectedCategory === category.name
+                        ? 'bg-pet-brown-dark text-white shadow-md'
+                        : 'hover:bg-muted'}`}
+                    >
+                      <span className="text-xl" aria-hidden>{category.icon}</span>
+                      <span className="font-medium">{category.name}</span>
+                    </button>
+                  ))}
                 </div>
               </SheetContent>
             </Sheet>
           </div>
           
-          {/* Filtros em linha para desktop */}
-          <div className="hidden md:flex flex-wrap gap-3">
-            <Button variant={selectedCategory === 'all' ? 'default' : 'outline'} onClick={() => setSelectedCategory('all')} className="transition-all duration-300 hover-scale">
-              🏪 Todos os produtos
-            </Button>
-            {categories.map(category => <Button key={category.id} variant={selectedCategory === category.name ? 'default' : 'outline'} onClick={() => setSelectedCategory(category.name)} className="transition-all duration-300 hover-scale">
-                <span className="mr-2">{category.icon}</span>
-                {category.name}
-              </Button>)}
+          {/* Filtros em linha para desktop — pill chips */}
+          <div className="hidden md:flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === 'all'
+                ? 'bg-pet-brown-dark text-white shadow-md scale-105'
+                : 'bg-card border border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white'}`}
+            >
+              <span className="text-base" aria-hidden>🏪</span>
+              <span>Todos os produtos</span>
+            </button>
+            {categories.map(category => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.name)}
+                className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === category.name
+                  ? 'bg-pet-brown-dark text-white shadow-md scale-105'
+                  : 'bg-card border border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white'}`}
+              >
+                <span className="text-base" aria-hidden>{category.icon}</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
           </div>
           
-          {/* Categoria selecionada para mobile */}
+          {/* Categoria selecionada para mobile — pill chip */}
           <div className="md:hidden mt-4">
-            <div className="bg-card rounded-lg p-3 border">
-              <p className="text-sm text-muted-foreground mb-1">Categoria selecionada:</p>
-              <div className="flex items-center gap-2">
-                {selectedCategory === 'all' ? <>
-                    <span>🏪</span>
-                    <span className="font-medium">Todos os produtos</span>
-                  </> : <>
-                    <span>{categories.find(c => c.name === selectedCategory)?.icon}</span>
-                    <span className="font-medium">{selectedCategory}</span>
-                  </>}
-              </div>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pet-brown-dark text-white shadow-md">
+              <span aria-hidden>{selectedCategory === 'all' ? '🏪' : categories.find(c => c.name === selectedCategory)?.icon}</span>
+              <span className="text-sm font-medium">{selectedCategory === 'all' ? 'Todos os produtos' : selectedCategory}</span>
             </div>
           </div>
         </div>
 
         {/* Grid de produtos */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
           {filteredProducts.map(product => <ProductCard key={product.id} product={product} onWhatsApp={(size) => handleWhatsAppClick(product, size)} onViewDetails={setSelectedProduct} />)}
         </div>
 
-        {filteredProducts.length === 0 && <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">
-              Nenhum produto encontrado nesta categoria.
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-pet-beige-light mb-4">
+              <svg className="w-10 h-10 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">Nenhum produto por aqui</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Não encontramos produtos nessa categoria. Que tal explorar as outras?
             </p>
-          </div>}
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-pet-brown-dark text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Ver todos os produtos
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal de detalhes do produto */}
@@ -442,39 +484,59 @@ export default function Catalog() {
       </Dialog>
 
       {/* Seção de Benefícios */}
-      <section className="bg-background py-16">
+      <section className="bg-pet-beige-light/30 py-16">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
-                <MessageCircle className="h-6 w-6 text-pet-gold" />
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-foreground">Por que comprar com a gente</h2>
+            <p className="text-sm text-muted-foreground mt-1">Benefícios pensados pro seu pet e pra você</p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" />
+                </svg>
               </div>
-              <h3 className="font-bold text-foreground mb-2">Frete</h3>
-              <p className="text-sm text-muted-foreground">À combinar</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Frete</h3>
+              <p className="text-xs text-muted-foreground">A combinar</p>
             </div>
 
-            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
-                <Tag className="h-6 w-6 text-pet-gold" />
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <line x1="2" x2="22" y1="10" y2="10" />
+                </svg>
               </div>
-              <h3 className="font-bold text-foreground mb-2">Parcelamento</h3>
-              <p className="text-sm text-muted-foreground">Com juros</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Parcelamento</h3>
+              <p className="text-xs text-muted-foreground">Em até 12x</p>
             </div>
 
-            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
-                <Heart className="h-6 w-6 text-pet-gold" />
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                </svg>
               </div>
-              <h3 className="font-bold text-foreground mb-2">Garantia de Qualidade</h3>
-              <p className="text-sm text-muted-foreground">1 meses de garantia</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Garantia</h3>
+              <p className="text-xs text-muted-foreground">1 mês de cobertura</p>
             </div>
 
-            <div className="bg-card rounded-2xl p-6 text-center shadow-lg border-2 border-pet-beige-medium hover:border-pet-gold hover:shadow-2xl hover:bg-pet-beige-light hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="w-12 h-12 bg-pet-gold/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-pet-gold/30">
-                <X className="h-6 w-6 text-pet-gold" />
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                  <path d="M16 16h5v5" />
+                </svg>
               </div>
-              <h3 className="font-bold text-foreground mb-2">Troca Fácil</h3>
-              <p className="text-sm text-muted-foreground">7 dias para devolução</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Troca Fácil</h3>
+              <p className="text-xs text-muted-foreground">7 dias para devolução</p>
             </div>
           </div>
         </div>
@@ -494,128 +556,134 @@ function ProductCard({
   onViewDetails
 }: ProductCardProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
-  const [selectedSize, setSelectedSize] = useState<string>('');
-  
+  const [isLiked, setIsLiked] = useState(false);
+
   // Filtrar apenas imagens disponíveis
   const availableImages = product.product_images.filter(img => img.is_available !== false);
   const currentImage = availableImages[selectedImageIndex]?.image_url || availableImages[0]?.image_url;
-  const selectedPrice = selectedSize ? product.product_prices.find(p => p.sizes?.name === selectedSize)?.price : null;
+  const prices = product.product_prices.map(p => p.price);
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const maxPrice = prices.length ? Math.max(...prices) : 0;
+  const hasPriceRange = minPrice !== maxPrice;
+
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 group">
+    <div className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-pet-gold/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
       {/* Product Image */}
-      <div className="aspect-[3/2] relative overflow-hidden bg-gradient-to-br from-orange-50 to-peach-50">
-        <img 
-          src={currentImage || '/placeholder.svg'} 
+      <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-pet-beige-light via-pet-beige-medium/30 to-pet-beige-medium">
+        <img
+          src={currentImage || '/placeholder.svg'}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
         />
-        
-        {/* Custom Order Badge */}
+
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+        {/* Category icon (top-left) */}
+        {product.categories && (
+          <div className="absolute top-2 left-2 bg-card/90 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-base shadow-md ring-1 ring-black/5">
+            <span aria-hidden>{product.categories.icon}</span>
+          </div>
+        )}
+
+        {/* Like button (top-right) */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
+          aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          className="absolute top-2 right-2 bg-card/90 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center shadow-md ring-1 ring-black/5 hover:bg-card hover:scale-110 transition-all duration-200"
+        >
+          <Heart
+            className={`h-4 w-4 transition-all duration-200 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-muted-foreground'}`}
+          />
+        </button>
+
+        {/* Custom order badge (bottom-left) */}
         {product.is_custom_order && (
-          <Badge className="absolute top-1 right-1 bg-orange-500 text-white text-xs">
-            <Tag className="h-2 w-2 mr-1" />
+          <div className="absolute bottom-2 left-2 bg-pet-gold/95 text-pet-brown-dark text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-md ring-1 ring-black/5 flex items-center gap-1">
+            <Tag className="h-2.5 w-2.5" />
             Sob encomenda
-          </Badge>
+          </div>
+        )}
+
+        {/* Color swatches overlay (bottom-right) */}
+        {availableImages.length > 1 && (
+          <div className="absolute bottom-2 right-2 flex gap-1 bg-card/80 backdrop-blur-sm rounded-full px-1.5 py-1 shadow-md ring-1 ring-black/5">
+            {availableImages.slice(0, 4).map((image, idx) => (
+              <button
+                key={idx}
+                onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(idx); }}
+                aria-label={`Selecionar cor ${idx + 1}`}
+                className={`w-4 h-4 rounded-full overflow-hidden transition-all duration-200 ${selectedImageIndex === idx
+                  ? 'ring-2 ring-pet-gold ring-offset-1 scale-110'
+                  : 'ring-1 ring-black/10 hover:scale-110'}`}
+              >
+                <img src={image.image_url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+            {availableImages.length > 4 && (
+              <div className="w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[8px] font-bold">
+                +{availableImages.length - 4}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       {/* Product Content */}
-      <div className="p-2">
-        {/* Product Title */}
-        <h3 className="font-bold text-sm mb-1 text-gray-800 line-clamp-1">{product.name}</h3>
-        <p className="text-gray-600 text-xs mb-2 line-clamp-1 leading-relaxed">{product.description}</p>
-        
+      <div className="p-3 space-y-1">
+        {/* Title + category */}
+        <div>
+          <h3 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-pet-brown-dark transition-colors">
+            {product.name}
+          </h3>
+          <p className="text-xs text-muted-foreground line-clamp-1">
+            {product.description}
+          </p>
+        </div>
+
         {/* Observations */}
         {product.observations && (
-          <p className="text-orange-600 text-xs mb-2 font-medium line-clamp-1">{product.observations}</p>
+          <p className="text-orange-600 text-[11px] font-medium line-clamp-1 italic">
+            {product.observations}
+          </p>
         )}
-        
-        {/* Sizes and Prices */}
-        <div className="mb-2">
-          <h4 className="font-semibold mb-1 text-gray-700 text-xs uppercase tracking-wide">Tamanhos:</h4>
-          <div className="grid grid-cols-1 gap-1">
-            {product.product_prices.slice(0, 2).map((price, index) => (
-              <div 
-                key={price.sizes?.name || `price-${index}`} 
-                onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')}
-                className={`
-                  cursor-pointer rounded-md p-1 border transition-all duration-300
-                  ${selectedSize === price.sizes?.name 
-                    ? 'bg-orange-100 border-orange-300' 
-                    : 'bg-gray-50 border-gray-200 hover:border-orange-200'}
-                `}
-              >
-                <div className="font-bold text-gray-800 text-xs">{price.sizes?.name}</div>
-                <div className="font-bold text-emerald-600 text-xs">R$ {price.price.toFixed(2)}</div>
+
+        {/* Price */}
+        <div className="pt-1">
+          {hasPriceRange ? (
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">A partir de</div>
+              <div className="text-lg font-bold text-emerald-600 leading-none">
+                R$ {minPrice.toFixed(2)}
               </div>
-            ))}
-            {product.product_prices.length > 2 && (
-              <div className="text-xs text-gray-500 text-center">+{product.product_prices.length - 2} tamanhos</div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="text-lg font-bold text-emerald-600 leading-none">
+              R$ {minPrice.toFixed(2)}
+            </div>
+          )}
         </div>
-        
+
         {/* Action Buttons */}
-        <div className="flex gap-1 mb-2">
-          <Button 
-            variant="outline" 
-            onClick={() => onViewDetails(product)} 
-            className="flex-1 border border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-lg h-8 text-xs px-1"
+        <div className="flex gap-1.5 pt-1">
+          <Button
+            variant="outline"
+            onClick={() => onViewDetails(product)}
+            className="flex-1 h-9 text-xs font-semibold border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white rounded-xl transition-all duration-200"
           >
-            <Eye className="w-3 h-3 mr-1" />
-            Ver
+            <Eye className="w-3.5 h-3.5 mr-1" />
+            Detalhes
           </Button>
-          <Button 
-            onClick={() => onWhatsApp(selectedSize)} 
-            className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-lg h-8 text-xs px-1"
+          <Button
+            onClick={() => onWhatsApp()}
+            className="flex-1 h-9 text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
-            <MessageCircle className="w-3 h-3 mr-1" />
+            <MessageCircle className="w-3.5 h-3.5 mr-1" />
             Pedir
           </Button>
         </div>
-        
-        {/* Available Images */}
-        {availableImages.length > 1 && (
-          <div>
-            <h4 className="font-semibold mb-1 flex items-center text-gray-700 text-xs uppercase tracking-wide">
-              <Palette className="w-3 h-3 mr-1" />
-              Cores:
-            </h4>
-            <div className="flex flex-wrap gap-1">
-              {availableImages.slice(0, 4).map((image, index) => (
-                <div key={index} className="relative group">
-                  <button
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`
-                      w-6 h-6 rounded-md border object-cover cursor-pointer transition-all duration-200
-                      ${selectedImageIndex === index 
-                        ? 'border-orange-300 scale-105' 
-                        : 'border-gray-200 hover:border-orange-200'}
-                    `}
-                  >
-                    <img
-                      src={image.image_url}
-                      alt={`${product.name} - Cor ${index + 1}`}
-                      className="w-full h-full object-cover rounded-sm"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                    />
-                  </button>
-                  {/* Stock indicator */}
-                  {image.stock_quantity && image.stock_quantity <= 2 && (
-                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
-                  )}
-                </div>
-              ))}
-              {availableImages.length > 4 && (
-                <div className="w-6 h-6 rounded-md border border-gray-200 bg-gray-100 flex items-center justify-center">
-                  <span className="text-xs text-gray-600">+{availableImages.length - 4}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
