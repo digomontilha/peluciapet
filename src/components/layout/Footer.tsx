@@ -1,31 +1,46 @@
-import { Instagram, MessageCircle, Mail, Phone } from 'lucide-react';
+import { Instagram, MessageCircle, Mail, Phone, MapPin, Shield, FileText, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Footer() {
   return (
-    <footer className="bg-gradient-elegant text-white mt-16">
+    <footer className="bg-gradient-elegant text-white mt-0">
       <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Informações da empresa */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-pet-gold">PelúciaPet</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Marca */}
+          <div className="space-y-4 col-span-2 md:col-span-1">
+            <h3 className="text-xl font-serif font-bold text-pet-gold">PelúciaPet</h3>
             <p className="text-sm text-white/90">
-              Porque seu melhor amigo merece o melhor!
+              Caminhas premium pra pets que merecem o melhor.
             </p>
-            <p className="text-sm text-white/80">
-              Produtos de alta qualidade para o conforto e bem-estar do seu pet.
+            <p className="text-xs text-white/70">
+              Antialérgicas, laváveis e feitas pra durar.
             </p>
           </div>
 
           {/* Links úteis */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-pet-gold">Links Úteis</h4>
+            <h4 className="font-semibold text-pet-gold">Comprar</h4>
             <div className="space-y-2">
-              <a 
-                href="/como-comprar" 
-                className="block text-sm text-white/90 hover:text-pet-gold transition-colors"
+              <a
+                href="/como-comprar"
+                className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
               >
+                <HelpCircle className="h-3.5 w-3.5" />
                 Como Comprar
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                FAQ
+              </a>
+              <a
+                href="#"
+                className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
+              >
+                <Shield className="h-3.5 w-3.5" />
+                Política de Privacidade
               </a>
             </div>
           </div>
@@ -34,29 +49,59 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold text-pet-gold">Contato</h4>
             <div className="space-y-2">
-              <button 
+              <button
                 onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
-                className="flex items-center space-x-2 text-sm hover:text-pet-gold transition-colors cursor-pointer"
+                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer"
               >
                 <Phone className="h-4 w-4 text-pet-gold" />
                 <span>(11) 93741-3939</span>
               </button>
-              <button 
+              <button
                 onClick={() => window.open('mailto:contato@peluciapet.com.br', '_blank')}
-                className="flex items-center space-x-2 text-sm hover:text-pet-gold transition-colors cursor-pointer"
+                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer"
               >
                 <Mail className="h-4 w-4 text-pet-gold" />
                 <span>contato@peluciapet.com.br</span>
               </button>
+              <div className="flex items-center space-x-2 text-sm text-white/70">
+                <MapPin className="h-4 w-4 text-pet-gold/70" />
+                <span>São Paulo - SP</span>
+              </div>
             </div>
           </div>
 
+          {/* Social */}
+          <div className="space-y-4">
+            <h4 className="font-semibold text-pet-gold">Siga a gente</h4>
+            <div className="flex gap-3">
+              <a
+                href="https://instagram.com/peluciapet"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-pet-gold/20 hover:scale-110 flex items-center justify-center transition-all duration-200"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="https://wa.me/5511937413939"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-pet-gold/20 hover:scale-110 flex items-center justify-center transition-all duration-200"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </a>
+            </div>
+            <p className="text-xs text-white/60 leading-snug">
+              Atendimento via WhatsApp em horário comercial.
+            </p>
+          </div>
         </div>
 
-        <div className="border-t border-white/20 mt-8 pt-6 text-center">
-          <p className="text-sm text-white/70">
-            © 2025 PelúciaPet. Todos os direitos reservados.
-          </p>
+        <div className="border-t border-white/20 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-white/70">
+          <p>© 2025 PelúciaPet. Todos os direitos reservados.</p>
+          <p className="text-xs">CNPJ XX.XXX.XXX/0001-XX</p>
         </div>
       </div>
     </footer>
