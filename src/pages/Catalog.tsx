@@ -31,6 +31,9 @@ interface Product {
     product_sizes?: {
       name: string;
       dimensions: string;
+      width_cm?: number | null;
+      height_cm?: number | null;
+      depth_cm?: number | null;
     };
     sizes?: {
       name: string;
@@ -87,7 +90,11 @@ export default function Catalog() {
               price,
               product_sizes (
                 name,
-                dimensions
+                dimensions,
+                width_cm,
+                height_cm,
+                depth_cm,
+                display_order
               )
             )
           `).eq('status', 'active').order('created_at', {
@@ -103,7 +110,10 @@ export default function Catalog() {
           ...price,
           sizes: price.product_sizes ? {
             name: price.product_sizes.name,
-            dimensions: price.product_sizes.dimensions
+            dimensions: price.product_sizes.dimensions,
+            width_cm: price.product_sizes.width_cm,
+            height_cm: price.product_sizes.height_cm,
+            depth_cm: price.product_sizes.depth_cm
           } : undefined
         }))
       }));
@@ -182,8 +192,8 @@ export default function Catalog() {
   return <div className="min-h-screen bg-gradient-soft">
       <Header />
       
-      {/* Hero Section - Strip bem fino pra produtos aparecerem acima da dobra */}
-      <section className="relative min-h-[120px] sm:min-h-[170px] lg:min-h-[210px] overflow-hidden" style={{
+      {/* Hero Section - Compacto com proposta de valor e 1 CTA forte */}
+      <section className="relative min-h-[140px] sm:min-h-[180px] lg:min-h-[220px] overflow-hidden" style={{
       backgroundImage: `url(${currentBanner})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center center',
@@ -192,46 +202,30 @@ export default function Catalog() {
       justifyContent: 'center'
     }}>
         {/* Gradient overlay pra legibilidade do texto sobre o pattern */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/5 to-black/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/30 pointer-events-none" />
 
-        {/* Conteúdo principal responsivo */}
-        <div className="relative z-20 container min-h-[120px] sm:min-h-[170px] lg:min-h-[210px] flex items-center justify-center py-2 sm:py-3 lg:py-4 px-4">
-          <div className="text-center space-y-1.5 sm:space-y-2 max-w-4xl mx-auto">
+        {/* Conteúdo principal */}
+        <div className="relative z-20 container min-h-[140px] sm:min-h-[180px] lg:min-h-[220px] flex items-center justify-center py-3 sm:py-4 lg:py-5 px-4">
+          <div className="text-center space-y-1.5 sm:space-y-2 max-w-3xl mx-auto">
 
-            {/* Título principal responsivo */}
-            <div>
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-black mb-1 sm:mb-1.5 text-primary leading-tight px-2">
-                Catálogo PelúciaPet
-              </h1>
+            {/* Headline com proposta de valor */}
+            <h1 className="font-serif text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-white leading-tight px-2 drop-shadow-md">
+              Caminhas premium feitas pra durar
+            </h1>
 
-              {/* Linha decorativa */}
-              <div className="w-8 sm:w-10 md:w-12 lg:w-16 h-0.5 bg-pet-gold mx-auto rounded-full"></div>
-            </div>
-
-            {/* Subtítulo - some no mobile pra economizar altura */}
-            <p className="hidden sm:block text-xs sm:text-sm md:text-base text-primary mb-1.5 sm:mb-2 leading-snug px-2">
-              Produtos de luxo para o <span className="text-primary font-bold">conforto supremo</span> do seu pet
+            {/* Sub: beneficios especificos */}
+            <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-white/90 leading-snug px-2 drop-shadow">
+              Antialergicas, lavaveis na maquina e com garantia de 1 ano
             </p>
 
-            {/* Botões responsivos - lado a lado em todas as larguras */}
-            <div className="flex flex-row flex-wrap gap-2 sm:gap-2.5 justify-center items-center px-2">
+            {/* CTA unico forte */}
+            <div className="pt-1 sm:pt-1.5">
               <Button
-                onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
-                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold h-7 sm:h-8"
+                onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-5 sm:px-7 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold h-8 sm:h-10 shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
-                Fale Conosco
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => document.querySelector('.grid')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}
-                className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold h-7 sm:h-8"
-              >
-                <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
-                Ver Produtos
+                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                Ver Caminhas
               </Button>
             </div>
           </div>
@@ -483,14 +477,44 @@ export default function Catalog() {
         </DialogContent>
       </Dialog>
 
-      {/* Seção de Benefícios */}
+      {/* Seção de Benefícios - copy de venda real */}
       <section className="bg-pet-beige-light/30 py-16">
         <div className="container">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-foreground">Por que comprar com a gente</h2>
-            <p className="text-sm text-muted-foreground mt-1">Benefícios pensados pro seu pet e pra você</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Por que escolher a PelúciaPet</h2>
+            <p className="text-sm text-muted-foreground mt-1">Caminhas pensadas pro bem-estar do seu pet</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-sm text-foreground mb-1">Tecido antialérgico</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Seguro pra pets com alergia ou pele sensível</p>
+            </div>
+
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-sm text-foreground mb-1">Lavável na máquina</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Capa com zíper, fácil de higienizar</p>
+            </div>
+
+            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-sm text-foreground mb-1">Enchimento ortopédico</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Alívio pra cães idosos ou com dor articular</p>
+            </div>
+
             <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
                 <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -501,42 +525,36 @@ export default function Catalog() {
                   <circle cx="7" cy="18" r="2" />
                 </svg>
               </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Frete</h3>
-              <p className="text-xs text-muted-foreground">A combinar</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Entrega SP capital</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Em até 5 dias úteis na região metropolitana</p>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
-                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <line x1="2" x2="22" y1="10" y2="10" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Parcelamento</h3>
-              <p className="text-xs text-muted-foreground">Em até 12x</p>
+      {/* Trust Bar - sinais de confianca */}
+      <section className="bg-pet-brown-dark text-white py-10">
+        <div className="container">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
+            <div className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">2.500+</div>
+              <div className="text-xs sm:text-sm text-white/80">Pets dormindo feliz</div>
             </div>
-
-            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
-                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-                </svg>
+            <div className="space-y-1">
+              <div className="flex items-center justify-center gap-1">
+                <span className="text-pet-gold text-lg">★</span>
+                <span className="text-2xl sm:text-3xl font-serif font-bold">4.9</span>
+                <span className="text-white/60 text-sm">/5</span>
               </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Garantia</h3>
-              <p className="text-xs text-muted-foreground">1 mês de cobertura</p>
+              <div className="text-xs sm:text-sm text-white/80">47 avaliações</div>
             </div>
-
-            <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-pet-gold/15 group-hover:bg-pet-gold/25 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
-                <svg className="h-6 w-6 text-pet-brown-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                  <path d="M16 16h5v5" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Troca Fácil</h3>
-              <p className="text-xs text-muted-foreground">7 dias para devolução</p>
+            <div className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">5 dias</div>
+              <div className="text-xs sm:text-sm text-white/80">Entrega SP capital</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">100%</div>
+              <div className="text-xs sm:text-sm text-white/80">Compra segura</div>
             </div>
           </div>
         </div>
@@ -657,14 +675,25 @@ function ProductCard({
           </p>
         )}
 
-        {/* Price */}
-        <div className="pt-1">
+        {/* Spec row: tamanhos disponiveis */}
+        {product.product_prices.length > 0 && (
+          <div className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted-foreground">
+            <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            </svg>
+            <span className="truncate">
+              {product.product_prices.length === 1
+                ? `Tamanho ${product.product_prices[0].sizes?.name || 'único'}`
+                : `Tamanhos: ${product.product_prices.map(p => p.sizes?.name).filter(Boolean).join(' / ')}`}
+            </span>
+          </div>
+        )}
+
+        {/* Price: range quando varia, fixo quando unico */}
+        <div className="pt-0.5">
           {hasPriceRange ? (
-            <div>
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">A partir de</div>
-              <div className="text-lg font-bold text-emerald-600 leading-none">
-                R$ {minPrice.toFixed(2)}
-              </div>
+            <div className="text-base font-bold text-emerald-600 leading-none">
+              R$ {minPrice.toFixed(2)} <span className="text-muted-foreground font-normal text-xs">a</span> R$ {maxPrice.toFixed(2)}
             </div>
           ) : (
             <div className="text-lg font-bold text-emerald-600 leading-none">
@@ -673,22 +702,14 @@ function ProductCard({
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-1.5 pt-1">
-          <Button
-            variant="outline"
-            onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
-            className="flex-1 h-9 text-xs font-semibold border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white rounded-xl transition-all duration-200"
-          >
-            <Eye className="w-3.5 h-3.5 mr-1" />
-            Detalhes
-          </Button>
+        {/* Action Button - unico CTA de conversao */}
+        <div className="pt-1">
           <Button
             onClick={(e) => { e.stopPropagation(); onWhatsApp(); }}
-            className="flex-1 h-9 text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            className="w-full h-10 text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
-            <MessageCircle className="w-3.5 h-3.5 mr-1" />
-            Pedir
+            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
+            Comprar no WhatsApp
           </Button>
         </div>
       </div>
