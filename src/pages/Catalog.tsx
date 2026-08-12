@@ -166,55 +166,52 @@ export default function Catalog() {
   return <div className="min-h-screen bg-gradient-soft">
       <Header />
       
-      {/* Hero Section - Responsivo */}
-      <section className="relative min-h-[60vh] sm:min-h-[70vh] overflow-hidden" style={{
+      {/* Hero Section - Strip bem fino pra produtos aparecerem acima da dobra */}
+      <section className="relative min-h-[120px] sm:min-h-[170px] lg:min-h-[210px] overflow-hidden" style={{
       backgroundImage: `url(${currentBanner})`,
       backgroundSize: 'cover',
-      backgroundPosition: 'left center',
-      backgroundAttachment: 'fixed',
+      backgroundPosition: 'center center',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}>
         {/* Conteúdo principal responsivo */}
-        <div className="relative z-20 container min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center py-8 px-4">
-          <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-            
-            {/* Título principal responsivo - texto menor para mobile */}
+        <div className="relative z-20 container min-h-[120px] sm:min-h-[170px] lg:min-h-[210px] flex items-center justify-center py-2 sm:py-3 lg:py-4 px-4">
+          <div className="text-center space-y-1.5 sm:space-y-2 max-w-4xl mx-auto">
+
+            {/* Título principal responsivo */}
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-black mb-4 sm:mb-6 text-primary leading-tight px-2">
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-black mb-1 sm:mb-1.5 text-primary leading-tight px-2">
                 Catálogo PelúciaPet
               </h1>
-              
+
               {/* Linha decorativa */}
-              <div className="w-16 sm:w-20 md:w-24 lg:w-32 h-1 bg-pet-gold mx-auto rounded-full"></div>
+              <div className="w-8 sm:w-10 md:w-12 lg:w-16 h-0.5 bg-pet-gold mx-auto rounded-full"></div>
             </div>
 
-            {/* Subtítulo responsivo */}
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-primary mb-6 sm:mb-8 leading-relaxed px-2">
+            {/* Subtítulo - some no mobile pra economizar altura */}
+            <p className="hidden sm:block text-xs sm:text-sm md:text-base text-primary mb-1.5 sm:mb-2 leading-snug px-2">
               Produtos de luxo para o <span className="text-primary font-bold">conforto supremo</span> do seu pet
             </p>
 
-            {/* Botões responsivos */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4">
-              <Button 
-                size="lg" 
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')} 
-                className="w-full sm:w-auto bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold min-h-[48px]"
+            {/* Botões responsivos - lado a lado em todas as larguras */}
+            <div className="flex flex-row flex-wrap gap-2 sm:gap-2.5 justify-center items-center px-2">
+              <Button
+                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold h-7 sm:h-8"
               >
-                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
-                Fale Conosco Agora
+                <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
+                Fale Conosco
               </Button>
 
-              <Button 
-                variant="outline" 
-                size="lg" 
+              <Button
+                variant="outline"
                 onClick={() => document.querySelector('.grid')?.scrollIntoView({
                   behavior: 'smooth'
-                })} 
-                className="w-full sm:w-auto border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold min-h-[48px]"
+                })}
+                className="border-pet-brown-dark text-pet-brown-dark hover:bg-pet-brown-dark hover:text-white px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold h-7 sm:h-8"
               >
-                <Eye className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
                 Ver Produtos
               </Button>
             </div>
