@@ -143,7 +143,7 @@ export default function Catalog() {
     const productInfo = sizeInfo;
     const codeInfo = variantCode ? `\nCódigo: ${variantCode}` : '';
     const message = `Olá! Tenho interesse no produto: ${product.name}${productInfo ? ` (${productInfo})` : ''}${codeInfo}`;
-    return `https://wa.me/5511914608191?text=${encodeURIComponent(message)}`;
+    return `https://wa.me/5511937413939?text=${encodeURIComponent(message)}`;
   };
   const handleWhatsAppClick = async (product: Product, size?: string) => {
     const link = await generateWhatsAppLink(product, size);
@@ -197,7 +197,7 @@ export default function Catalog() {
             {/* Botões responsivos - lado a lado em todas as larguras */}
             <div className="flex flex-row flex-wrap gap-2 sm:gap-2.5 justify-center items-center px-2">
               <Button
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+                onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
                 className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold h-7 sm:h-8"
               >
                 <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />

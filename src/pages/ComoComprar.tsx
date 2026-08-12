@@ -38,7 +38,7 @@ export default function ComoComprar() {
   }, []);
 
   const handleWhatsApp = () => {
-    window.open('https://wa.me/5511914608191', '_blank');
+    window.open('https://wa.me/5511937413939', '_blank');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -136,7 +136,7 @@ export default function ComoComprar() {
                 </div>
                 <h3 className="text-xl font-bold text-primary mb-3">1. Entre em Contato</h3>
                 <p className="text-muted-foreground">
-                  Fale conosco pelo WhatsApp (11) 91460-8191 ou pelo formulário abaixo
+                  Fale conosco pelo WhatsApp (11) 93741-3939 ou pelo formulário abaixo
                 </p>
               </CardContent>
             </Card>
@@ -252,7 +252,7 @@ export default function ComoComprar() {
                     <MessageCircle className="h-6 w-6 text-pet-gold mr-3" />
                     <h3 className="text-xl font-bold text-primary">WhatsApp</h3>
                   </div>
-                  <p className="text-muted-foreground mb-4">(11) 91460-8191</p>
+                  <p className="text-muted-foreground mb-4">(11) 93741-3939</p>
                   <Button onClick={handleWhatsApp} className="w-full">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Conversar no WhatsApp

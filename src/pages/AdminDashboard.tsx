@@ -221,7 +221,7 @@ export default function AdminDashboard() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => window.open('https://wa.me/5511914608191', '_blank')}
+                onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
                 className="hover:bg-pet-gold hover:text-white transition-all duration-300"
               >
                 WhatsApp da Loja
