@@ -75,7 +75,7 @@ export function Footer() {
             <h4 className="font-semibold text-pet-gold">Siga a gente</h4>
             <div className="flex gap-3">
               <a
-                href="https://instagram.com/peluciapet"
+                href="https://www.instagram.com/pelucia.pet"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
