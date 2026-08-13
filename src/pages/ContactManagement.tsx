@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, Mail, Phone, Calendar, User, MessageSquare, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNoindex } from "@/hooks/use-noindex";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -26,6 +27,7 @@ interface ContactMessage {
 }
 
 export default function ContactManagement() {
+  useNoindex();
   const { isAdmin, loading: isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();

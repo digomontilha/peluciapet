@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useNoindex } from '@/hooks/use-noindex';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import logo from '/lovable-uploads/96f8f9d3-cd58-4b22-a2ab-9f8c894aa0f3.png';
 
 export default function Auth() {
+  useNoindex();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -119,13 +121,13 @@ export default function Auth() {
     <div className="min-h-screen bg-gradient-soft flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img 
-            src={logo} 
-            alt="PelúciaPet" 
+          <img
+            src={logo}
+            alt="Pelúcia Pet"
             className="h-20 w-20 mx-auto rounded-full object-cover shadow-warm mb-4"
           />
           <h1 className="text-3xl font-bold bg-gradient-warm bg-clip-text text-transparent">
-            PelúciaPet
+            Pelúcia Pet
           </h1>
           <p className="text-muted-foreground mt-2">
             Acesso administrativo

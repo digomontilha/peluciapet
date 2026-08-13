@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, ArrowLeft, Pencil, Trash2, Save, X } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { useNoindex } from "@/hooks/use-noindex";
 import { toast } from "@/hooks/use-toast";
 
 interface ProductSize {

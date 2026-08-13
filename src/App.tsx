@@ -12,6 +12,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProductForm from "./pages/ProductForm";
 import ProductList from "./pages/ProductList";
 import ProductDetail from "./pages/ProductDetail";
+import FAQ from "./pages/FAQ";
+import Privacidade from "./pages/Privacidade";
+import TrocasDevolucoes from "./pages/TrocasDevolucoes";
 
 import CategoryManagement from "./pages/CategoryManagement";
 import UserManagement from "./pages/UserManagement";
@@ -34,6 +37,9 @@ const App = () => (
               <Route path="/" element={<Catalog />} />
               <Route path="/produto/:slug" element={<ProductDetail />} />
               <Route path="/como-comprar" element={<ComoComprar />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/privacidade" element={<Privacidade />} />
+              <Route path="/trocas-e-devolucoes" element={<TrocasDevolucoes />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/products" element={<ProductList />} />
@@ -56,3 +62,4 @@ const App = () => (
 );
 
 export default App;
+
