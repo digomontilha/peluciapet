@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { MessageCircle, Eye, Tag, Heart, Menu } from 'lucide-react';
+import { MessageCircle, Eye, Tag, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
@@ -20,23 +19,30 @@ interface Product {
   short_description?: string | null;
   observations?: string;
   is_custom_order: boolean;
+  has_essential?: boolean;
+  has_premium?: boolean;
   categories?: {
     name: string;
     icon: string;
   };
   product_images: Array<{
+    id?: string;
     image_url: string;
     alt_text?: string;
     stock_quantity?: number;
     is_available?: boolean;
+    color_id?: string | null;
   }>;
   product_prices: Array<{
+    id?: string;
     price: number;
     pix_price?: number | null;
     commercial_line?: string | null;
     product_sizes?: {
+      id?: string;
       name: string;
       dimensions: string;
+      display_order?: number;
       width_cm?: number | null;
       height_cm?: number | null;
       depth_cm?: number | null;
@@ -52,14 +58,19 @@ interface Category {
   name: string;
   icon: string;
 }
+interface ColorRow {
+  id: string;
+  name: string;
+  hex_code: string;
+}
 export default function Catalog() {
   const navigate = useNavigate();
   const { config: storeConfig } = useStoreConfig();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [colorsById, setColorsById] = useState<Map<string, ColorRow>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(banner);
 
   // Hook para detectar tamanho da tela e trocar banner
@@ -80,47 +91,70 @@ export default function Catalog() {
   }, []);
   const fetchData = async () => {
     try {
-      // Buscar dados em paralelo
-      const [productsResult, categoriesResult] = await Promise.all([supabase.from('products').select(`
+      // Buscar dados em paralelo: produtos, categorias, cores (mapa)
+      const [productsResult, categoriesResult, colorsResult] = await Promise.all([
+        supabase.from('products').select(`
             id, name, slug, description, short_description, observations, is_custom_order, category_id,
             categories:category_id (name, icon),
             product_images (
-              image_url,
-              alt_text,
-              stock_quantity,
-              is_available
+              id, image_url, alt_text, stock_quantity, is_available, color_id
             ),
             product_prices (
-              price, pix_price, commercial_line,
+              id, price, pix_price, commercial_line,
               product_sizes (
-                name,
-                dimensions,
-                width_cm,
-                height_cm,
-                depth_cm,
-                display_order
+                id, name, dimensions, width_cm, height_cm, depth_cm, display_order
               )
             )
           `).eq('status', 'active').order('created_at', {
-        ascending: false
-      }), supabase.from('categories').select('*').order('name')]);
+          ascending: false
+        }),
+        supabase.from('categories').select('*').order('name'),
+        supabase.from('colors').select('id, name, hex_code').order('name')
+      ]);
       if (productsResult.error) throw productsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
 
-      // Processar produtos para incluir informações de dimensões
-      const processedProducts = (productsResult.data || []).map(product => ({
-        ...product,
-        product_prices: (product.product_prices || []).map(price => ({
-          ...price,
-          sizes: price.product_sizes ? {
-            name: price.product_sizes.name,
-            dimensions: price.product_sizes.dimensions,
-            width_cm: price.product_sizes.width_cm,
-            height_cm: price.product_sizes.height_cm,
-            depth_cm: price.product_sizes.depth_cm
-          } : undefined
-        }))
-      }));
+      // Mapa de cores por id (pra aria-label das bolinhas)
+      const colorsMap = new Map<string, ColorRow>();
+      (colorsResult.data || []).forEach((c) => colorsMap.set(c.id, c as ColorRow));
+      setColorsById(colorsMap);
+
+      // Processar produtos: marca has_essential/has_premium via subquery JS
+      // (subquery no select do PostgREST exigiria 2 round-trips extras; aqui
+      // derivamos do product_fabrics via lookup paralelo)
+      const productIds = (productsResult.data || []).map((p) => p.id);
+      const { data: pfData } = await supabase
+        .from('product_fabrics')
+        .select('product_id, fabrics:commercial_line')
+        .in('product_id', productIds.length > 0 ? productIds : ['00000000-0000-0000-0000-000000000000']);
+      const fabricByProduct = new Map<string, { essential: boolean; premium: boolean }>();
+      ((pfData || []) as Array<{ product_id: string; fabrics: 'essential' | 'premium' | null }>).forEach((row) => {
+        const cur = fabricByProduct.get(row.product_id) || { essential: false, premium: false };
+        if (row.fabrics === 'essential') cur.essential = true;
+        if (row.fabrics === 'premium') cur.premium = true;
+        fabricByProduct.set(row.product_id, cur);
+      });
+
+      const processedProducts = (productsResult.data || []).map(product => {
+        const lineFlags = fabricByProduct.get(product.id) || { essential: false, premium: false };
+        return {
+          ...product,
+          has_essential: lineFlags.essential,
+          has_premium: lineFlags.premium,
+          product_prices: (product.product_prices || []).map(price => ({
+            ...price,
+            sizes: price.product_sizes ? {
+              id: price.product_sizes.id,
+              name: price.product_sizes.name,
+              dimensions: price.product_sizes.dimensions,
+              display_order: price.product_sizes.display_order,
+              width_cm: price.product_sizes.width_cm,
+              height_cm: price.product_sizes.height_cm,
+              depth_cm: price.product_sizes.depth_cm
+            } : undefined
+          }))
+        };
+      });
       setProducts(processedProducts);
       setCategories(categoriesResult.data || []);
     } catch (error) {
@@ -229,64 +263,53 @@ export default function Catalog() {
       <div className="container py-12">
         {/* Filtros de categoria */}
         <div className="mb-8">
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div className="min-w-0 flex-1">
-              <h2 className="text-base sm:text-2xl font-bold text-foreground leading-tight">
-                Explore por categoria
-                <span className="ml-1.5 sm:ml-2 text-xs sm:text-base font-normal text-muted-foreground">
-                  ({products.length})
-                </span>
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Encontre o produto perfeito pro seu pet</p>
-            </div>
-            
-            {/* Menu hambúrguer para mobile */}
-            <Sheet open={isCategoryMenuOpen} onOpenChange={setIsCategoryMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="md:hidden rounded-full min-h-[40px] h-10 px-4 gap-2 text-sm font-medium border-pet-brown-dark/20 hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white">
-                  <Menu className="h-4 w-4" />
-                  Categorias
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <SheetHeader>
-                  <SheetTitle className="text-xl font-bold text-primary">Categorias</SheetTitle>
-                  <SheetDescription>
-                    Escolha uma categoria para filtrar os produtos
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-2">
-                  <button
-                    onClick={() => { setSelectedCategory('all'); setIsCategoryMenuOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${selectedCategory === 'all'
-                      ? 'bg-pet-brown-dark text-white shadow-md'
-                      : 'hover:bg-muted'}`}
-                  >
-                    <span className="text-xl" aria-hidden>🏪</span>
-                    <span className="font-medium">Todos os produtos</span>
-                  </button>
-                  {categories.map(category => (
-                    <button
-                      key={category.id}
-                      onClick={() => { setSelectedCategory(category.name); setIsCategoryMenuOpen(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${selectedCategory === category.name
-                        ? 'bg-pet-brown-dark text-white shadow-md'
-                        : 'hover:bg-muted'}`}
-                    >
-                      <span className="text-xl" aria-hidden>{category.icon}</span>
-                      <span className="font-medium">{category.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
+          <div className="mb-4">
+            <h2 className="text-base sm:text-2xl font-bold text-foreground leading-tight">
+              Explore por categoria
+              <span className="ml-1.5 sm:ml-2 text-xs sm:text-base font-normal text-muted-foreground">
+                ({products.length})
+              </span>
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Encontre o produto perfeito pro seu pet</p>
           </div>
-          
-          {/* Filtros em linha para desktop — pill chips */}
+
+          {/* Mobile: chips horizontais com scroll-snap (substitui o Sheet) */}
+          <div
+            className="md:hidden -mx-4 px-4 overflow-x-auto pb-1 flex gap-2 snap-x snap-mandatory"
+            role="group"
+            aria-label="Filtrar por categoria"
+          >
+            <button
+              onClick={() => setSelectedCategory('all')}
+              aria-pressed={selectedCategory === 'all'}
+              className={`snap-start shrink-0 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === 'all'
+                ? 'bg-pet-brown-dark text-white shadow-md'
+                : 'bg-card border border-border'}`}
+            >
+              <span className="text-base" aria-hidden>🏪</span>
+              <span>Todos</span>
+            </button>
+            {categories.map(category => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.name)}
+                aria-pressed={selectedCategory === category.name}
+                className={`snap-start shrink-0 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === category.name
+                  ? 'bg-pet-brown-dark text-white shadow-md'
+                  : 'bg-card border border-border'}`}
+              >
+                <span className="text-base" aria-hidden>{category.icon}</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop: chips com flex-wrap */}
           <div className="hidden md:flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === 'all'
+              aria-pressed={selectedCategory === 'all'}
+              className={`group inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === 'all'
                 ? 'bg-pet-brown-dark text-white shadow-md scale-105'
                 : 'bg-card border border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white'}`}
             >
@@ -297,7 +320,8 @@ export default function Catalog() {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === category.name
+                aria-pressed={selectedCategory === category.name}
+                className={`group inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === category.name
                   ? 'bg-pet-brown-dark text-white shadow-md scale-105'
                   : 'bg-card border border-border hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white'}`}
               >
@@ -305,14 +329,6 @@ export default function Catalog() {
                 <span>{category.name}</span>
               </button>
             ))}
-          </div>
-          
-          {/* Categoria selecionada para mobile — pill chip */}
-          <div className="md:hidden mt-4">
-            <div className="inline-flex items-center gap-2 px-4 min-h-[40px] py-2.5 rounded-full bg-pet-brown-dark text-white shadow-md">
-              <span aria-hidden>{selectedCategory === 'all' ? '🏪' : categories.find(c => c.name === selectedCategory)?.icon}</span>
-              <span className="text-sm font-medium">{selectedCategory === 'all' ? 'Todos os produtos' : selectedCategory}</span>
-            </div>
           </div>
         </div>
 
@@ -323,6 +339,8 @@ export default function Catalog() {
               key={product.id}
               product={product}
               onViewDetails={goToProduct}
+              colorsById={colorsById}
+              pixDiscountPercent={storeConfig?.pix_discount_percent ?? 5}
             />
           ))}
         </div>
@@ -439,10 +457,14 @@ export default function Catalog() {
 interface ProductCardProps {
   product: Product;
   onViewDetails: (product: Product) => void;
+  colorsById: Map<string, ColorRow>;
+  pixDiscountPercent: number;
 }
 function ProductCard({
   product,
-  onViewDetails
+  onViewDetails,
+  colorsById,
+  pixDiscountPercent
 }: ProductCardProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -450,10 +472,45 @@ function ProductCard({
   // Filtrar apenas imagens disponíveis
   const availableImages = product.product_images.filter(img => img.is_available !== false);
   const currentImage = availableImages[selectedImageIndex]?.image_url || availableImages[0]?.image_url;
-  const prices = product.product_prices.map(p => p.price);
-  const minPrice = prices.length ? Math.min(...prices) : 0;
-  const maxPrice = prices.length ? Math.max(...prices) : 0;
-  const hasPriceRange = minPrice !== maxPrice;
+
+  // Badge de linha: calculado a partir de has_essential/has_premium
+  const hasEssential = product.has_essential;
+  const hasPremium = product.has_premium;
+  const lineBadge = hasEssential && hasPremium
+    ? 'Essencial • Premium'
+    : hasPremium
+      ? 'Premium'
+      : hasEssential
+        ? 'Essencial'
+        : null;
+
+  // Preço inicial: menor price entre product_prices com commercial_line populado
+  // pix_price é o valor com desconto Pix (vem do banco)
+  const pricedEntries = product.product_prices.filter(p => p.commercial_line != null && p.price > 0);
+  const minPriceEntry = pricedEntries.length
+    ? pricedEntries.reduce((min, p) => (p.price < min.price ? p : min), pricedEntries[0])
+    : null;
+  const hasAnyPrice = !!minPriceEntry;
+  const minPrice = minPriceEntry?.price ?? 0;
+  const minPixPrice = minPriceEntry?.pix_price ?? null;
+
+  // Tamanhos: lista única de product_sizes, ordenada por display_order
+  const uniqueSizes = Array.from(
+    new Map(
+      product.product_prices
+        .map(p => p.product_sizes)
+        .filter((s): s is NonNullable<typeof s> => !!s)
+        .map(s => [s.id || s.name, s])
+    ).values()
+  ).sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+  const displaySizes = uniqueSizes.slice(0, 4);
+  const moreSizes = uniqueSizes.length - displaySizes.length;
+
+  // Cores: pega nome real via colorsById
+  const colorIds = Array.from(new Set(availableImages.map(i => i.color_id).filter(Boolean)));
+  const availableColors = colorIds
+    .map((id): ColorRow | null => colorsById.get(id as string) || null)
+    .filter((c): c is ColorRow => !!c);
 
   return (
     <div
@@ -461,7 +518,7 @@ function ProductCard({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewDetails(product); } }}
       role="button"
       tabIndex={0}
-      aria-label={`Ver detalhes de ${product.name}`}
+      aria-label={`Ver opções de ${product.name}`}
       className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-pet-gold/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
     >
       {/* Product Image */}
@@ -484,11 +541,19 @@ function ProductCard({
           </div>
         )}
 
-        {/* Like button (top-right) */}
+        {/* Line badge (top-right) - Essencial / Premium */}
+        {lineBadge && (
+          <div className="absolute top-2 right-2 bg-pet-gold/95 text-pet-brown-dark text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-md ring-1 ring-black/5 max-w-[60%] truncate">
+            {lineBadge}
+          </div>
+        )}
+
+        {/* Like button (right side, below badge if present) */}
         <button
           onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
           aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-          className="absolute top-2 right-2 bg-card/90 backdrop-blur-sm rounded-full w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md ring-1 ring-black/5 hover:bg-card hover:scale-110 transition-all duration-200"
+          aria-pressed={isLiked}
+          className={`absolute ${lineBadge ? 'top-12' : 'top-2'} right-2 bg-card/90 backdrop-blur-sm rounded-full w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md ring-1 ring-black/5 hover:bg-card hover:scale-110 transition-all duration-200`}
         >
           <Heart
             className={`h-5 w-5 transition-all duration-200 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-muted-foreground'}`}
@@ -497,31 +562,32 @@ function ProductCard({
 
         {/* Custom order badge (bottom-left) */}
         {product.is_custom_order && (
-          <div className="absolute bottom-2 left-2 bg-pet-gold/95 text-pet-brown-dark text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-md ring-1 ring-black/5 flex items-center gap-1">
+          <div className="absolute bottom-2 left-2 bg-pet-brown-dark/95 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-md ring-1 ring-black/5 flex items-center gap-1">
             <Tag className="h-2.5 w-2.5" />
             Sob encomenda
           </div>
         )}
 
-        {/* Color swatches overlay (bottom-right) */}
-        {availableImages.length > 1 && (
+        {/* Color swatches overlay (bottom-right) - aria-label com nome real */}
+        {availableColors.length > 0 && (
           <div className="absolute inset-x-2 bottom-2 flex justify-end pointer-events-none">
             <div className="flex gap-1 sm:gap-1.5 bg-card/80 backdrop-blur-sm rounded-full px-1.5 sm:px-2 py-1 sm:py-1.5 shadow-md ring-1 ring-black/5 pointer-events-auto max-w-full">
-              {availableImages.slice(0, 4).map((image, idx) => (
+              {availableColors.slice(0, 4).map((color, idx) => (
                 <button
-                  key={idx}
+                  key={color.id}
                   onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(idx); }}
-                  aria-label={`Selecionar cor ${idx + 1}`}
+                  aria-label={`Selecionar cor ${color.name}`}
+                  aria-pressed={selectedImageIndex === idx}
                   className={`w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] rounded-full overflow-hidden transition-all duration-200 shrink-0 ${selectedImageIndex === idx
                     ? 'ring-2 ring-pet-gold ring-offset-1 scale-110'
                     : 'ring-1 ring-black/10 hover:scale-110'}`}
-                >
-                  <img src={image.image_url} alt="" className="w-full h-full object-cover" />
-                </button>
+                  style={{ backgroundColor: color.hex_code }}
+                  title={color.name}
+                />
               ))}
-              {availableImages.length > 4 && (
+              {availableColors.length > 4 && (
                 <div className="w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-bold shrink-0">
-                  +{availableImages.length - 4}
+                  +{availableColors.length - 4}
                 </div>
               )}
             </div>
@@ -530,60 +596,75 @@ function ProductCard({
       </div>
 
       {/* Product Content */}
-      <div className="p-3 space-y-1">
-        {/* Title + category */}
+      <div className="p-3 space-y-1.5">
+        {/* Title + description */}
         <div>
-          <h3 className="font-bold text-sm text-foreground leading-tight line-clamp-2 sm:line-clamp-1 group-hover:text-pet-brown-dark transition-colors min-w-0 break-words">
+          <h3 className="font-bold text-sm text-foreground leading-tight line-clamp-2 group-hover:text-pet-brown-dark transition-colors min-w-0 break-words">
             {product.name}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
-            {product.description}
-          </p>
+          {product.short_description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mt-0.5">
+              {product.short_description}
+            </p>
+          )}
         </div>
 
-        {/* Observations */}
-        {product.observations && (
-          <p className="text-orange-600 text-[11px] font-medium line-clamp-1 italic">
-            {product.observations}
-          </p>
-        )}
-
-        {/* Spec row: tamanhos disponiveis */}
-        {product.product_prices.length > 0 && (
-          <div className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted-foreground">
-            <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-            </svg>
-            <span className="truncate">
-              {product.product_prices.length === 1
-                ? `Tamanho ${product.product_prices[0].sizes?.name || 'único'}`
-                : `Tamanhos: ${product.product_prices.map(p => p.sizes?.name).filter(Boolean).join(' / ')}`}
-            </span>
+        {/* Tamanhos: chips horizontais */}
+        {displaySizes.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1 pt-0.5">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mr-0.5">Tamanhos</span>
+            {displaySizes.map((size) => (
+              <span
+                key={size.id || size.name}
+                className="inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 rounded-md bg-muted text-[11px] font-semibold text-foreground"
+                title={size.dimensions}
+              >
+                {size.name}
+              </span>
+            ))}
+            {moreSizes > 0 && (
+              <span className="text-[10px] text-muted-foreground font-medium">+{moreSizes}</span>
+            )}
           </div>
         )}
 
-        {/* Price: range quando varia, fixo quando unico */}
-        <div className="pt-0.5">
-          {hasPriceRange ? (
-            <div className="text-sm sm:text-base font-bold text-emerald-600 leading-tight whitespace-nowrap">
-              <span className="sm:hidden">R$ {minPrice.toFixed(0)} - R$ {maxPrice.toFixed(0)}</span>
-              <span className="hidden sm:inline">R$ {minPrice.toFixed(2)} <span className="text-muted-foreground font-normal text-xs">a</span> R$ {maxPrice.toFixed(2)}</span>
-            </div>
-          ) : (
-            <div className="text-base sm:text-lg font-bold text-emerald-600 leading-none">
+        {/* Preço inicial: "A partir de R$ X" + "R$ Y no Pix" */}
+        {hasAnyPrice ? (
+          <div className="pt-0.5">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">A partir de</div>
+            <div className="text-base sm:text-lg font-bold text-emerald-700 leading-tight">
               R$ {minPrice.toFixed(2)}
             </div>
-          )}
-        </div>
+            {minPixPrice && minPixPrice < minPrice && (
+              <div className="text-[11px] text-emerald-700 font-medium leading-tight">
+                R$ {minPixPrice.toFixed(2)} no Pix
+                <span className="text-muted-foreground ml-1">({pixDiscountPercent}% off)</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="pt-0.5">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Preço</div>
+            <div className="text-sm font-semibold text-muted-foreground">Consulte</div>
+          </div>
+        )}
+
+        {/* Observations (compact, italic) */}
+        {product.observations && (
+          <p className="text-orange-700 text-[10px] font-medium line-clamp-1 italic pt-0.5">
+            {product.observations}
+          </p>
+        )}
 
         {/* Action Button - leva pra página de seleção (issue #33) */}
         <div className="pt-1">
           <Button
             onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
             className="w-full min-h-[44px] h-11 text-xs sm:text-sm font-semibold bg-pet-brown-dark hover:bg-pet-brown-medium text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            aria-label={`Ver opções de ${product.name}`}
           >
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
-            Ver opcoes
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" aria-hidden />
+            Ver opções
           </Button>
         </div>
       </div>
