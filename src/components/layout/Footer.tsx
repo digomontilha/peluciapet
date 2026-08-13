@@ -46,25 +46,25 @@ export function Footer() {
           </div>
 
           {/* Contato */}
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             <h4 className="font-semibold text-pet-gold">Contato</h4>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <button
                 onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
-                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer"
+                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer min-w-0"
               >
-                <Phone className="h-4 w-4 text-pet-gold" />
+                <Phone className="h-4 w-4 text-pet-gold shrink-0" />
                 <span>(11) 93741-3939</span>
               </button>
               <button
                 onClick={() => window.open('mailto:contato@peluciapet.com.br', '_blank')}
-                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer"
+                className="flex items-center space-x-2 text-xs sm:text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer min-w-0 w-full text-left group"
               >
-                <Mail className="h-4 w-4 text-pet-gold" />
-                <span>contato@peluciapet.com.br</span>
+                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-pet-gold shrink-0" />
+                <span className="min-w-0 leading-tight">contato@peluciapet.com.br</span>
               </button>
               <div className="flex items-center space-x-2 text-sm text-white/70">
-                <MapPin className="h-4 w-4 text-pet-gold/70" />
+                <MapPin className="h-4 w-4 text-pet-gold/70 shrink-0" />
                 <span>São Paulo - SP</span>
               </div>
             </div>
