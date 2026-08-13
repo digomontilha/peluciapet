@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProductVariant {
@@ -53,14 +54,28 @@ export default function ProductVariants() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAdmin, loading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
   const [formData, setFormData] = useState({
     product_id: '',
     product_size_id: '',
+    color_id: '',
     stock_quantity: 0,
     is_available: true
   });
+
+  // Guard: redireciona nao-admin para /auth
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      toast({
+        title: 'Acesso restrito',
+        description: 'Voce precisa ser admin para gerenciar variantes.',
+        variant: 'destructive',
+      });
+      navigate('/auth');
+    }
+  }, [authLoading, isAdmin, navigate, toast]);
 
   // Fetch data
   const { data: variants, isLoading } = useQuery({
@@ -125,13 +140,13 @@ export default function ProductVariants() {
   });
 
   // Generate variant code automatically
-  const generateVariantCode = async (productId: string): Promise<string> => {
+  const generateVariantCode = async (productId: string, colorId: string | null): Promise<string> => {
     try {
       const { data, error } = await supabase.rpc('generate_auto_variant_code', {
         p_product_id: productId,
-        p_color_id: null
+        p_color_id: colorId
       });
-      
+
       if (error) throw error;
       return data;
     } catch (error) {
@@ -144,12 +159,18 @@ export default function ProductVariants() {
   // Create/Update variant mutation
   const saveVariantMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      // color_id agora vem do form (pode ser null se nenhuma cor selecionada)
+      const colorId = data.color_id && data.color_id.length > 0 ? data.color_id : null;
+
       // Gerar código automaticamente
-      const variantCode = await generateVariantCode(data.product_id);
+      const variantCode = await generateVariantCode(data.product_id, colorId);
 
       const variantData = {
-        ...data,
-        color_id: null,
+        product_id: data.product_id,
+        product_size_id: data.product_size_id,
+        color_id: colorId,
+        stock_quantity: data.stock_quantity,
+        is_available: data.is_available,
         variant_code: variantCode
       };
 
@@ -170,7 +191,7 @@ export default function ProductVariants() {
       queryClient.invalidateQueries({ queryKey: ['product-variants'] });
       setIsDialogOpen(false);
       setEditingVariant(null);
-      setFormData({ product_id: '', product_size_id: '', stock_quantity: 0, is_available: true });
+      setFormData({ product_id: '', product_size_id: '', color_id: '', stock_quantity: 0, is_available: true });
       toast({
         title: editingVariant ? 'Variante atualizada' : 'Variante criada',
         description: editingVariant ? 'A variante foi atualizada com sucesso.' : 'A nova variante foi criada com sucesso.'
@@ -232,6 +253,7 @@ export default function ProductVariants() {
     setFormData({
       product_id: variant.product_id,
       product_size_id: variant.product_size_id,
+      color_id: variant.color_id || '',
       stock_quantity: variant.stock_quantity,
       is_available: variant.is_available
     });
@@ -246,9 +268,19 @@ export default function ProductVariants() {
 
   const openCreateDialog = () => {
     setEditingVariant(null);
-    setFormData({ product_id: '', product_size_id: '', stock_quantity: 0, is_available: true });
+    setFormData({ product_id: '', product_size_id: '', color_id: '', stock_quantity: 0, is_available: true });
     setIsDialogOpen(true);
   };
+
+  if (authLoading || !isAdmin) {
+    return (
+      <div className="container py-8">
+        <div className="flex items-center justify-center min-h-64">
+          <p className="text-muted-foreground">Verificando permissões…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -323,8 +355,8 @@ export default function ProductVariants() {
               
               <div>
                 <Label htmlFor="size">Tamanho *</Label>
-                <Select 
-                  value={formData.product_size_id} 
+                <Select
+                  value={formData.product_size_id}
                   onValueChange={(value) => setFormData({ ...formData, product_size_id: value })}
                 >
                   <SelectTrigger>
@@ -339,7 +371,34 @@ export default function ProductVariants() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
+              <div>
+                <Label htmlFor="color">Cor (opcional)</Label>
+                <Select
+                  value={formData.color_id || 'none'}
+                  onValueChange={(value) => setFormData({ ...formData, color_id: value === 'none' ? '' : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma cor (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem cor específica</SelectItem>
+                    {colors?.map((color) => (
+                      <SelectItem key={color.id} value={color.id}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-4 h-4 rounded-full border border-border inline-block"
+                            style={{ backgroundColor: color.hex_code }}
+                            aria-hidden
+                          />
+                          {color.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div>
                 <Label htmlFor="stock">Quantidade em Estoque</Label>
                 <Input

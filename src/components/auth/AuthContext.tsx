@@ -28,26 +28,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Verificar se o usuário é admin ou super_admin
-          setTimeout(async () => {
-            try {
-              const { data: adminProfile } = await supabase
-                .from('admin_profiles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-              
-              const hasAdminProfile = !!adminProfile;
-              const isSuperAdminUser = adminProfile?.role === 'super_admin';
-              
-              setIsAdmin(hasAdminProfile);
-              setIsSuperAdmin(isSuperAdminUser);
-            } catch (error) {
-              console.error('Erro ao verificar perfil admin:', error);
-              setIsAdmin(false);
-              setIsSuperAdmin(false);
-            }
-          }, 0);
+          // Verificar se o usuário é admin ou super_admin.
+          // Aceita apenas role IN ('admin', 'super_admin'); perfis com role='user' nao viram admin.
+          try {
+            const { data: adminProfile } = await supabase
+              .from('admin_profiles')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
+
+            const isAdminUser = adminProfile?.role === 'admin' || adminProfile?.role === 'super_admin';
+            const isSuperAdminUser = adminProfile?.role === 'super_admin';
+
+            setIsAdmin(isAdminUser);
+            setIsSuperAdmin(isSuperAdminUser);
+          } catch (error) {
+            console.error('Erro ao verificar perfil admin:', error);
+            setIsAdmin(false);
+            setIsSuperAdmin(false);
+          }
         } else {
           setIsAdmin(false);
           setIsSuperAdmin(false);

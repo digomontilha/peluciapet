@@ -80,40 +80,30 @@ export default function UserManagement() {
           .eq('id', editingUser.id);
         if (error) throw error;
 
-        // Atualizar senha se fornecida
+        // Atualizar senha se fornecida via Edge Function reset-admin-password
         if (data.password) {
-          // Para atualizar senha, seria necessário usar a API Admin
-          // Por enquanto, vamos mostrar uma mensagem de que a senha não pode ser alterada
-          toast({
-            title: "Aviso",
-            description: "Funcionalidade de alterar senha em desenvolvimento.",
-            variant: "default",
+          const { error: pwError } = await supabase.functions.invoke('reset-admin-password', {
+            body: {
+              user_id: editingUser.user_id,
+              new_password: data.password
+            }
           });
+          if (pwError) {
+            throw new Error(`Senha do perfil atualizada, mas falhou alterar a senha: ${pwError.message}`);
+          }
         }
       } else {
-        // Criar novo usuário usando Edge Function
-        const { data: session } = await supabase.auth.getSession();
-        if (!session.session) {
-          throw new Error('Usuário não autenticado');
-        }
-
-        const response = await fetch('https://eogzmfpioypmrcbjnvtd.supabase.co/functions/v1/create-admin-user', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.session.access_token}`,
-          },
-          body: JSON.stringify({
+        // Criar novo usuário usando Edge Function create-admin-user
+        const { error: createError } = await supabase.functions.invoke('create-admin-user', {
+          body: {
             email: data.email,
             password: data.password,
             full_name: data.full_name,
             role: data.role,
-          }),
+          }
         });
-
-        const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.error || 'Erro ao criar usuário');
+        if (createError) {
+          throw new Error(createError.message || 'Erro ao criar usuário');
         }
       }
     },
@@ -284,6 +274,8 @@ export default function UserManagement() {
     switch (role) {
       case 'super_admin':
         return <Crown className="h-4 w-4" />;
+      case 'admin':
+        return <Shield className="h-4 w-4" />;
       case 'user':
         return <User className="h-4 w-4" />;
       default:
@@ -295,10 +287,21 @@ export default function UserManagement() {
     switch (role) {
       case 'super_admin':
         return 'default';
+      case 'admin':
+        return 'default';
       case 'user':
         return 'secondary';
       default:
         return 'outline';
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'super_admin': return 'Super Admin';
+      case 'admin': return 'Admin';
+      case 'user': return 'User';
+      default: return role;
     }
   };
 
@@ -425,6 +428,7 @@ export default function UserManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                   </SelectContent>
                 </Select>
@@ -514,7 +518,7 @@ export default function UserManagement() {
             <CardContent>
               <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center gap-1 w-fit">
                 {getRoleIcon(user.role)}
-                {user.role === 'super_admin' ? 'Super Admin' : 'User'}
+                {getRoleLabel(user.role)}
               </Badge>
               <p className="text-xs text-muted-foreground mt-2">
                 Criado em {new Date(user.created_at).toLocaleDateString('pt-BR')}
