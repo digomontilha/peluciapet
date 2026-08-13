@@ -1,19 +1,29 @@
-import { Instagram, MessageCircle, Mail, Phone, MapPin, Shield, FileText, HelpCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Instagram, MessageCircle, Mail, Phone, MapPin, FileText, HelpCircle, Shield, RefreshCcw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useStoreConfig } from '@/hooks/use-store-config';
 
 export function Footer() {
+  const { config: storeConfig } = useStoreConfig();
+
+  const whatsappNumber = storeConfig?.whatsapp_number || '5511937413939';
+  const whatsappDisplay = storeConfig?.whatsapp_display || '(11) 93741-3939';
+  const email = storeConfig?.email || 'contato@peluciapet.com.br';
+  const addressLocality = storeConfig?.address_locality || 'Jundiaí';
+  const addressRegion = storeConfig?.address_region || 'SP';
+  const addressDisplay = addressRegion ? `${addressLocality} - ${addressRegion}` : addressLocality;
+  const instagramUrl = storeConfig?.instagram_url || 'https://www.instagram.com/pelucia.pet';
+  const currentYear = new Date().getFullYear();
+  const whatsappUrl = `https://wa.me/${whatsappNumber}`;
+
   return (
     <footer className="bg-gradient-elegant text-white mt-0">
       <div className="container py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Marca */}
           <div className="space-y-4 col-span-2 md:col-span-1">
-            <h3 className="text-xl font-serif font-bold text-pet-gold">PelúciaPet</h3>
+            <h3 className="text-xl font-serif font-bold text-pet-gold">Pelúcia Pet</h3>
             <p className="text-sm text-white/90">
               Caminhas premium pra pets que merecem o melhor.
-            </p>
-            <p className="text-xs text-white/70">
-              Antialérgicas, laváveis e feitas pra durar.
             </p>
           </div>
 
@@ -21,27 +31,34 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold text-pet-gold">Comprar</h4>
             <div className="space-y-2">
-              <a
-                href="/como-comprar"
+              <Link
+                to="/como-comprar"
                 className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
               >
                 <HelpCircle className="h-3.5 w-3.5" />
                 Como Comprar
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/faq"
                 className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
               >
                 <FileText className="h-3.5 w-3.5" />
                 FAQ
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/trocas-e-devolucoes"
+                className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
+              >
+                <RefreshCcw className="h-3.5 w-3.5" />
+                Trocas e Devoluções
+              </Link>
+              <Link
+                to="/privacidade"
                 className="flex items-center gap-2 text-sm text-white/90 hover:text-pet-gold transition-colors"
               >
                 <Shield className="h-3.5 w-3.5" />
                 Política de Privacidade
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -49,23 +66,27 @@ export function Footer() {
           <div className="space-y-4 min-w-0">
             <h4 className="font-semibold text-pet-gold">Contato</h4>
             <div className="space-y-3">
-              <button
-                onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
-                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer min-w-0"
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`WhatsApp ${whatsappDisplay}`}
+                className="flex items-center space-x-2 text-sm text-white/90 hover:text-pet-gold transition-colors min-w-0"
               >
                 <Phone className="h-4 w-4 text-pet-gold shrink-0" />
-                <span>(11) 93741-3939</span>
-              </button>
-              <button
-                onClick={() => window.open('mailto:contato@peluciapet.com.br', '_blank')}
-                className="flex items-center space-x-2 text-xs sm:text-sm text-white/90 hover:text-pet-gold transition-colors cursor-pointer min-w-0 w-full text-left group"
+                <span>{whatsappDisplay}</span>
+              </a>
+              <a
+                href={`mailto:${email}`}
+                aria-label={`Enviar email para ${email}`}
+                className="flex items-center space-x-2 text-xs sm:text-sm text-white/90 hover:text-pet-gold transition-colors min-w-0 w-full text-left group"
               >
                 <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-pet-gold shrink-0" />
-                <span className="min-w-0 leading-tight">contato@peluciapet.com.br</span>
-              </button>
+                <span className="min-w-0 leading-tight">{email}</span>
+              </a>
               <div className="flex items-center space-x-2 text-sm text-white/70">
                 <MapPin className="h-4 w-4 text-pet-gold/70 shrink-0" />
-                <span>São Paulo - SP</span>
+                <span>{addressDisplay}</span>
               </div>
             </div>
           </div>
@@ -75,7 +96,7 @@ export function Footer() {
             <h4 className="font-semibold text-pet-gold">Siga a gente</h4>
             <div className="flex gap-3">
               <a
-                href="https://www.instagram.com/pelucia.pet"
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -84,10 +105,10 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://wa.me/5511937413939"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="WhatsApp"
+                aria-label={`WhatsApp ${whatsappDisplay}`}
                 className="w-10 h-10 rounded-full bg-white/10 hover:bg-pet-gold/20 hover:scale-110 flex items-center justify-center transition-all duration-200"
               >
                 <MessageCircle className="h-5 w-5" />
@@ -101,7 +122,7 @@ export function Footer() {
 
         <div className="border-t border-white/20 mt-10 pt-6 text-center">
           <p className="text-sm text-white/70">
-            © 2025 PelúciaPet. Todos os direitos reservados.
+            © {currentYear} Pelúcia Pet. Todos os direitos reservados.
           </p>
         </div>
       </div>
