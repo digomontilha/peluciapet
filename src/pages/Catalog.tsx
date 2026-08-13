@@ -235,9 +235,14 @@ export default function Catalog() {
       <div className="container py-12">
         {/* Filtros de categoria */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">Explore por categoria</h2>
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                Explore por categoria
+                <span className="ml-1 sm:ml-2 text-sm sm:text-base font-normal text-muted-foreground">
+                  ({products.length})
+                </span>
+              </h2>
               <p className="text-sm text-muted-foreground mt-0.5">Encontre o produto perfeito pro seu pet</p>
             </div>
             
