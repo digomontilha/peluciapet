@@ -237,13 +237,13 @@ export default function Catalog() {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="min-w-0 flex-1">
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+              <h2 className="text-base sm:text-2xl font-bold text-foreground leading-tight">
                 Explore por categoria
-                <span className="ml-1 sm:ml-2 text-sm sm:text-base font-normal text-muted-foreground">
+                <span className="ml-1.5 sm:ml-2 text-xs sm:text-base font-normal text-muted-foreground">
                   ({products.length})
                 </span>
               </h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Encontre o produto perfeito pro seu pet</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Encontre o produto perfeito pro seu pet</p>
             </div>
             
             {/* Menu hambúrguer para mobile */}
