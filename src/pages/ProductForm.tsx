@@ -327,96 +327,67 @@ export default function ProductForm() {
           .from('products')
           .update(productData)
           .eq('id', id);
-        
+
         if (productError) throw productError;
         productId = id;
-        
+
         // Remover preços antigos e inserir novos
         await supabase.from('product_prices').delete().eq('product_id', id);
-        
-      } else {
-        // Gerar código do produto automaticamente
-        const { data: generatedCode, error: codeError } = await supabase.rpc('generate_auto_product_code', {
-          p_category_id: productData.category_id
-        });
-        
-        if (codeError) throw codeError;
-        
-        const productDataWithCode = {
-          ...productData,
-          product_code: generatedCode
-        };
-        
-        // Criar novo produto
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .insert(productDataWithCode)
-          .select()
-          .single();
-        
-        if (productError) throw productError;
-        productId = product.id;
-      }
-      
-      // Para novos produtos, criar tamanhos padrão e preços
-      if (!isEditing) {
-        // Criar tamanhos padrão para o produto
-        const defaultSizes = [
-          { name: 'P', dimensions: '50x40x17cm', width_cm: 50, height_cm: 40, depth_cm: 17, display_order: 1 },
-          { name: 'M', dimensions: '60x50x17cm', width_cm: 60, height_cm: 50, depth_cm: 17, display_order: 2 },
-          { name: 'G', dimensions: '70x60x17cm', width_cm: 70, height_cm: 60, depth_cm: 17, display_order: 3 },
-          { name: 'GG', dimensions: '80x70x17cm', width_cm: 80, height_cm: 70, depth_cm: 17, display_order: 4 }
-        ];
-
-        const { data: sizesData, error: sizesError } = await supabase
-          .from('product_sizes')
-          .insert(defaultSizes.map(size => ({
-            ...size,
-            product_id: productId
-          })))
-          .select();
-
-        if (sizesError) throw sizesError;
-
-        // Criar preços padrão para todos os tamanhos
-        const defaultPrices = sizesData?.map(size => ({
-          product_id: productId,
-          product_size_id: size.id,
-          price: 100 // Preço padrão
-        })) || [];
-
-        const { error: pricesError } = await supabase
-          .from('product_prices')
-          .insert(defaultPrices);
-
-        if (pricesError) throw pricesError;
-      } else {
-        // Para edição, apenas atualizar preços existentes se houver algum
         if (prices.length > 0) {
           const pricesData = prices.map(price => ({
             product_id: productId,
             product_size_id: price.size_id,
             price: price.price
           }));
-          
+
           const { error: pricesError } = await supabase
             .from('product_prices')
             .insert(pricesData);
-          
+
           if (pricesError) throw pricesError;
         }
+
+      } else {
+        // Gerar código do produto automaticamente
+        const { data: generatedCode, error: codeError } = await supabase.rpc('generate_auto_product_code', {
+          p_category_id: productData.category_id
+        });
+
+        if (codeError) throw codeError;
+
+        const productDataWithCode = {
+          ...productData,
+          product_code: generatedCode
+        };
+
+        // Criar novo produto
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .insert(productDataWithCode)
+          .select()
+          .single();
+
+        if (productError) throw productError;
+        productId = product.id;
+
+        toast({
+          title: "Produto criado!",
+          description: "Adicione tamanhos e preços antes de publicar.",
+        });
       }
       
       // Upload de imagens (apenas se houver novas imagens)
       if (selectedImages.length > 0) {
         await uploadProductImages(productId);
       }
-      
-      toast({
-        title: isEditing ? "Produto atualizado!" : "Produto criado!",
-        description: `${productData.name} foi ${isEditing ? 'atualizado' : 'adicionado ao catálogo'}.`,
-      });
-      
+
+      if (isEditing) {
+        toast({
+          title: "Produto atualizado!",
+          description: `${productData.name} foi atualizado.`,
+        });
+      }
+
       navigate('/admin/products');
       
     } catch (error: any) {

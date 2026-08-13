@@ -26,7 +26,7 @@ interface ContactMessage {
 }
 
 export default function ContactManagement() {
-  const { user, loading: isLoading } = useAuth();
+  const { isAdmin, loading: isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -34,15 +34,20 @@ export default function ContactManagement() {
   const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      navigate("/auth");
+    if (!isLoading && !isAdmin) {
+      toast({
+        title: 'Acesso restrito',
+        description: 'Voce precisa ser admin para gerenciar mensagens.',
+        variant: 'destructive',
+      });
+      navigate('/auth');
       return;
     }
 
-    if (user) {
+    if (isAdmin) {
       fetchMessages();
     }
-  }, [user, isLoading, navigate]);
+  }, [isAdmin, isLoading, navigate, toast]);
 
   const fetchMessages = async () => {
     try {

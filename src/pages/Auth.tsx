@@ -35,37 +35,42 @@ export default function Auth() {
         if (error) throw error;
 
         if (data.user) {
-          // Verificar se é admin usando timeout para aguardar a sessão
-          setTimeout(async () => {
-            try {
-              const { data: adminProfile, error } = await supabase
-                .from('admin_profiles')
-                .select('*')
-                .eq('user_id', data.user.id)
-                .maybeSingle();
-
-              console.log('Admin check:', { adminProfile, error, userId: data.user.id });
-
-              if (!adminProfile) {
-                await supabase.auth.signOut();
-                setError('Acesso negado. Apenas administradores podem fazer login.');
-                setLoading(false);
-                return;
-              }
-
-              toast({
-                title: "Login realizado com sucesso!",
-                description: `Bem-vindo(a), ${adminProfile.full_name || email}!`,
-              });
-              navigate('/admin');
-              setLoading(false);
-            } catch (err) {
-              console.error('Erro ao verificar admin:', err);
-              await supabase.auth.signOut();
-              setError('Erro ao verificar permissões administrativas.');
-              setLoading(false);
+          // A sessão retornada por signInWithPassword já carrega o user completo.
+          // Sem setTimeout. Retry no admin_profile por ate ~2s caso a RLS ainda esteja propagando.
+          const maxAttempts = 5;
+          const delayMs = 400;
+          let adminProfile: { role: string; full_name: string | null } | null = null;
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            const { data: profile, error: profileError } = await supabase
+              .from('admin_profiles')
+              .select('role, full_name')
+              .eq('user_id', data.user.id)
+              .maybeSingle();
+            if (profileError) {
+              console.error('Admin profile query error:', profileError);
             }
-          }, 100);
+            if (profile) {
+              adminProfile = profile;
+              break;
+            }
+            if (attempt < maxAttempts) {
+              await new Promise((r) => setTimeout(r, delayMs));
+            }
+          }
+
+          if (!adminProfile || (adminProfile.role !== 'admin' && adminProfile.role !== 'super_admin')) {
+            await supabase.auth.signOut();
+            setError('Acesso negado. Apenas administradores podem fazer login.');
+            setLoading(false);
+            return;
+          }
+
+          toast({
+            title: "Login realizado com sucesso!",
+            description: `Bem-vindo(a), ${adminProfile.full_name || email}!`,
+          });
+          navigate('/admin');
+          setLoading(false);
         }
       } else {
         const redirectUrl = `${window.location.origin}/`;

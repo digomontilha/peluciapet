@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, ArrowLeft } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Category {
@@ -24,6 +25,7 @@ export default function CategoryManagement() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAdmin, loading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
@@ -31,6 +33,18 @@ export default function CategoryManagement() {
     description: '',
     icon: ''
   });
+
+  // Guard: redireciona nao-admin para /auth
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      toast({
+        title: 'Acesso restrito',
+        description: 'Voce precisa ser admin para gerenciar categorias.',
+        variant: 'destructive',
+      });
+      navigate('/auth');
+    }
+  }, [authLoading, isAdmin, navigate, toast]);
 
   // Fetch categories
   const { data: categories, isLoading } = useQuery({
@@ -142,6 +156,16 @@ export default function CategoryManagement() {
     setFormData({ name: '', description: '', icon: '' });
     setIsDialogOpen(true);
   };
+
+  if (authLoading || !isAdmin) {
+    return (
+      <div className="container py-8">
+        <div className="flex items-center justify-center min-h-64">
+          <p className="text-muted-foreground">Verificando permissões…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
