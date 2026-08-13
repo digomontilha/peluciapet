@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useNoindex } from '@/hooks/use-noindex';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProductVariant {

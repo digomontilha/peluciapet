@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Users, Settings, Plus, Eye, Mail, Bell } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { useNoindex } from '@/hooks/use-noindex';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -19,6 +20,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  useNoindex();
   const { user, isAdmin, isSuperAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({

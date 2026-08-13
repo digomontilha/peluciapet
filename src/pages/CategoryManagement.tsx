@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useNoindex } from '@/hooks/use-noindex';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Category {
@@ -22,6 +23,7 @@ interface Category {
 }
 
 export default function CategoryManagement() {
+  useNoindex();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
