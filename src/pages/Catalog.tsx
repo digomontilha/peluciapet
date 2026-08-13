@@ -690,11 +690,12 @@ function ProductCard({
         {/* Price: range quando varia, fixo quando unico */}
         <div className="pt-0.5">
           {hasPriceRange ? (
-            <div className="text-base font-bold text-emerald-600 leading-none">
-              R$ {minPrice.toFixed(2)} <span className="text-muted-foreground font-normal text-xs">a</span> R$ {maxPrice.toFixed(2)}
+            <div className="text-sm sm:text-base font-bold text-emerald-600 leading-tight whitespace-nowrap">
+              <span className="sm:hidden">R$ {minPrice.toFixed(0)} - R$ {maxPrice.toFixed(0)}</span>
+              <span className="hidden sm:inline">R$ {minPrice.toFixed(2)} <span className="text-muted-foreground font-normal text-xs">a</span> R$ {maxPrice.toFixed(2)}</span>
             </div>
           ) : (
-            <div className="text-lg font-bold text-emerald-600 leading-none">
+            <div className="text-base sm:text-lg font-bold text-emerald-600 leading-none">
               R$ {minPrice.toFixed(2)}
             </div>
           )}
@@ -707,7 +708,8 @@ function ProductCard({
             className="w-full h-10 text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
             <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
-            Comprar no WhatsApp
+            <span className="sm:hidden">WhatsApp</span>
+            <span className="hidden sm:inline">Comprar no WhatsApp</span>
           </Button>
         </div>
       </div>
