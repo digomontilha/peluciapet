@@ -1,4 +1,4 @@
-import { Heart, ShoppingBag, User, LogOut, Settings, Menu, X } from 'lucide-react';
+import { MessageCircle, ShoppingBag, User, LogOut, Settings, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/components/auth/AuthContext';
+import { useStoreConfig } from '@/hooks/use-store-config';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -16,22 +17,27 @@ import logo from '/lovable-uploads/96f8f9d3-cd58-4b22-a2ab-9f8c894aa0f3.png';
 
 export function Header() {
   const { user, isAdmin, signOut } = useAuth();
+  const { config: storeConfig } = useStoreConfig();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const whatsappNumber = storeConfig?.whatsapp_number || '5511937413939';
+  const whatsappDisplay = storeConfig?.whatsapp_display || '(11) 93741-3939';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}`;
 
   const handleSignOut = async () => {
     try {
       await signOut();
       toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso.",
+        title: 'Logout realizado',
+        description: 'Você foi desconectado com sucesso.',
       });
       navigate('/');
     } catch (error) {
       toast({
-        title: "Erro no logout",
-        description: "Não foi possível realizar o logout.",
-        variant: "destructive",
+        title: 'Erro no logout',
+        description: 'Não foi possível realizar o logout.',
+        variant: 'destructive',
       });
     }
   };
@@ -46,14 +52,14 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo - Versão responsiva */}
         <div className="flex items-center space-x-3">
-          <img 
-            src={logo} 
-            alt="PelúciaPet" 
+          <img
+            src={logo}
+            alt="Pelúcia Pet"
             className="h-10 w-10 rounded-full object-cover shadow-soft"
           />
           <div className="flex flex-col">
             <h1 className="text-lg md:text-xl font-bold bg-gradient-warm bg-clip-text text-transparent">
-              PelúciaPet
+              Pelúcia Pet
             </h1>
             <p className="hidden sm:block text-xs text-muted-foreground">
               Porque seu melhor amigo merece o melhor!
@@ -66,6 +72,9 @@ export function Header() {
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
             <ShoppingBag className="h-4 w-4 mr-2" />
             Catálogo
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/como-comprar')}>
+            Como Comprar
           </Button>
           {isAdmin && (
             <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
@@ -80,46 +89,34 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
+            onClick={() => window.open(whatsappUrl, '_blank')}
+            aria-label={`Contato via WhatsApp ${whatsappDisplay}`}
             className="hover:bg-pet-gold hover:text-white transition-all duration-300"
           >
-            <Heart className="h-4 w-4 mr-2" />
+            <MessageCircle className="h-4 w-4 mr-2" />
             Contato
           </Button>
 
-          {user ? (
+          {isAdmin && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
                   <User className="h-4 w-4 mr-2" />
-                  {user.email?.split('@')[0]}
+                  {user?.email?.split('@')[0] || 'Admin'}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur">
-                {isAdmin && (
-                  <>
-                    <DropdownMenuItem onClick={() => navigate('/admin')}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Painel Admin
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
+                <DropdownMenuItem onClick={() => navigate('/admin')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Painel Admin
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => navigate('/auth')}
-              className="border-pet-gold text-pet-gold hover:bg-pet-gold hover:text-white transition-all duration-300"
-            >
-              Login Admin
-            </Button>
           )}
         </div>
 
@@ -129,11 +126,11 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
-            aria-label="Contato via WhatsApp"
-            className="min-w-[40px] min-h-[40px] h-10 w-10 p-0 hover:bg-pet-gold hover:text-white transition-all duration-300"
+            onClick={() => window.open(whatsappUrl, '_blank')}
+            aria-label={`Contato via WhatsApp ${whatsappDisplay}`}
+            className="min-w-[44px] min-h-[44px] h-10 w-10 p-0 hover:bg-pet-gold hover:text-white transition-all duration-300"
           >
-            <Heart className="h-5 w-5" />
+            <MessageCircle className="h-5 w-5" />
           </Button>
 
           {/* Menu Hambúrguer */}
@@ -143,7 +140,7 @@ export function Header() {
                 variant="ghost"
                 size="sm"
                 aria-label="Abrir menu"
-                className="min-w-[40px] min-h-[40px] h-10 w-10 p-0"
+                className="min-w-[44px] min-h-[44px] h-10 w-10 p-0"
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -151,20 +148,20 @@ export function Header() {
             <SheetContent side="right" className="w-80">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-3">
-                  <img 
-                    src={logo} 
-                    alt="PelúciaPet" 
+                  <img
+                    src={logo}
+                    alt="Pelúcia Pet"
                     className="h-8 w-8 rounded-full object-cover"
                   />
                   <span className="text-xl font-bold bg-gradient-warm bg-clip-text text-transparent">
-                    PelúciaPet
+                    Pelúcia Pet
                   </span>
                 </SheetTitle>
                 <SheetDescription>
                   Navegue pelo nosso catálogo e encontre o melhor para seu pet
                 </SheetDescription>
               </SheetHeader>
-              
+
               <div className="mt-8 space-y-4">
                 {/* Navegação */}
                 <div className="space-y-2">
@@ -177,6 +174,17 @@ export function Header() {
                     <div>
                       <div className="font-medium">Catálogo</div>
                       <div className="text-xs text-muted-foreground">Ver todos os produtos</div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavigation('/como-comprar')}
+                    className="w-full justify-start h-12 text-left"
+                  >
+                    <div>
+                      <div className="font-medium">Como Comprar</div>
+                      <div className="text-xs text-muted-foreground">Passo a passo</div>
                     </div>
                   </Button>
 
@@ -200,27 +208,28 @@ export function Header() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      window.open('https://wa.me/5511937413939', '_blank');
+                      window.open(whatsappUrl, '_blank');
                       setIsMobileMenuOpen(false);
                     }}
+                    aria-label={`Contato via WhatsApp ${whatsappDisplay}`}
                     className="w-full justify-start h-12 border-pet-gold text-pet-gold hover:bg-pet-gold hover:text-white"
                   >
-                    <Heart className="h-5 w-5 mr-3" />
+                    <MessageCircle className="h-5 w-5 mr-3" />
                     <div>
                       <div className="font-medium">Contato via WhatsApp</div>
-                      <div className="text-xs opacity-75">(11) 93741-3939</div>
+                      <div className="text-xs opacity-75">{whatsappDisplay}</div>
                     </div>
                   </Button>
                 </div>
 
-                {/* Autenticação */}
-                <div className="border-t pt-4">
-                  {user ? (
+                {/* Autenticação (só admin logado vê "Sair") */}
+                {isAdmin && (
+                  <div className="border-t pt-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 p-3 bg-pet-gold/10 rounded-lg">
                         <User className="h-5 w-5 text-pet-gold" />
                         <div>
-                          <div className="font-medium">{user.email?.split('@')[0]}</div>
+                          <div className="font-medium">{user?.email?.split('@')[0]}</div>
                           <div className="text-xs text-muted-foreground">Logado como admin</div>
                         </div>
                       </div>
@@ -236,17 +245,8 @@ export function Header() {
                         Sair
                       </Button>
                     </div>
-                  ) : (
-                    <Button 
-                      variant="default"
-                      onClick={() => handleNavigation('/auth')}
-                      className="w-full bg-pet-gold hover:bg-pet-gold/90"
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Login Admin
-                    </Button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>
