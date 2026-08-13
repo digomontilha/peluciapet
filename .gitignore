@@ -7,6 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Lockfiles (projeto usa Bun; package-lock.json e yarn.lock proibidos)
+package-lock.json
+yarn.lock
+
 node_modules
 dist
 dist-ssr
