@@ -637,24 +637,26 @@ function ProductCard({
 
         {/* Color swatches overlay (bottom-right) */}
         {availableImages.length > 1 && (
-          <div className="absolute bottom-2 right-2 flex gap-1.5 bg-card/80 backdrop-blur-sm rounded-full px-2 py-1.5 shadow-md ring-1 ring-black/5">
-            {availableImages.slice(0, 4).map((image, idx) => (
-              <button
-                key={idx}
-                onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(idx); }}
-                aria-label={`Selecionar cor ${idx + 1}`}
-                className={`w-7 h-7 min-w-[28px] min-h-[28px] rounded-full overflow-hidden transition-all duration-200 ${selectedImageIndex === idx
-                  ? 'ring-2 ring-pet-gold ring-offset-1 scale-110'
-                  : 'ring-1 ring-black/10 hover:scale-110'}`}
-              >
-                <img src={image.image_url} alt="" className="w-full h-full object-cover" />
-              </button>
-            ))}
-            {availableImages.length > 4 && (
-              <div className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-bold">
-                +{availableImages.length - 4}
-              </div>
-            )}
+          <div className="absolute inset-x-2 bottom-2 flex justify-end pointer-events-none">
+            <div className="flex gap-1 sm:gap-1.5 bg-card/80 backdrop-blur-sm rounded-full px-1.5 sm:px-2 py-1 sm:py-1.5 shadow-md ring-1 ring-black/5 pointer-events-auto max-w-full">
+              {availableImages.slice(0, 4).map((image, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(idx); }}
+                  aria-label={`Selecionar cor ${idx + 1}`}
+                  className={`w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] rounded-full overflow-hidden transition-all duration-200 shrink-0 ${selectedImageIndex === idx
+                    ? 'ring-2 ring-pet-gold ring-offset-1 scale-110'
+                    : 'ring-1 ring-black/10 hover:scale-110'}`}
+                >
+                  <img src={image.image_url} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+              {availableImages.length > 4 && (
+                <div className="w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-bold shrink-0">
+                  +{availableImages.length - 4}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
