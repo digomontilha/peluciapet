@@ -125,6 +125,122 @@ export type Database = {
         }
         Relationships: []
       }
+      fabrics: {
+        Row: {
+          commercial_line: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          commercial_line: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          commercial_line?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_benefits: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon_name: string | null
+          id: string
+          is_active: boolean
+          product_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          product_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_benefits_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_fabrics: {
+        Row: {
+          created_at: string
+          display_order: number
+          fabric_id: string
+          id: string
+          is_available: boolean
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          fabric_id: string
+          id?: string
+          is_available?: boolean
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          fabric_id?: string
+          id?: string
+          is_available?: boolean
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_fabrics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           alt_text: string | null
@@ -178,27 +294,43 @@ export type Database = {
       }
       product_prices: {
         Row: {
+          commercial_line: string | null
           created_at: string
+          fabric_id: string | null
           id: string
+          pix_price: number | null
           price: number
           product_id: string
           product_size_id: string | null
         }
         Insert: {
+          commercial_line?: string | null
           created_at?: string
+          fabric_id?: string | null
           id?: string
+          pix_price?: number | null
           price: number
           product_id: string
           product_size_id?: string | null
         }
         Update: {
+          commercial_line?: string | null
           created_at?: string
+          fabric_id?: string | null
           id?: string
+          pix_price?: number | null
           price?: number
           product_id?: string
           product_size_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "product_prices_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "product_prices_product_id_fkey"
             columns: ["product_id"]
@@ -252,12 +384,21 @@ export type Database = {
           updated_at?: string
           width_cm?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_sizes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_variants: {
         Row: {
           color_id: string | null
           created_at: string
+          fabric_id: string | null
           id: string
           is_available: boolean | null
           product_id: string
@@ -269,6 +410,7 @@ export type Database = {
         Insert: {
           color_id?: string | null
           created_at?: string
+          fabric_id?: string | null
           id?: string
           is_available?: boolean | null
           product_id: string
@@ -280,6 +422,7 @@ export type Database = {
         Update: {
           color_id?: string | null
           created_at?: string
+          fabric_id?: string | null
           id?: string
           is_available?: boolean | null
           product_id?: string
@@ -294,6 +437,13 @@ export type Database = {
             columns: ["color_id"]
             isOneToOne: false
             referencedRelation: "colors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
             referencedColumns: ["id"]
           },
           {
@@ -319,9 +469,13 @@ export type Database = {
           description: string | null
           id: string
           is_custom_order: boolean | null
+          meta_description: string | null
+          meta_title: string | null
           name: string
           observations: string | null
           product_code: string | null
+          short_description: string | null
+          slug: string | null
           status: string | null
           updated_at: string
         }
@@ -331,9 +485,13 @@ export type Database = {
           description?: string | null
           id?: string
           is_custom_order?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
           name: string
           observations?: string | null
           product_code?: string | null
+          short_description?: string | null
+          slug?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -343,9 +501,13 @@ export type Database = {
           description?: string | null
           id?: string
           is_custom_order?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
           name?: string
           observations?: string | null
           product_code?: string | null
+          short_description?: string | null
+          slug?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -395,6 +557,63 @@ export type Database = {
         }
         Relationships: []
       }
+      store_config: {
+        Row: {
+          address_country: string
+          address_locality: string | null
+          address_region: string | null
+          email: string
+          id: number
+          instagram_url: string | null
+          og_image_url: string | null
+          payment_methods: string[]
+          pix_discount_percent: number
+          production_time: string
+          shipping_time: string
+          site_url: string
+          updated_at: string
+          warranty: string
+          whatsapp_display: string
+          whatsapp_number: string
+        }
+        Insert: {
+          address_country?: string
+          address_locality?: string | null
+          address_region?: string | null
+          email?: string
+          id?: number
+          instagram_url?: string | null
+          og_image_url?: string | null
+          payment_methods?: string[]
+          pix_discount_percent?: number
+          production_time?: string
+          shipping_time?: string
+          site_url?: string
+          updated_at?: string
+          warranty?: string
+          whatsapp_display?: string
+          whatsapp_number?: string
+        }
+        Update: {
+          address_country?: string
+          address_locality?: string | null
+          address_region?: string | null
+          email?: string
+          id?: number
+          instagram_url?: string | null
+          og_image_url?: string | null
+          payment_methods?: string[]
+          pix_discount_percent?: number
+          production_time?: string
+          shipping_time?: string
+          site_url?: string
+          updated_at?: string
+          warranty?: string
+          whatsapp_display?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -412,14 +631,8 @@ export type Database = {
         Args: { color_name?: string; product_code: string; size_name: string }
         Returns: string
       }
-      is_admin: {
-        Args: { user_id?: string }
-        Returns: boolean
-      }
-      is_super_admin: {
-        Args: { user_id?: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { user_id?: string }; Returns: boolean }
+      is_super_admin: { Args: { user_id?: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
@@ -520,12 +733,16 @@ export type Enums<
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  ? DefaultSchemaEnumNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+    ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+    : never
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -537,14 +754,26 @@ export type CompositeTypes<
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["CompositeTypes"][
+      PublicCompositeTypeNameOrOptions
+    ][CompositeTypeName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    ? DefaultSchema["CompositeTypes"][
+        PublicCompositeTypeNameOrOptions
+      ][CompositeTypeName] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
 
 export const Constants = {
