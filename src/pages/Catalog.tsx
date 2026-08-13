@@ -238,12 +238,12 @@ export default function Catalog() {
 
             {/* Headline com proposta de valor */}
             <h1 className="font-serif text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-white leading-tight px-2 drop-shadow-md">
-              Caminhas premium feitas pra durar
+              Caminhas com capa lavavel
             </h1>
 
             {/* Sub: beneficios especificos */}
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white leading-snug px-2 drop-shadow-md font-medium">
-              Antialergicas, lavaveis na maquina e com garantia de 1 mes
+              Capa lavavel na maquina e garantia de 30 dias
             </p>
 
             {/* CTA unico forte */}
@@ -384,8 +384,8 @@ export default function Catalog() {
                   <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
                 </svg>
               </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Tecido antialérgico</h3>
-              <p className="text-xs text-muted-foreground leading-snug">Seguro pra pets com alergia ou pele sensível</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Tecido macio</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Toque suave, pensado pro descanso do pet</p>
             </div>
 
             <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -404,8 +404,8 @@ export default function Catalog() {
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
               </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Enchimento ortopédico</h3>
-              <p className="text-xs text-muted-foreground leading-snug">Alívio pra cães idosos ou com dor articular</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Enchimento confortavel</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Mantem o formato e acomoda bem o pet</p>
             </div>
 
             <div className="group bg-card rounded-2xl p-5 sm:p-6 text-center border border-border/50 hover:border-pet-gold/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -418,8 +418,8 @@ export default function Catalog() {
                   <circle cx="7" cy="18" r="2" />
                 </svg>
               </div>
-              <h3 className="font-bold text-sm text-foreground mb-1">Entrega SP capital</h3>
-              <p className="text-xs text-muted-foreground leading-snug">Em até 5 dias úteis na região metropolitana</p>
+              <h3 className="font-bold text-sm text-foreground mb-1">Envio por transportadora</h3>
+              <p className="text-xs text-muted-foreground leading-snug">Codigo de rastreio enviado por WhatsApp</p>
             </div>
           </div>
         </div>
@@ -431,11 +431,11 @@ export default function Catalog() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">5 dias</div>
-              <div className="text-xs sm:text-sm text-white/80">Entrega</div>
+              <div className="text-xs sm:text-sm text-white/80">Producao</div>
             </div>
             <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">100%</div>
-              <div className="text-xs sm:text-sm text-white/80">Compra segura</div>
+              <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">5%</div>
+              <div className="text-xs sm:text-sm text-white/80">Pix off</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-serif font-bold text-pet-gold">1 mes</div>
