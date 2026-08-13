@@ -214,15 +214,15 @@ export default function Catalog() {
             </h1>
 
             {/* Sub: beneficios especificos */}
-            <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-white/90 leading-snug px-2 drop-shadow">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white leading-snug px-2 drop-shadow-md font-medium">
               Antialergicas, lavaveis na maquina e com garantia de 1 mes
             </p>
 
             {/* CTA unico forte */}
-            <div className="pt-1 sm:pt-1.5">
+            <div className="pt-1.5 sm:pt-2">
               <Button
                 onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-5 sm:px-7 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold h-8 sm:h-10 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-5 sm:px-7 min-h-[44px] h-11 sm:h-10 text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                 Ver Caminhas
@@ -249,7 +249,7 @@ export default function Catalog() {
             {/* Menu hambúrguer para mobile */}
             <Sheet open={isCategoryMenuOpen} onOpenChange={setIsCategoryMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden rounded-full gap-2 border-pet-brown-dark/20 hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white">
+                <Button variant="outline" className="md:hidden rounded-full min-h-[40px] h-10 px-4 gap-2 text-sm font-medium border-pet-brown-dark/20 hover:border-pet-brown-dark hover:bg-pet-brown-dark hover:text-white">
                   <Menu className="h-4 w-4" />
                   Categorias
                 </Button>
@@ -315,7 +315,7 @@ export default function Catalog() {
           
           {/* Categoria selecionada para mobile — pill chip */}
           <div className="md:hidden mt-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pet-brown-dark text-white shadow-md">
+            <div className="inline-flex items-center gap-2 px-4 min-h-[40px] py-2.5 rounded-full bg-pet-brown-dark text-white shadow-md">
               <span aria-hidden>{selectedCategory === 'all' ? '🏪' : categories.find(c => c.name === selectedCategory)?.icon}</span>
               <span className="text-sm font-medium">{selectedCategory === 'all' ? 'Todos os produtos' : selectedCategory}</span>
             </div>
@@ -620,10 +620,10 @@ function ProductCard({
         <button
           onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
           aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-          className="absolute top-2 right-2 bg-card/90 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center shadow-md ring-1 ring-black/5 hover:bg-card hover:scale-110 transition-all duration-200"
+          className="absolute top-2 right-2 bg-card/90 backdrop-blur-sm rounded-full w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md ring-1 ring-black/5 hover:bg-card hover:scale-110 transition-all duration-200"
         >
           <Heart
-            className={`h-4 w-4 transition-all duration-200 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-muted-foreground'}`}
+            className={`h-5 w-5 transition-all duration-200 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-muted-foreground'}`}
           />
         </button>
 
@@ -637,13 +637,13 @@ function ProductCard({
 
         {/* Color swatches overlay (bottom-right) */}
         {availableImages.length > 1 && (
-          <div className="absolute bottom-2 right-2 flex gap-1 bg-card/80 backdrop-blur-sm rounded-full px-1.5 py-1 shadow-md ring-1 ring-black/5">
+          <div className="absolute bottom-2 right-2 flex gap-1.5 bg-card/80 backdrop-blur-sm rounded-full px-2 py-1.5 shadow-md ring-1 ring-black/5">
             {availableImages.slice(0, 4).map((image, idx) => (
               <button
                 key={idx}
                 onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(idx); }}
                 aria-label={`Selecionar cor ${idx + 1}`}
-                className={`w-4 h-4 rounded-full overflow-hidden transition-all duration-200 ${selectedImageIndex === idx
+                className={`w-7 h-7 min-w-[28px] min-h-[28px] rounded-full overflow-hidden transition-all duration-200 ${selectedImageIndex === idx
                   ? 'ring-2 ring-pet-gold ring-offset-1 scale-110'
                   : 'ring-1 ring-black/10 hover:scale-110'}`}
               >
@@ -651,7 +651,7 @@ function ProductCard({
               </button>
             ))}
             {availableImages.length > 4 && (
-              <div className="w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[8px] font-bold">
+              <div className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] font-bold">
                 +{availableImages.length - 4}
               </div>
             )}
@@ -663,7 +663,7 @@ function ProductCard({
       <div className="p-3 space-y-1">
         {/* Title + category */}
         <div>
-          <h3 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-pet-brown-dark transition-colors">
+          <h3 className="font-bold text-sm text-foreground leading-tight line-clamp-2 sm:line-clamp-1 group-hover:text-pet-brown-dark transition-colors min-w-0 break-words">
             {product.name}
           </h3>
           <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
@@ -710,7 +710,7 @@ function ProductCard({
         <div className="pt-1">
           <Button
             onClick={(e) => { e.stopPropagation(); onWhatsApp(); }}
-            className="w-full h-10 text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            className="w-full min-h-[44px] h-11 text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
             <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
             <span className="sm:hidden">WhatsApp</span>

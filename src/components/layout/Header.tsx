@@ -130,9 +130,10 @@ export function Header() {
             variant="ghost"
             size="sm"
             onClick={() => window.open('https://wa.me/5511937413939', '_blank')}
-            className="p-2 hover:bg-pet-gold hover:text-white transition-all duration-300"
+            aria-label="Contato via WhatsApp"
+            className="min-w-[40px] min-h-[40px] h-10 w-10 p-0 hover:bg-pet-gold hover:text-white transition-all duration-300"
           >
-            <Heart className="h-4 w-4" />
+            <Heart className="h-5 w-5" />
           </Button>
 
           {/* Menu Hambúrguer */}
@@ -141,7 +142,8 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-2"
+                aria-label="Abrir menu"
+                className="min-w-[40px] min-h-[40px] h-10 w-10 p-0"
               >
                 <Menu className="h-5 w-5" />
               </Button>
