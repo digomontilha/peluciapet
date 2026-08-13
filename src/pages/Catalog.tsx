@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { MessageCircle, Eye, Tag, Heart, Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { useStoreConfig } from '@/hooks/use-store-config';
 // import banner from '@/assets/pelucia-pet-banner.png';
 const banner = '/lovable-uploads/5a83c0d7-9107-43ae-aa06-700419a9adee.png';
 interface Product {
   id: string;
   name: string;
+  slug: string | null;
   description: string;
+  short_description?: string | null;
   observations?: string;
   is_custom_order: boolean;
   categories?: {
@@ -28,6 +32,8 @@ interface Product {
   }>;
   product_prices: Array<{
     price: number;
+    pix_price?: number | null;
+    commercial_line?: string | null;
     product_sizes?: {
       name: string;
       dimensions: string;
@@ -47,11 +53,11 @@ interface Category {
   icon: string;
 }
 export default function Catalog() {
+  const navigate = useNavigate();
+  const { config: storeConfig } = useStoreConfig();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(banner);
@@ -59,15 +65,13 @@ export default function Catalog() {
   // Hook para detectar tamanho da tela e trocar banner
   useEffect(() => {
     const updateBannerForScreen = () => {
-      const width = window.innerWidth;
-      
       // Usar o mesmo banner para todas as resoluções
       setCurrentBanner('/lovable-uploads/0f657d4e-81af-4ebf-9fcb-96c97eae066a.png');
     };
 
     updateBannerForScreen();
     window.addEventListener('resize', updateBannerForScreen);
-    
+
     return () => window.removeEventListener('resize', updateBannerForScreen);
   }, []);
 
@@ -78,7 +82,7 @@ export default function Catalog() {
     try {
       // Buscar dados em paralelo
       const [productsResult, categoriesResult] = await Promise.all([supabase.from('products').select(`
-            *,
+            id, name, slug, description, short_description, observations, is_custom_order, category_id,
             categories:category_id (name, icon),
             product_images (
               image_url,
@@ -87,7 +91,7 @@ export default function Catalog() {
               is_available
             ),
             product_prices (
-              price,
+              price, pix_price, commercial_line,
               product_sizes (
                 name,
                 dimensions,
@@ -106,7 +110,7 @@ export default function Catalog() {
       // Processar produtos para incluir informações de dimensões
       const processedProducts = (productsResult.data || []).map(product => ({
         ...product,
-        product_prices: product.product_prices.map(price => ({
+        product_prices: (product.product_prices || []).map(price => ({
           ...price,
           sizes: price.product_sizes ? {
             name: price.product_sizes.name,
@@ -131,35 +135,12 @@ export default function Catalog() {
     }
   };
   const filteredProducts = products.filter(product => selectedCategory === 'all' || product.categories?.name === selectedCategory);
-  const generateWhatsAppLink = async (product: Product, size?: string) => {
-    let variantCode = '';
-
-    // Buscar código da variante específica
-    if (size) {
-      try {
-        const {
-          data: variant
-        } = await supabase.from('product_variants').select('variant_code, product_sizes!inner(name)').eq('product_id', product.id).eq('product_sizes.name', size).single();
-        if (variant) {
-          variantCode = variant.variant_code;
-        }
-      } catch (error) {
-        console.log('Variante não encontrada, usando código do produto');
-        variantCode = product.id.substring(0, 8).toUpperCase();
-      }
-    }
-    const sizeInfo = size ? `tamanho ${size}` : '';
-    const productInfo = sizeInfo;
-    const codeInfo = variantCode ? `\nCódigo: ${variantCode}` : '';
-    const message = `Olá! Tenho interesse no produto: ${product.name}${productInfo ? ` (${productInfo})` : ''}${codeInfo}`;
-    return `https://wa.me/5511937413939?text=${encodeURIComponent(message)}`;
-  };
-  const handleWhatsAppClick = async (product: Product, size?: string) => {
-    const link = await generateWhatsAppLink(product, size);
-    window.open(link, '_blank');
-  };
   const getProductImage = (product: Product) => {
     return product.product_images[0]?.image_url || '/placeholder.svg';
+  };
+  const goToProduct = (product: Product) => {
+    const slug = product.slug || product.id;
+    navigate(`/produto/${slug}`);
   };
   if (loading) {
     return <div className="min-h-screen bg-gradient-soft">
@@ -190,8 +171,21 @@ export default function Catalog() {
       </div>;
   }
   return <div className="min-h-screen bg-gradient-soft">
+      <Helmet>
+        <title>Caminhas para Pets | Pelucia Pet</title>
+        <meta
+          name="description"
+          content="Caminhas para pets em diferentes tamanhos, tecidos e cores. Escolha sua combinacao e finalize o pedido com atendimento pelo WhatsApp."
+        />
+        <link rel="canonical" href={`${storeConfig?.site_url || 'https://peluciapet.com.br'}/`} />
+        <meta property="og:title" content="Caminhas para Pets | Pelucia Pet" />
+        <meta property="og:description" content="Caminhas para pets em diferentes tamanhos, tecidos e cores." />
+        <meta property="og:url" content={`${storeConfig?.site_url || 'https://peluciapet.com.br'}/`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="pt_BR" />
+      </Helmet>
       <Header />
-      
+
       {/* Hero Section - Compacto com proposta de valor e 1 CTA forte */}
       <section className="relative min-h-[140px] sm:min-h-[180px] lg:min-h-[220px] overflow-hidden" style={{
       backgroundImage: `url(${currentBanner})`,
@@ -324,7 +318,13 @@ export default function Catalog() {
 
         {/* Grid de produtos */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-          {filteredProducts.map(product => <ProductCard key={product.id} product={product} onWhatsApp={(size) => handleWhatsAppClick(product, size)} onViewDetails={setSelectedProduct} />)}
+          {filteredProducts.map(product => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onViewDetails={goToProduct}
+            />
+          ))}
         </div>
 
         {filteredProducts.length === 0 && (
@@ -349,138 +349,8 @@ export default function Catalog() {
         )}
       </div>
 
-      {/* Modal de detalhes do produto */}
-      <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {selectedProduct && <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-primary flex items-center justify-between">
-                  {selectedProduct.name}
-                  {selectedProduct.is_custom_order && <Badge className="bg-pet-gold text-white">
-                      <Tag className="h-3 w-3 mr-1" />
-                      Sob encomenda
-                    </Badge>}
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Galeria de imagens */}
-                <div className="space-y-4">
-                  <div className="aspect-square overflow-hidden rounded-lg">
-                    <img src={getProductImage(selectedProduct) || '/placeholder.svg'} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                  </div>
-                </div>
-
-                {/* Informações do produto */}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Descrição</h3>
-                    <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
-                      {selectedProduct.description}
-                    </div>
-                    {selectedProduct.observations && (
-                      <p className="text-orange-600 mt-3 font-medium whitespace-pre-line">
-                        {selectedProduct.observations}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Categoria</h3>
-                    <Badge variant="outline" className="text-sm">
-                      <span className="mr-1">{selectedProduct.categories?.icon}</span>
-                      {selectedProduct.categories?.name}
-                    </Badge>
-                  </div>
-
-                  {/* Tabela de preços detalhada */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Tamanhos e preços</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {selectedProduct.product_prices.map(price => (
-                        <div 
-                          key={price.sizes?.name || 'no-size'} 
-                          onClick={() => setSelectedSize(selectedSize === price.sizes?.name ? '' : price.sizes?.name || '')} 
-                          className={`cursor-pointer rounded-xl p-4 border transition-all duration-300 hover:shadow-md ${
-                            selectedSize === price.sizes?.name 
-                              ? 'bg-orange-100 border-orange-300 shadow-md' 
-                              : 'bg-gray-50 border-gray-200 hover:border-orange-200'
-                          }`}
-                        >
-                          <div className="font-bold text-gray-800 text-lg">{price.sizes?.name}</div>
-                          {price.sizes?.dimensions && (
-                            <div className="text-xs text-gray-500 mb-2">{price.sizes.dimensions}</div>
-                          )}
-                          <div className="font-bold text-emerald-600 text-xl">R$ {price.price.toFixed(2)}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Botões de ação */}
-                  <div className="flex gap-3 pt-4">
-                    <Button onClick={() => handleWhatsAppClick(selectedProduct, selectedSize)} className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl h-12 shadow-lg hover:shadow-xl transition-all duration-200" size="lg">
-                      <MessageCircle className="h-5 w-5 mr-2" />
-                      Pedir via WhatsApp
-                    </Button>
-                  </div>
-
-                  {/* Cores disponíveis */}
-                  {selectedProduct.product_images && selectedProduct.product_images.length > 1 && (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3 flex items-center">
-                        <Eye className="w-5 h-5 mr-2" />
-                        Cores disponíveis:
-                      </h3>
-                      <div className="flex flex-wrap gap-3">
-                        {selectedProduct.product_images.map((image, index) => (
-                          <div key={index} className="relative group">
-                             <img
-                               src={image.image_url}
-                               alt={`${selectedProduct.name} - Cor ${index + 1}`}
-                               className="w-20 h-20 rounded-xl object-cover cursor-pointer transition-all duration-300 border-[3px] border-solid border-gray-400 hover:border-orange-400"
-                               style={{
-                                 boxShadow: `
-                                   0 6px 12px rgba(0, 0, 0, 0.15),
-                                   inset 0 2px 4px rgba(255, 255, 255, 0.4),
-                                   inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-                                   0 0 0 1px rgba(255, 255, 255, 0.2)
-                                 `,
-                                 transform: 'translateZ(0)'
-                               }}
-                               onMouseEnter={(e) => {
-                                 e.currentTarget.style.boxShadow = `
-                                   0 10px 20px rgba(0, 0, 0, 0.25),
-                                   inset 0 3px 6px rgba(255, 255, 255, 0.5),
-                                   inset 0 -3px 6px rgba(0, 0, 0, 0.3),
-                                   0 0 0 2px rgba(255, 255, 255, 0.3)
-                                 `;
-                                 e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
-                               }}
-                               onMouseLeave={(e) => {
-                                 e.currentTarget.style.boxShadow = `
-                                   0 6px 12px rgba(0, 0, 0, 0.15),
-                                   inset 0 2px 4px rgba(255, 255, 255, 0.4),
-                                   inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-                                   0 0 0 1px rgba(255, 255, 255, 0.2)
-                                 `;
-                                 e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                               }}
-                             />
-                            {/* Stock indicator */}
-                            {image.stock_quantity && image.stock_quantity <= 2 && (
-                              <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>}
-        </DialogContent>
-      </Dialog>
+      {/* Modal de detalhes do produto - removido na issue #33. Agora cada card
+          navega direto pra /produto/:slug. */}
 
       {/* Seção de Benefícios - copy de venda real */}
       <section className="bg-pet-beige-light/30 py-16">
@@ -568,12 +438,10 @@ export default function Catalog() {
 }
 interface ProductCardProps {
   product: Product;
-  onWhatsApp: (size?: string) => void;
   onViewDetails: (product: Product) => void;
 }
 function ProductCard({
   product,
-  onWhatsApp,
   onViewDetails
 }: ProductCardProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
@@ -708,15 +576,14 @@ function ProductCard({
           )}
         </div>
 
-        {/* Action Button - unico CTA de conversao */}
+        {/* Action Button - leva pra página de seleção (issue #33) */}
         <div className="pt-1">
           <Button
-            onClick={(e) => { e.stopPropagation(); onWhatsApp(); }}
-            className="w-full min-h-[44px] h-11 text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
+            className="w-full min-h-[44px] h-11 text-xs sm:text-sm font-semibold bg-pet-brown-dark hover:bg-pet-brown-medium text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
-            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
-            <span className="sm:hidden">WhatsApp</span>
-            <span className="hidden sm:inline">Comprar no WhatsApp</span>
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
+            Ver opcoes
           </Button>
         </div>
       </div>

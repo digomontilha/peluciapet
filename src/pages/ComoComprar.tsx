@@ -6,11 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import { useStoreConfig } from '@/hooks/use-store-config';
 
 export default function ComoComprar() {
   const { toast } = useToast();
+  const { config: storeConfig } = useStoreConfig();
   const [formData, setFormData] = useState({
     nome: '',
     telefone: '',
@@ -110,6 +113,18 @@ export default function ComoComprar() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Como Comprar | Pelucia Pet</title>
+        <meta
+          name="description"
+          content="Saiba como escolher sua caminha, selecionar linha, tamanho, tecido e cor, e finalizar o pedido pelo WhatsApp."
+        />
+        <link rel="canonical" href={`${storeConfig?.site_url || 'https://peluciapet.com.br'}/como-comprar`} />
+        <meta property="og:title" content="Como Comprar | Pelucia Pet" />
+        <meta property="og:description" content="Passo a passo para escolher e finalizar sua caminha." />
+        <meta property="og:url" content={`${storeConfig?.site_url || 'https://peluciapet.com.br'}/como-comprar`} />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
       
       {/* Hero Section */}
