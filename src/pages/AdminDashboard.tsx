@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Users, Settings, Plus, Eye, Mail, Bell } from 'lucide-react';
+import { Package, Users, Settings, Plus, Eye, Mail, Bell, Scissors } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useNoindex } from '@/hooks/use-noindex';
@@ -168,6 +168,12 @@ export default function AdminDashboard() {
             description="Configurar categorias de produtos"
             icon={Settings}
             onClick={() => navigate('/admin/categories')}
+          />
+          <ActionCard
+            title="Tecidos"
+            description="Cadastrar tecidos e organizar linhas comerciais"
+            icon={Scissors}
+            onClick={() => navigate('/admin/fabrics')}
           />
           {isSuperAdmin && (
             <ActionCard
