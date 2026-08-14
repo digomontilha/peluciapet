@@ -24,6 +24,7 @@ interface ProductRow {
   short_description: string | null;
   meta_title: string | null;
   meta_description: string | null;
+  product_code: string | null;
   is_custom_order: boolean | null;
   category_id: string | null;
   categories?: { name: string; icon: string | null } | null;
@@ -69,6 +70,7 @@ interface FabricRow {
 interface ProductFabricRow {
   fabric_id: string;
   is_available: boolean | null;
+  display_order: number;
   fabrics: FabricRow | null;
 }
 
@@ -77,6 +79,11 @@ interface ColorRow {
   name: string;
   hex_code: string;
 }
+
+const formatMoney = (value: number) => new Intl.NumberFormat('pt-BR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value);
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -126,22 +133,23 @@ export default function ProductDetail() {
           supabase.from('product_images').select('*').eq('product_id', p.id).order('display_order'),
           supabase.from('product_sizes').select('*').eq('product_id', p.id).order('display_order'),
           supabase.from('product_prices').select('*').eq('product_id', p.id),
-          supabase.from('product_fabrics').select('fabric_id, is_available, fabrics:fabric_id(*)').eq('product_id', p.id),
+          supabase.from('product_fabrics').select('fabric_id, is_available, display_order, fabrics:fabric_id(*)').eq('product_id', p.id).order('display_order'),
           supabase.from('fabrics').select('*').eq('is_active', true).order('commercial_line, display_order'),
         ]);
 
         if (cancelled) return;
-        setImages((imgsRes.data || []) as ImageRow[]);
+        setImages(((imgsRes.data || []) as ImageRow[]).filter((image) => image.is_available !== false));
         setSizes((szsRes.data || []) as SizeRow[]);
         setPrices((prsRes.data || []) as PriceRow[]);
-        setProductFabrics(((pfsRes.data || []) as Array<{ fabric_id: string; is_available: boolean | null; fabrics: FabricRow | null }>).map((row) => ({
+        setProductFabrics(((pfsRes.data || []) as Array<{ fabric_id: string; is_available: boolean | null; display_order: number; fabrics: FabricRow | null }>).map((row) => ({
           fabric_id: row.fabric_id,
           is_available: row.is_available,
+          display_order: row.display_order,
           fabrics: row.fabrics,
         })));
         setFabrics((fbsRes.data || []) as FabricRow[]);
 
-        const colorIds = Array.from(new Set((imgsRes.data || []).map((i) => (i as ImageRow).color_id).filter((id): id is string => !!id)));
+        const colorIds = Array.from(new Set((imgsRes.data || []).filter((i) => (i as ImageRow).is_available !== false).map((i) => (i as ImageRow).color_id).filter((id): id is string => !!id)));
         if (colorIds.length > 0) {
           const { data: cls } = await supabase.from('colors').select('*').in('id', colorIds).order('name');
           if (!cancelled) setColors((cls || []) as ColorRow[]);
@@ -157,6 +165,10 @@ export default function ProductDetail() {
     return () => { cancelled = true; };
   }, [slug]);
 
+  const availableLines = useMemo(() => (['essential', 'premium'] as CommercialLine[]).filter((line) =>
+    productFabrics.some((association) => association.is_available !== false && association.fabrics?.commercial_line === line)
+  ), [productFabrics]);
+
   // Tecidos disponiveis para a linha escolhida
   const availableFabrics = useMemo(() => {
     if (!selectedLine) return [] as FabricRow[];
@@ -166,10 +178,26 @@ export default function ProductDetail() {
       .filter((f): f is FabricRow => !!f);
   }, [productFabrics, selectedLine]);
 
-  // Reseta tecido quando linha muda
+  // Seleciona automaticamente etapas com uma única opção válida.
   useEffect(() => {
-    setSelectedFabricId(null);
-  }, [selectedLine]);
+    if (availableLines.length === 1) setSelectedLine(availableLines[0]);
+    else if (selectedLine && !availableLines.includes(selectedLine)) setSelectedLine(null);
+  }, [availableLines, selectedLine]);
+
+  useEffect(() => {
+    if (sizes.length === 1) setSelectedSizeId(sizes[0].id);
+    else if (selectedSizeId && !sizes.some((size) => size.id === selectedSizeId)) setSelectedSizeId(null);
+  }, [selectedSizeId, sizes]);
+
+  useEffect(() => {
+    if (availableFabrics.length === 1) setSelectedFabricId(availableFabrics[0].id);
+    else if (selectedFabricId && !availableFabrics.some((fabric) => fabric.id === selectedFabricId)) setSelectedFabricId(null);
+  }, [availableFabrics, selectedFabricId]);
+
+  useEffect(() => {
+    if (colors.length === 1) setSelectedColorId(colors[0].id);
+    else if (selectedColorId && !colors.some((color) => color.id === selectedColorId)) setSelectedColorId(null);
+  }, [colors, selectedColorId]);
 
   // Preco atual baseado em linha + tamanho + tecido
   const currentPrice = useMemo(() => {
@@ -236,23 +264,25 @@ export default function ProductDetail() {
     const sizeText = selectedSize ? `${selectedSize.name} (${selectedSize.dimensions})` : '';
     const fabricText = selectedFabric?.name || '';
     const colorText = selectedColor?.name || '';
-    const priceText = `R$ ${currentPrice.price.toFixed(2)}`;
+    const priceText = `R$ ${formatMoney(currentPrice.price)}`;
     const pixText = currentPrice.pix_price
-      ? `R$ ${currentPrice.pix_price.toFixed(2)} (${storeConfig.pix_discount_percent}% off no Pix)`
+      ? `R$ ${formatMoney(currentPrice.pix_price)}`
       : '';
     const canonicalUrl = `${storeConfig.site_url}/produto/${product.slug}`;
 
     const lines = [
-      `Ola! Quero esta caminha da Pelucia Pet:`,
+      'Olá! Tenho interesse nesta caminha da Pelúcia Pet.',
       '',
       `Produto: ${product.name}`,
+      `Categoria: ${product.categories?.name || 'Não informada'}`,
       `Linha: ${lineLabel}`,
     ];
     if (sizeText) lines.push(`Tamanho: ${sizeText}`);
     if (fabricText) lines.push(`Tecido: ${fabricText}`);
     if (colorText) lines.push(`Cor: ${colorText}`);
-    lines.push(`Preco: ${priceText}`);
+    lines.push(`Preço: ${priceText}`);
     if (pixText) lines.push(`Pix: ${pixText}`);
+    if (product.product_code) lines.push(`Código: ${product.product_code}`);
     lines.push(`Link: ${canonicalUrl}`);
     lines.push('', 'Pode me ajudar a finalizar o pedido?');
 
@@ -264,9 +294,10 @@ export default function ProductDetail() {
     if (url) window.open(url, '_blank');
   };
 
-  const canCheckout = !!(selectedLine && selectedSizeId && selectedFabricId && currentPrice);
+  const canCheckout = !!(selectedLine && selectedSizeId && selectedFabricId && currentPrice && (colors.length === 0 || selectedColorId));
   const isReady = !loading && !loadError && product;
   const mainImage = images[mainImageIdx] || images[0];
+  const startingPrice = prices.filter((price) => price.price > 0 && price.commercial_line).sort((a, b) => a.price - b.price)[0] || null;
 
   if (loading) {
     return (
@@ -344,7 +375,6 @@ export default function ProductDetail() {
                     alt={mainImage.alt_text || product.name}
                     className="w-full h-full object-cover"
                     loading="eager"
-                    fetchPriority="high"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
@@ -400,10 +430,11 @@ export default function ProductDetail() {
               </div>
 
               {/* Seletor 1: Linha */}
-              <fieldset>
-                <legend className="text-sm font-semibold mb-2">1. Escolha a linha</legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['essential', 'premium'] as const).map((line) => {
+              {availableLines.length > 1 && (
+                <fieldset>
+                  <legend className="text-sm font-semibold mb-2">1. Escolha a linha</legend>
+                  <div className="grid grid-cols-2 gap-2">
+                  {availableLines.map((line) => {
                     const isSelected = selectedLine === line;
                     return (
                       <button
@@ -428,19 +459,18 @@ export default function ProductDetail() {
                       </button>
                     );
                   })}
-                </div>
-              </fieldset>
+                  </div>
+                </fieldset>
+              )}
+              {availableLines.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nenhuma linha comercial disponível para este produto.</p>
+              )}
 
               {/* Seletor 2: Tamanho */}
-              {selectedLine && (
+              {selectedLine && sizes.length > 1 && (
                 <fieldset>
                   <legend className="text-sm font-semibold mb-2">2. Escolha o tamanho</legend>
-                  {sizes.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Nenhum tamanho disponivel pra este produto.
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                       {sizes.map((size) => {
                         const isSelected = selectedSizeId === size.id;
                         const sizePrice = prices.find((p) =>
@@ -462,14 +492,13 @@ export default function ProductDetail() {
                             <div className="text-[11px] text-muted-foreground">{size.dimensions}</div>
                             {sizePrice && (
                               <div className="text-xs font-medium text-emerald-700 mt-0.5">
-                                R$ {sizePrice.price.toFixed(2)}
+                                R$ {formatMoney(sizePrice.price)}
                               </div>
                             )}
                           </button>
                         );
                       })}
-                    </div>
-                  )}
+                  </div>
 
                   <Collapsible open={sizeGuideOpen} onOpenChange={setSizeGuideOpen} className="mt-3">
                     <CollapsibleTrigger asChild>
@@ -491,15 +520,10 @@ export default function ProductDetail() {
               )}
 
               {/* Seletor 3: Tecido */}
-              {selectedLine && selectedSizeId && (
+              {selectedLine && selectedSizeId && availableFabrics.length > 1 && (
                 <fieldset>
                   <legend className="text-sm font-semibold mb-2">3. Escolha o tecido</legend>
-                  {availableFabrics.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Nenhum tecido disponivel pra esta linha. Tente outra linha.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
+                  <div className="space-y-2">
                       {availableFabrics.map((fabric) => {
                         const isSelected = selectedFabricId === fabric.id;
                         return (
@@ -521,13 +545,18 @@ export default function ProductDetail() {
                           </button>
                         );
                       })}
-                    </div>
-                  )}
+                  </div>
                 </fieldset>
+              )}
+              {selectedLine && sizes.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nenhum tamanho disponível para este produto.</p>
+              )}
+              {selectedLine && selectedSizeId && availableFabrics.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nenhum tecido disponível para esta linha.</p>
               )}
 
               {/* Seletor 4: Cor */}
-              {selectedLine && selectedSizeId && selectedFabricId && colors.length > 0 && (
+              {selectedLine && selectedSizeId && selectedFabricId && colors.length > 1 && (
                 <fieldset>
                   <legend className="text-sm font-semibold mb-2">4. Escolha a cor</legend>
                   <div className="flex flex-wrap gap-2">
@@ -538,7 +567,8 @@ export default function ProductDetail() {
                           key={color.id}
                           type="button"
                           onClick={() => setSelectedColorId(isSelected ? null : color.id)}
-                          aria-label={`Cor ${color.name}`}
+                          aria-label={`Selecionar cor ${color.name}`}
+                          title={`Selecionar cor ${color.name}`}
                           aria-pressed={isSelected}
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 min-h-[44px] transition-all ${
                             isSelected
@@ -558,17 +588,20 @@ export default function ProductDetail() {
                   </div>
                 </fieldset>
               )}
+              {selectedLine && selectedSizeId && selectedFabricId && colors.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nenhuma cor disponível para este produto.</p>
+              )}
 
               {/* Preco */}
               <div className="pt-4 border-t" aria-live="polite">
                 {currentPrice ? (
                   <div>
                     <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                      R$ {currentPrice.price.toFixed(2)}
+                      R$ {formatMoney(currentPrice.price)}
                     </div>
                     {currentPrice.pix_price && storeConfig && (
                       <div className="text-sm text-emerald-700 font-medium mt-1">
-                        R$ {currentPrice.pix_price.toFixed(2)} no Pix
+                        R$ {formatMoney(currentPrice.pix_price)} no Pix
                         <span className="text-xs text-muted-foreground ml-1">
                           ({storeConfig.pix_discount_percent}% de desconto)
                         </span>
@@ -576,12 +609,16 @@ export default function ProductDetail() {
                     )}
                   </div>
                 ) : selectedLine && selectedSizeId ? (
-                  <p className="text-sm text-muted-foreground">Preco indisponivel pra esta combinacao.</p>
+                  <p className="text-sm text-muted-foreground">Preço ainda não cadastrado para esta combinação.</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    A partir de R$ {prices[0]?.price.toFixed(2) || '---'}
-                    <span className="ml-1 text-xs">— escolha linha e tamanho</span>
-                  </p>
+                  <div className="text-sm text-muted-foreground">
+                    {startingPrice ? (
+                      <>
+                        <p>A partir de R$ {formatMoney(startingPrice.price)}</p>
+                        {startingPrice.pix_price && <p className="text-emerald-700">R$ {formatMoney(startingPrice.pix_price)} no Pix</p>}
+                      </>
+                    ) : <p>Preço ainda não cadastrado.</p>}
+                  </div>
                 )}
               </div>
 
@@ -598,7 +635,7 @@ export default function ProductDetail() {
                 </Button>
                 {!canCheckout && (
                   <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Selecione linha, tamanho e tecido.
+                    Selecione linha, tamanho, tecido{colors.length > 0 ? ' e cor' : ''}.
                   </p>
                 )}
               </div>

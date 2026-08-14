@@ -21,6 +21,7 @@ import UserManagement from "./pages/UserManagement";
 import ProductVariants from "./pages/ProductVariants";
 import ContactManagement from "./pages/ContactManagement";
 import ProductSizes from "./pages/ProductSizes";
+import FabricManagement from "./pages/FabricManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/admin/products/:id/edit" element={<ProductForm />} />
 
               <Route path="/admin/categories" element={<CategoryManagement />} />
+              <Route path="/admin/fabrics" element={<FabricManagement />} />
               <Route path="/admin/users" element={<UserManagement />} />
               <Route path="/admin/variants" element={<ProductVariants />} />
               <Route path="/admin/products/:productId/sizes" element={<ProductSizes />} />

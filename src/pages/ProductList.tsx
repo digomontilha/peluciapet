@@ -11,6 +11,7 @@ import { useNoindex } from '@/hooks/use-noindex';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Package, Plus, Search, Edit, Trash2, Eye, Power, PowerOff } from 'lucide-react';
+import { CommercialLine, makePriceKey, validateCommercialProduct } from '@/lib/product-commercial';
 
 interface Product {
   id: string;
@@ -113,6 +114,46 @@ export default function ProductList() {
     if (!confirm(`Tem certeza que deseja ${actionText} este produto?`)) return;
 
     try {
+      if (newStatus === 'active') {
+        const product = products.find((item) => item.id === productId);
+        const [sizesResult, fabricsResult, pricesResult] = await Promise.all([
+          supabase.from('product_sizes').select('id').eq('product_id', productId),
+          supabase.from('product_fabrics').select('is_available, fabrics:fabric_id(commercial_line, is_active)').eq('product_id', productId),
+          supabase.from('product_prices').select('product_size_id, commercial_line, price, pix_price').eq('product_id', productId),
+        ]);
+        if (sizesResult.error) throw sizesResult.error;
+        if (fabricsResult.error) throw fabricsResult.error;
+        if (pricesResult.error) throw pricesResult.error;
+
+        const associations = (fabricsResult.data || []) as unknown as Array<{
+          is_available: boolean;
+          fabrics: { commercial_line: CommercialLine; is_active: boolean } | null;
+        }>;
+        const priceRows = (pricesResult.data || []).filter((row) =>
+          row.product_size_id && (row.commercial_line === 'essential' || row.commercial_line === 'premium')
+        );
+        const selectedLines = Array.from(new Set([
+          ...associations.map((row) => row.fabrics?.commercial_line).filter((line): line is CommercialLine => Boolean(line)),
+          ...priceRows.map((row) => row.commercial_line as CommercialLine),
+        ]));
+        const availableFabricLines = associations
+          .filter((row) => row.is_available && row.fabrics?.is_active)
+          .map((row) => row.fabrics!.commercial_line);
+        const priceMap = Object.fromEntries(priceRows.map((row) => [
+          makePriceKey(row.product_size_id!, row.commercial_line as CommercialLine),
+          { price: Number(row.price) || 0, pixPrice: Number(row.pix_price) || 0 },
+        ]));
+        const issues = validateCommercialProduct({
+          categoryId: product?.category_id || '',
+          status: 'active',
+          sizeIds: (sizesResult.data || []).map((size) => size.id),
+          selectedLines,
+          availableFabricLines,
+          prices: priceMap,
+        });
+        if (issues.length) throw new Error(issues.join(' '));
+      }
+
       const { error } = await supabase
         .from('products')
         .update({ status: newStatus })
@@ -130,7 +171,7 @@ export default function ProductList() {
       console.error('Erro ao alterar status do produto:', error);
       toast({
         title: "Erro ao alterar status",
-        description: "Não foi possível alterar o status do produto.",
+        description: error instanceof Error ? error.message : "Não foi possível alterar o status do produto.",
         variant: "destructive",
       });
     }
@@ -273,7 +314,7 @@ export default function ProductList() {
                               variant={product.status === 'active' ? 'default' : 'secondary'}
                               className={product.status === 'active' ? 'bg-green-100 text-green-800' : ''}
                             >
-                              {product.status === 'active' ? 'Ativo' : 'Inativo'}
+                              {product.status === 'active' ? 'Ativo' : product.status === 'draft' ? 'Rascunho' : 'Inativo'}
                             </Badge>
                             {product.is_custom_order && (
                               <Badge variant="outline" className="border-pet-gold text-pet-gold text-xs">
