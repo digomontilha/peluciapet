@@ -90,6 +90,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { config: storeConfig } = useStoreConfig();
 
+
   // Data
   const [product, setProduct] = useState<ProductRow | null>(null);
   const [images, setImages] = useState<ImageRow[]>([]);
@@ -234,6 +235,26 @@ export default function ProductDetail() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Navegação "Voltar" - prioriza histórico, depois categoria, depois catálogo
+  const handleBack = () => {
+    // Tenta voltar no histórico do navegador
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    
+    // Fallback: se tem categoria, vai para o catálogo filtrado por ela
+    // Como o catálogo usa estado local, navega para a raiz
+    // O usuário pode então filtrar pela categoria
+    if (product?.categories?.name) {
+      navigate('/');
+      return;
+    }
+    
+    // Fallback final: catálogo principal
+    navigate('/');
+  };
+
   // JSON-LD Product (apenas quando tem preco)
   const productJsonLd = useMemo(() => {
     if (!product || !storeConfig || !currentPrice) return null;
@@ -350,13 +371,26 @@ export default function ProductDetail() {
 
       <main className="bg-background">
         <div className="container py-4">
+          {/* Botão Voltar */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="mb-2 min-h-[44px] h-9 px-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-pet-beige-light/50 transition-colors focus:outline-none focus:ring-2 focus:ring-pet-gold focus:ring-offset-2 rounded-lg"
+            aria-label="Voltar para a página anterior"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1.5" aria-hidden />
+            Voltar
+          </Button>
+
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1 flex-wrap">
-            <Link to="/" className="hover:text-foreground transition-colors">Catalogo</Link>
+            <Link to="/" className="hover:text-foreground transition-colors underline underline-offset-2">Catalogo</Link>
             {product.categories?.name && (
               <>
                 <ChevronRight className="h-3 w-3" />
-                <span>{product.categories.name}</span>
+                <Link to="/" className="hover:text-foreground transition-colors underline underline-offset-2">{product.categories.name}</Link>
               </>
             )}
             <ChevronRight className="h-3 w-3" />
