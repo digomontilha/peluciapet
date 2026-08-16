@@ -1,0 +1,52 @@
+correcao: SEO crítico — canonical .com.br, JSON-LD, sitemap, robots, noindex, placeholders (#41)
+
+index.html:
+- canonical: peluciapet.com → peluciapet.com.br
+- og:url, og:image (com width/height 1200x630), og:title, og:description
+- JSON-LD @type "PetStore" → "Store" + additionalType PetStore
+- JSON-LD telephone: +55-11-99999-9999 → +55-11-93741-3939
+- JSON-LD email: contato@peluciapet.com → contato@peluciapet.com.br
+- JSON-LD address: +addressRegion SP, addressLocality Jundiaí
+- JSON-LD hasOfferCatalog: removido "Brinquedos Macios" (categoria inexistente)
+- JSON-LD sameAs: removido Facebook (canal nao existe)
+- JSON-LD description: "caminhas premium" (sem brinquedos/acessórios)
+- title: "Caminhas para Pets | Pelúcia Pet"
+- twitter card com og:image
+- meta keywords removido (Google ignora desde 2009)
+
+public/robots.txt:
+- Adicionado Sitemap: https://peluciapet.com.br/sitemap.xml
+- Disallow /admin, /admin/*, /auth
+
+public/sitemap.xml (novo):
+- /, /como-comprar, /faq, /privacidade, /trocas-e-devolucoes
+- changefreq/priority por rota
+
+src/components/ e src/hooks/:
+- Novo useNoindex(): hook que seta meta robots noindex,nofollow via DOM
+  quando o componente monta, e restaura no cleanup. Mais leve que
+  injetar <Helmet> em cada JSX de admin.
+
+src/App.tsx:
+- Rotas /faq, /privacidade, /trocas-e-devolucoes adicionadas
+
+src/pages/FAQ.tsx, Privacidade.tsx, TrocasDevolucoes.tsx (novos):
+- Placeholders com <Helmet> próprio (title, description, canonical)
+- "Esta pagina esta sendo preparada" (issue #40 expande conteúdo real)
+
+src/pages/Auth.tsx + 8 admin pages:
+- useNoindex() no início de cada componente
+- Aplica noindex,nofollow via meta robots dinamicamente
+- Restaura o estado original ao desmontar
+
+Nao-objetivos:
+- OG image 1200x630 dedicada (issue #44 separada, worker nao produziu)
+- Conteudo juridico FAQ/Privacidade/Trocas (issue #40)
+- /admin/* ja tinha redirect via useAuth, mas o noindex cobre a parte
+  de SEO quando o admin está logado
+
+Pendência:
+- og:image em index.html aponta pra https://peluciapet.com.br/og-image.png
+  que ainda não foi gerada. Issue #44 vai resolver.
+
+Closes #41

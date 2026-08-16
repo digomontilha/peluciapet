@@ -1,0 +1,8 @@
+nova-funcao: schema base — fabrics, linhas, pix_price, slugs, store_config (#29)
+
+Adiciona 4 tabelas novas (fabrics, product_fabrics, store_config, product_benefits),
+8 colunas aditivas (products.slug/meta_*, product_prices.pix_price/commercial_line/fabric_id,
+product_variants.fabric_id), corrige FK faltante em product_sizes, adiciona UNIQUE em
+product_prices. 100% aditivo, idempotente. Aplicado via Supabase Management API.
+
+Closes #29

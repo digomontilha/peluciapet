@@ -1,0 +1,10 @@
+chore(seo): adicionar og-image 1200x630
+
+Asset gerado pelo worker de imagem (issue OG image pendente).
+- 1200x630 (spec Open Graph)
+- Paleta Pelucia Pet (marrom + bege + dourado)
+- Logo + copy neutra ("Caminhas feitas para o conforto do seu pet")
+- Sem claims medicos, sem numeros magicos
+
+store_config.og_image_url ja foi atualizado via Supabase API
+para https://peluciapet.com.br/og-image.png (id=1, updated_at 2026-08-13 21:06:57).

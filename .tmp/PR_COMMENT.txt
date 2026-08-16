@@ -1,0 +1,14 @@
+## Data fix adicional (commit `66191a9`)
+
+Apliquei `store_config.address_locality = 'Jundiaí'` (era `'São Paulo'`) — confirmado pelo Rodrigo em 2026-08-13 que a empresa fica em **Jundiaí - SP**, não São Paulo capital.
+
+Migration nova: `supabase/migrations/20260813170000_fix_store_config_address.sql` (idempotente, sem mudança de schema).
+
+### Follow-up fora deste PR (issues já planejadas)
+
+Os seguintes pontos **ainda** mostram "São Paulo" e serão corrigidos em issues separadas:
+
+- `src/components/layout/Footer.tsx:68` — `<span>São Paulo - SP</span>` → corrigir na **#34 (Header/Footer)**
+- `index.html:68` — JSON-LD `"addressLocality": "São Paulo"` → corrigir na **#36 (SEO crítico)**
+
+A URL canônica `https://peluciapet.com.br/` já está consistente em `store_config.site_url` (default da migration #29).

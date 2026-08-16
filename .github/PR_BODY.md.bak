@@ -1,0 +1,50 @@
+## Resumo
+
+Refatora o `ProductCard` em `Catalog.tsx` pra refletir a nova jornada de compra (issue #33) e substitui o `Sheet` mobile de categorias por chips horizontais com scroll. O card agora mostra badge de linha, preço inicial com Pix, chips de tamanho e cores com aria-label real.
+
+## Mudanças
+
+### 1. ProductCard (Catalog.tsx)
+
+- **Badge de linha** (top-right): "Essencial • Premium" / "Premium" / "Essencial". Calculado via `has_essential`/`has_premium` derivados de `product_fabrics JOIN fabrics.commercial_line` num único SELECT paralelo.
+- **Preço inicial** ("A partir de R$ X" + "R$ Y no Pix (5% off)"): menor `price` entre `product_prices` com `commercial_line` populado. `pix_price` vem do banco. Quando não tem preço, mostra "Consulte" (não inventa número).
+- **Chips de tamanho** (até 4 + "+N"): P/M/G/GG como chip. `title` com dimensões completas no hover.
+- **Cores com aria-label real**: carrega `colorsById: Map<id, ColorRow>` no `fetchData`. Bolinha mostra `cor.hex_code` como `backgroundColor`. aria-label = "Selecionar cor {nome}". `title` com nome.
+- **Botão "Ver opções"**: continua levando pra `/produto/:slug` (já tem `aria-label`).
+
+### 2. Chips de categoria mobile (substitui o Sheet)
+
+- Removido o `Sheet` mobile que abria lateral
+- Mobile: chips horizontais com `overflow-x-auto snap-x snap-mandatory`
+- Cada chip: `min-h-[44px]` (touch target), `aria-pressed={isSelected}`, scroll-snap-start
+- Desktop: mantém o `flex-wrap` com `scale-105` no selecionado
+
+## Validação
+
+- ✅ `npm run build`: passa em 5.63s
+- ✅ `npm run lint`: 14 errors / 12 warnings (mesmo número de antes da issue #37, zero novo)
+
+## Como testar
+
+1. Acessar `/` (catalog) em desktop e mobile
+2. Card mostra:
+   - **Badge "Essencial • Premium"** no topo direito (RoundDream, Suede Comfort, NinhoDream etc — todos com 5 tecidos)
+   - **"A partir de R$ 149,90"** + **"R$ 139,90 no Pix (5% off)"** (RoundDream tem 8 preços; Suede Comfort tem 6)
+   - Para NinhoDream, PuppyJoy, SoftDream, SuedeCharm (sem preço): **"Consulte"**
+   - **Chips de tamanho** (P/M/G/GG ou P/M/G)
+3. Bolinhas de cor: inspecionar e ver `aria-label="Selecionar cor Bege"` (não "Cor 1")
+4. Mobile (360x844):
+   - **Chips de categoria rolam horizontalmente** com snap
+   - Cada chip tem 44x44 min-height
+   - aria-pressed muda quando seleciona
+5. Desktop: chips continuam com flex-wrap (igual antes)
+6. Click num card → `/produto/:slug` (verifique preço dinâmico)
+
+## Não-objetivos
+
+- Não corrige Hero/Trust bar (issue #42)
+- Não corrige Footer "São Paulo - SP" (issue #39)
+- Não mexe em SEO/JSON-LD (issue #41)
+- Não remove `package-lock.json` (issue #36)
+
+Closes #38
