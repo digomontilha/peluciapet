@@ -1,0 +1,17 @@
+fix(copy): remover claims medicos e numeros magicos do Hero/Beneficios/Trust Bar (issue #47)
+
+Claims removidos:
+- "Caminhas premium feitas pra durar" -> "Caminhas com capa lavavel"
+- "Antialergicas, lavaveis..." -> "Capa lavavel na maquina e garantia de 30 dias"
+- "Tecido antialergico / Seguro pra pets com alergia..." -> "Tecido macio / Toque suave..."
+- "Enchimento ortopedico / Alivio para caes idosos..." -> "Enchimento confortavel / Mantem o formato..."
+- "Entrega SP capital / Em ate 5 dias uteis na regiao metropolitana"
+  -> "Envio por transportadora / Codigo de rastreio enviado por WhatsApp"
+- "100% Compra segura" -> "5% Pix off" (factual: pix_discount_percent = 5)
+- Trust bar "Entrega" -> "Producao" (5 dias e prazo de PRODUCAO, nao entrega em si)
+
+Toda a copy nova e factual, sem inventar reviews, sem claims medicos
+(antialergico, ortopedico, alivio), sem numeros magicos. Endereco do
+card 4 corrigido: Pelucia Pet e de Jundiai-SP, nao capital.
+
+Closes #47

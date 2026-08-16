@@ -221,7 +221,7 @@ export default function Catalog() {
       <Header />
 
       {/* Hero Section - Compacto com proposta de valor e 1 CTA forte */}
-      <section className="relative min-h-[140px] sm:min-h-[180px] lg:min-h-[220px] overflow-hidden" style={{
+      <section className="relative min-h-[120px] sm:min-h-[150px] lg:min-h-[180px] overflow-hidden" style={{
       backgroundImage: `url(${currentBanner})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center center',
@@ -229,30 +229,30 @@ export default function Catalog() {
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-        {/* Gradient overlay pra legibilidade do texto sobre o pattern */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-black/30 pointer-events-none" />
+        {/* Gradient overlay pra legibilidade do texto sobre o pattern - mais suave */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/5 to-black/25 pointer-events-none" />
 
         {/* Conteúdo principal */}
-        <div className="relative z-20 container min-h-[140px] sm:min-h-[180px] lg:min-h-[220px] flex items-center justify-center py-3 sm:py-4 lg:py-5 px-4">
-          <div className="text-center space-y-1.5 sm:space-y-2 max-w-3xl mx-auto">
+        <div className="relative z-20 container min-h-[120px] sm:min-h-[150px] lg:min-h-[180px] flex items-center justify-center py-4 sm:py-5 lg:py-6 px-4">
+          <div className="text-center space-y-2 sm:space-y-3 max-w-3xl mx-auto">
 
-            {/* Headline com proposta de valor */}
-            <h1 className="font-serif text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-white leading-tight px-2 drop-shadow-md">
-              Caminhas com capa lavavel
+            {/* Headline com proposta de valor - hierarquia melhorada */}
+            <h1 className="font-serif text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-white leading-tight px-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+              Caminhas para o conforto que seu pet merece
             </h1>
 
-            {/* Sub: beneficios especificos */}
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white leading-snug px-2 drop-shadow-md font-medium">
-              Capa lavavel na maquina e garantia de 30 dias
+            {/* Sub: beneficios especificos - mais legível */}
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white leading-snug px-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] font-normal">
+              Modelos, tamanhos e estilos para diferentes tipos de pets
             </p>
 
-            {/* CTA unico forte */}
-            <div className="pt-1.5 sm:pt-2">
+            {/* CTA único forte - área de toque melhorada */}
+            <div className="pt-2 sm:pt-3">
               <Button
                 onClick={() => document.querySelector('.grid')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-5 sm:px-7 min-h-[44px] h-11 sm:h-10 text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-pet-gold hover:bg-pet-gold/90 text-pet-brown-dark px-6 sm:px-8 min-h-[48px] sm:min-h-[50px] h-12 sm:h-11 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl"
               >
-                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Ver Caminhas
               </Button>
             </div>

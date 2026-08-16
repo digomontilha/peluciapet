@@ -76,12 +76,6 @@ export function Header() {
           <Button variant="ghost" size="sm" onClick={() => navigate('/como-comprar')}>
             Como Comprar
           </Button>
-          {isAdmin && (
-            <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
-              <Settings className="h-4 w-4 mr-2" />
-              Painel Admin
-            </Button>
-          )}
         </nav>
 
         {/* Ações Desktop */}
@@ -106,11 +100,6 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur">
-                <DropdownMenuItem onClick={() => navigate('/admin')}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Painel Admin
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sair
@@ -188,23 +177,6 @@ export function Header() {
                     </div>
                   </Button>
 
-                  {isAdmin && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleNavigation('/admin')}
-                      className="w-full justify-start h-12 text-left"
-                    >
-                      <Settings className="h-5 w-5 mr-3" />
-                      <div>
-                        <div className="font-medium">Painel Admin</div>
-                        <div className="text-xs text-muted-foreground">Gerenciar produtos</div>
-                      </div>
-                    </Button>
-                  )}
-                </div>
-
-                {/* Contato */}
-                <div className="border-t pt-4">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -222,31 +194,7 @@ export function Header() {
                   </Button>
                 </div>
 
-                {/* Autenticação (só admin logado vê "Sair") */}
-                {isAdmin && (
-                  <div className="border-t pt-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 p-3 bg-pet-gold/10 rounded-lg">
-                        <User className="h-5 w-5 text-pet-gold" />
-                        <div>
-                          <div className="font-medium">{user?.email?.split('@')[0]}</div>
-                          <div className="text-xs text-muted-foreground">Logado como admin</div>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          handleSignOut();
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sair
-                      </Button>
-                    </div>
-                  </div>
-                )}
+
               </div>
             </SheetContent>
           </Sheet>

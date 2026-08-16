@@ -1,0 +1,13 @@
+// src/components/Noindex.tsx
+// Helmet que adiciona noindex,nofollow. Use em paginas que nao devem ser
+// indexadas por mecanismos de busca (auth, admin, etc).
+import { Helmet } from 'react-helmet-async';
+
+export function Noindex() {
+  return (
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+      <meta name="googlebot" content="noindex, nofollow" />
+    </Helmet>
+  );
+}

@@ -1,0 +1,17 @@
+feat(legal): conteudo real FAQ + Privacidade + Trocas/Devolucoes (issue #45)
+
+- FAQ: 13 perguntas com respostas baseadas em dados reais do projeto
+  (5 dias uteis producao, 30 dias garantia, 5% Pix, tecidos Oxford/Tricoline/
+  Fleece/Plush/Carpete, sem parcelamento cartao).
+- Privacidade: 8 secoes LGPD-like (dados, finalidade, compartilhamento,
+  direitos titular, encarregado/DPO, cookies, seguranca, base legal).
+- Trocas/Devolucoes: 7 secoes CDC-like (arrependimento 7 dias art. 49,
+  vicios 30/90 dias art. 26, como solicitar, condicoes, reembolso,
+  custos de envio, dados pessoais).
+- Aviso no topo de cada pagina: "Texto modelo - consulte um advogado
+  antes de publicar oficialmente".
+- TODOs explicitos em campos especificos (CNPJ, endereco DPO).
+- WhatsApp/email puxados dinamicamente de useStoreConfig.
+- og:title/description/type/url adicionados em cada pagina.
+
+Closes #45
