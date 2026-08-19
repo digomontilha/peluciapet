@@ -24,6 +24,7 @@ import {
   makePriceKey,
   validateCommercialProduct,
 } from '@/lib/product-commercial';
+import { slugifyProductName } from '@/lib/slug';
 
 interface Category { id: string; name: string; icon: string | null }
 interface Fabric {
@@ -64,6 +65,7 @@ interface NewImage {
 
 const emptyProduct = {
   name: '',
+  slug: '',
   description: '',
   product_code: '',
   category_id: '',
@@ -94,6 +96,10 @@ export default function ProductForm() {
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
+  // slugDirty: true quando o admin sobrescreveu manualmente o slug.
+  // Em modo de edicao ja comeca true (slug carregado do banco nao deve
+  // auto-sincronizar com mudancas de nome, senao quebraria URLs).
+  const [slugDirty, setSlugDirty] = useState<boolean>(Boolean(id));
 
   const fetchData = useCallback(async () => {
     setLoadingData(true);
@@ -130,6 +136,7 @@ export default function ProductForm() {
       const product = productResult.data;
       setProductData({
         name: product.name || '',
+        slug: product.slug || '',
         description: product.description || '',
         product_code: product.product_code || '',
         category_id: product.category_id || '',
@@ -186,6 +193,15 @@ export default function ProductForm() {
     }
     if (isAdmin) void fetchData();
   }, [authLoading, fetchData, isAdmin, navigate]);
+
+  // Auto-sugere slug a partir do nome enquanto o admin nao sobrescreveu
+  // manualmente o campo. Em modo de edicao o auto-sync fica desligado
+  // para nao quebrar URLs existentes quando o admin edita o nome.
+  useEffect(() => {
+    if (slugDirty) return;
+    const suggested = slugifyProductName(productData.name);
+    setProductData((current) => (current.slug === suggested ? current : { ...current, slug: suggested }));
+  }, [productData.name, slugDirty]);
 
   const selectedFabricRows = useMemo(
     () => Object.values(productFabrics).filter((association) => {
@@ -290,6 +306,19 @@ export default function ProductForm() {
       toast({ title: 'Nome obrigatório', description: 'Informe o nome do produto.', variant: 'destructive' });
       return;
     }
+    // Slug: se o admin limpou o campo, a trigger SQL gera a partir do
+    // nome. Se ele preencheu manualmente, validamos formato (kebab,
+    // [a-z0-9-]) para evitar 500 do PostgREST.
+    const slugClean = (productData.slug || '').trim();
+    if (slugClean && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugClean)) {
+      toast({
+        title: 'Slug inválido',
+        description: 'Use apenas letras minúsculas, números e hífens (sem espaços, acentos ou caracteres especiais).',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const payload = { ...productData, slug: slugClean };
     const availableFabricLines = selectedFabricRows
       .filter((association) => association.is_available)
       .map((association) => fabrics.find((fabric) => fabric.id === association.fabric_id))
@@ -305,12 +334,24 @@ export default function ProductForm() {
     try {
       let productId = id;
       if (id) {
-        const { error } = await supabase.from('products').update(productData).eq('id', id);
+        // Em edicao, se o admin limpou o slug manualmente, NAO
+        // enviamos o campo para UPDATE (mantem o slug atual do banco
+        // em vez de quebrar o link). A trigger BEFORE INSERT nao
+        // atua em UPDATE.
+        const updatePayload = slugClean ? payload : (() => {
+          const { slug: _omit, ...rest } = payload;
+          return rest;
+        })();
+        const { error } = await supabase.from('products').update(updatePayload).eq('id', id);
         if (error) throw error;
       } else {
         const codeResult = await supabase.rpc('generate_auto_product_code', { p_category_id: productData.category_id });
         if (codeResult.error) throw codeResult.error;
-        const result = await supabase.from('products').insert({ ...productData, product_code: codeResult.data }).select('id').single();
+        // Em criacao: se o slug veio vazio, a trigger SQL gera
+        // automaticamente a partir de name; se veio preenchido,
+        // usamos o valor do admin.
+        const insertPayload = slugClean ? { ...payload, product_code: codeResult.data } : { ...payload, product_code: codeResult.data, slug: null };
+        const result = await supabase.from('products').insert(insertPayload).select('id, slug').single();
         if (result.error) throw result.error;
         productId = result.data.id;
       }
@@ -346,6 +387,21 @@ export default function ProductForm() {
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2"><Label htmlFor="name">Nome *</Label><Input id="name" value={productData.name} onChange={(event) => setProductData((current) => ({ ...current, name: event.target.value }))} /></div>
             <div className="space-y-2"><Label>Categoria *</Label><Select value={productData.category_id} onValueChange={(value) => setProductData((current) => ({ ...current, category_id: value }))}><SelectTrigger><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger><SelectContent>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.icon} {category.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="slug">Slug (URL)</Label>
+              <Input
+                id="slug"
+                value={productData.slug}
+                onChange={(event) => { setSlugDirty(true); setProductData((current) => ({ ...current, slug: event.target.value })); }}
+                placeholder="caminha-premium-para-caes"
+                spellCheck={false}
+                autoCapitalize="none"
+                autoCorrect="off"
+              />
+              <p className="text-xs text-muted-foreground">
+                Identificador único na URL <code className="rounded bg-muted px-1 py-0.5">/produto/&lt;slug&gt;</code>. Sugerido automaticamente a partir do nome; você pode editar. Use apenas letras minúsculas, números e hífens.
+              </p>
+            </div>
             <div className="space-y-2 md:col-span-2"><Label htmlFor="description">Descrição</Label><Textarea id="description" rows={4} value={productData.description} onChange={(event) => setProductData((current) => ({ ...current, description: event.target.value }))} /></div>
             <div className="space-y-2 md:col-span-2"><Label htmlFor="observations">Observações</Label><Input id="observations" value={productData.observations} onChange={(event) => setProductData((current) => ({ ...current, observations: event.target.value }))} /></div>
           </CardContent>

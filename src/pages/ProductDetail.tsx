@@ -119,12 +119,19 @@ export default function ProductDetail() {
     setLoadError(null);
     (async () => {
       try {
-        const { data: p, error: pErr } = await supabase
+        // Aceita tanto slug quanto UUID na URL. Slug e o caminho
+        // canonico (catalogo envia slug apos a correcao #56), mas
+        // mantemos compatibilidade com UUID para nao quebrar links
+        // antigos compartilhados e URLs em cache.
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+        const baseQuery = supabase
           .from('products')
           .select('*, categories:category_id(name, icon)')
-          .eq('slug', slug)
-          .eq('status', 'active')
-          .maybeSingle();
+          .eq('status', 'active');
+        const { data: p, error: pErr } = await (isUuid
+          ? baseQuery.eq('id', slug)
+          : baseQuery.eq('slug', slug)
+        ).maybeSingle();
         if (cancelled) return;
         if (pErr) throw pErr;
         if (!p) { setLoadError('Produto nao encontrado.'); setLoading(false); return; }

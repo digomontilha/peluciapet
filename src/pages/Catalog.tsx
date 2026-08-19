@@ -266,7 +266,16 @@ export default function Catalog() {
           <div className="mb-4">
             <h2 className="text-base sm:text-2xl font-bold text-foreground leading-tight">
               Explore por categoria
-              <span className="ml-1.5 sm:ml-2 text-xs sm:text-base font-normal text-muted-foreground">
+              {/*
+                Contador calculado a partir de `products.length`, que vem
+                direto do Supabase filtrado por `status = 'active'` na
+                query acima. NAO hardcoded — reflete o total de produtos
+                ativos retornados pelo banco (issue #56).
+              */}
+              <span
+                className="ml-1.5 sm:ml-2 text-xs sm:text-base font-normal text-muted-foreground"
+                data-testid="catalog-active-count"
+              >
                 ({products.length})
               </span>
             </h2>
